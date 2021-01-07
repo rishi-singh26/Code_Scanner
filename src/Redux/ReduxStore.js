@@ -1,5 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from "redux";
 import { ScannedData } from "./ScannedData/index";
+import { Auth } from "./Auth/Auth";
 
 import thunk from "redux-thunk";
 import logger from "redux-logger";
@@ -16,7 +17,8 @@ export const ConfigureStore = () => {
   };
   const store = createStore(
     persistCombineReducers(config, {
-      scannedData: ScannedData
+      scannedData: ScannedData,
+      auth: Auth,
     }),
     applyMiddleware(thunk)
   );

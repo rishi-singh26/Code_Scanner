@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   TouchableOpacity,
@@ -6,21 +6,22 @@ import {
   Text,
   FlatList,
   View,
-  Clipboard,Share
-} from 'react-native';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import { useDispatch, useSelector } from 'react-redux';
+  Clipboard,
+} from "react-native";
+import { BarCodeScanner } from "expo-barcode-scanner";
+import { useDispatch, useSelector } from "react-redux";
 import {
-  addScannedData,
   removeScannedData,
-} from '../../Redux/ScannedData/ActionCreator';
-import { Feather } from '@expo/vector-icons';
-import { useActionSheet } from '@expo/react-native-action-sheet';
-import Toast from 'react-native-simple-toast';
+  getScannedData,
+} from "../../Redux/ScannedData/ActionCreator";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { toast } from "../../Shared/Functions";
+import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 
 export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
+  console.log(scannedData.data);
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   // Action sheet provider
@@ -31,27 +32,23 @@ export default function Home(props) {
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     })();
+    dispach(getScannedData());
   }, []);
 
   const scnaCode = () => {
     if (hasPermission) {
-      props.navigation.navigate('Scanner', {
-        onScnaFunc: (data) => {
-          dispach(addScannedData(data));
-        },
-      });
-      console.log('Scanning');
+      props.navigation.navigate("Scanner");
     } else {
-      alert('No permission to camera.');
+      alert("No permission to camera.");
     }
   };
 
   const openActionSheet = (data, index) => {
-    const options = ['Delete', 'Copy', 'Share', 'Cancel'];
+    const options = ["Delete", "Copy", "Cancel"];
     const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 3;
+    const cancelButtonIndex = 2;
 
     showActionSheetWithOptions(
       {
@@ -60,49 +57,27 @@ export default function Home(props) {
         destructiveButtonIndex,
       },
       (buttonIndex) => {
-        if(buttonIndex == 0){
-          dispach(removeScannedData(index));
+        if (buttonIndex == 0) {
+          console.log({ index, id: data._id });
+          dispach(removeScannedData(index, data._id));
           return;
         }
-        if(buttonIndex == 1){
+        if (buttonIndex == 1) {
           copyToClipboard(data);
-          return;
-        }
-        if(buttonIndex == 2){
-          onShare(data.data);
           return;
         }
       }
     );
   };
 
-  const onShare = async (data) => {
-    try {
-      const result = await Share.share({
-        message: data,
-      });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          Toast.show("Shared successfullu")
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
   const copyToClipboard = (data) => {
-    Clipboard.setString(data.data);
-    Toast.show('Copied to clipboard.');
+    Clipboard.setString(data.data.data);
+    toast("Copied to clipboard.");
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {scannedData.isLoading ? <CustomActivityIndicator /> : null}
       <FlatList
         data={scannedData.data}
         keyExtractor={(item, index) => index.toString()}
@@ -112,22 +87,26 @@ export default function Home(props) {
               <Text style={styles.listNumber}>{index + 1}</Text>
               <TouchableOpacity
                 onPress={() => openActionSheet(item, index)}
-                style={{ flex: 8 }}>
-                {item != '' ? (
+                style={{ flex: 8 }}
+              >
+                {item.scannedData.data != "" ? (
                   <Text
                     numberOfLines={3}
-                    style={{ fontSize: 15, fontWeight: '700' }}>
-                    {item.data}
+                    style={{ fontSize: 15, fontWeight: "700" }}
+                  >
+                    {item.scannedData.data}
                   </Text>
                 ) : null}
-                {item != '' ? <Text>{item.type}</Text> : null}
+                {item.scannedData.type != "" ? (
+                  <Text>{item.scannedData.type}</Text>
+                ) : null}
               </TouchableOpacity>
             </View>
           );
         }}
       />
       <TouchableOpacity style={styles.button} onPress={scnaCode}>
-        <Text style={{ fontSize: 17, fontWeight: '700', color: '#fff' }}>
+        <Text style={{ fontSize: 17, fontWeight: "700", color: "#fff" }}>
           Scan code
         </Text>
       </TouchableOpacity>
@@ -143,16 +122,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: '#3071ff',
-    alignItems: 'center',
+    backgroundColor: "#3071ff",
+    alignItems: "center",
     margin: 20,
   },
   scannedData: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     marginTop: 3,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 10,
   },
@@ -160,6 +139,6 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     flex: 1,
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });
