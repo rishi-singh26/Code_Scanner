@@ -54,14 +54,14 @@ const getUserData = (user) => (dispatch) => {
         const _id = user.id;
         userData.push({ _id, ...data });
       });
-      // console.log("User data successfully fetched after login", userData);
+      console.log("User data successfully fetched after login", userData);
       dispatch(receiveLogin(userData[0]));
-      toast("Sign up successfull");
+      // toast("Sign up successfull");
     })
     .catch((error) => {
       console.log("Error in adding chat ", error.message);
       dispatch(loginError(err.message));
-      toast("Sign up failed");
+      // toast("Sign up failed");
     });
 };
 

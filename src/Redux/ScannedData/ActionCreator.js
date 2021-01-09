@@ -1,5 +1,6 @@
 import * as ActionTypes from "./ActionTypes";
 import { auth, firestore } from "../../Constants/Api";
+import { toast } from "../../Shared/Functions";
 
 export const addScannedData = (data) => (dispatch) => {
   // console.log("Addin in ACTION");
@@ -34,6 +35,7 @@ export const removeScannedData = (index, dataId) => (dispatch) => {
     .then((resp) => {
       dispatch(removeData(index));
       dispatch(getScannedData());
+      toast("Deleted");
     })
     .catch((err) => {
       console.log("Erron in deleting One Data\n", err.message);
@@ -52,6 +54,7 @@ export const getScannedData = () => (dispatch) => {
   console.log("Getting all data");
   firestore
     .collection("scannedCodes")
+    .where("userId", "==", auth.currentUser.uid)
     .where("isDeleted", "==", false)
     .get()
     .then((resp) => {
@@ -72,3 +75,23 @@ const addAllData = (allData) => ({
   type: ActionTypes.GET_ALL_DATA,
   payload: allData,
 });
+
+export const editTitle = (title, dataId) => (dispatch) => {
+  if (!auth.currentUser) {
+    return;
+  }
+  dispatch(editData());
+  firestore
+    .collection("scannedCodes")
+    .doc(dataId)
+    .update({ title: title })
+    .then((resp) => {
+      dispatch(getScannedData());
+      toast("Edited");
+    })
+    .catch((err) => {
+      console.log("Erron in editing One data title\n", err.message);
+    });
+};
+
+const editData = (index) => ({ type: ActionTypes.EDIT_DATA });

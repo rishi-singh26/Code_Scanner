@@ -3,6 +3,7 @@ import { StatusBar } from "react-native";
 import Home from "../Pages/Home/index";
 import Scanner from "../Pages/Scanner/index";
 import Authentication from "../Pages/Authentication/index";
+import QrGenerator from "../Pages/Generator/index";
 
 import { useSelector } from "react-redux";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -22,6 +23,11 @@ export default function Navigator() {
           <>
             <Stack.Screen name="Home" component={Home} />
             <Stack.Screen name="Scanner" component={Scanner} />
+            <Stack.Screen
+              name="QrGenerator"
+              component={QrGenerator}
+              options={{ title: "QR Code generator" }}
+            />
           </>
         ) : (
           <Stack.Screen

@@ -34,12 +34,6 @@ export default function Signup(props) {
     setFullnameErr("");
   };
 
-  const onDobChange = (event, selectedDate) => {
-    const currentDate = selectedDate || dob;
-    setShowDobPicker(Platform.OS === "ios");
-    setDob(currentDate);
-  };
-
   const signUpUserAfterDataValidation = () => {
     if (fullName === "") {
       resetErrState();
@@ -72,7 +66,7 @@ export default function Signup(props) {
       return;
     }
     resetErrState();
-    dispatch(signUpUser({ email: email, password: pass, fullName, dob }));
+    dispatch(signUpUser({ email: email, password: pass, fullName }));
   };
 
   return (

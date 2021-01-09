@@ -28,6 +28,12 @@ export const ScannedData = (
         isLoading: true,
       };
 
+    case ActionTypes.EDIT_DATA:
+      return {
+        ...state,
+        isLoading: true,
+      };
+
     default:
       return state;
   }
