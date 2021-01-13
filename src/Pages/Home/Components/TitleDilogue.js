@@ -12,7 +12,7 @@ import { useDispatch } from "react-redux";
 import { editTitle } from "../../../Redux/ScannedData/ActionCreator";
 
 export default function TitleDilogue(props) {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(props?.selectedData?.title || "");
   const dispatch = useDispatch();
 
   const editThisTitle = (selectedData, titel) => {

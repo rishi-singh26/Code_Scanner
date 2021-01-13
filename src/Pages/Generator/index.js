@@ -14,6 +14,9 @@ import * as MediaLibrary from "expo-media-library";
 import { toast } from "../../Shared/Functions";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Feather } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
+import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
+import { auth } from "../../Constants/Api";
 
 export default function QrGenerator(props) {
   // *Local state
@@ -22,6 +25,8 @@ export default function QrGenerator(props) {
   const { showActionSheetWithOptions } = useActionSheet();
   // *Qrcode ref
   const shareQrRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   let onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {
@@ -46,9 +51,21 @@ export default function QrGenerator(props) {
     });
   };
 
+  const uploadScannedData = (data) => {
+    console.log(data);
+    dispatch(
+      addScannedData({
+        scannedData: { type: "Not available", data: qrcodeVal },
+        creationDate: new Date(),
+        userId: auth.currentUser.uid,
+      })
+    );
+    toast("Added to list");
+  };
+
   const openActionSheet = () => {
-    const options = ["Save to gallery", "Share", "Cancel"];
-    const cancelButtonIndex = 2;
+    const options = ["Save to gallery", "Add to list", "Share", "Cancel"];
+    const cancelButtonIndex = 3;
     showActionSheetWithOptions(
       {
         options,
@@ -60,6 +77,10 @@ export default function QrGenerator(props) {
           return;
         }
         if (buttonIndex == 1) {
+          uploadScannedData(qrcodeVal);
+          return;
+        }
+        if (buttonIndex == 2) {
           shareQrCode();
           return;
         }
@@ -72,7 +93,7 @@ export default function QrGenerator(props) {
       headerRight: () => {
         return (
           <TouchableOpacity
-            style={{ marginHorizontal: 20 }}
+            style={{ paddingHorizontal: 20, paddingVertical: 12 }}
             onPress={() => {
               openActionSheet();
             }}
@@ -86,7 +107,7 @@ export default function QrGenerator(props) {
 
   useEffect(() => {
     setHeaderOptions();
-  }, []);
+  }, [qrcodeVal]);
 
   return (
     <SafeAreaView

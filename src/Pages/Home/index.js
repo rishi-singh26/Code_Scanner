@@ -4,24 +4,22 @@ import {
   TouchableOpacity,
   StyleSheet,
   Text,
+  TextInput,
   FlatList,
   View,
-  Clipboard,
   Linking,
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  removeScannedData,
-  getScannedData,
-} from "../../Redux/ScannedData/ActionCreator";
+import { removeScannedData } from "../../Redux/ScannedData/ActionCreator";
 import { logoutUser } from "../../Redux/Auth/ActionCreator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
-import { toast, validateUrl } from "../../Shared/Functions";
+import { copyToClipboard, validateUrl } from "../../Shared/Functions";
 import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 import { FontAwesome, Feather } from "@expo/vector-icons";
 import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
 import TitleDilogue from "./Components/TitleDilogue";
+import Accordion from "../../Components/Accordian/Accordian";
 
 export default function Home(props) {
   // Global state
@@ -30,23 +28,41 @@ export default function Home(props) {
   const [hasPermission, setHasPermission] = useState(false);
   const [showTitleDilogue, setShowTitleDilogue] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [showSearchBar, setShowSearchBar] = useState([]);
+  const [searchKey, setSearchKey] = useState("");
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
-  const dispach = useDispatch();
+  const dispatch = useDispatch();
 
   const setHeaderOptions = () => {
     props.navigation.setOptions({
       headerRight: () => {
         return (
-          <TouchableOpacity
-            style={{ marginHorizontal: 20 }}
-            onPress={() => {
-              openLogoutActionSheet();
-            }}
-          >
-            <Feather name="log-out" size={22} color="black" />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row" }}>
+            {/* <TouchableOpacity
+              style={{ paddingHorizontal: 15, paddingVertical: 12 }}
+              onPress={() => {
+                showSearchBar.length > 0
+                  ? setShowSearchBar([])
+                  : setShowSearchBar([0]);
+              }}
+            >
+              <Feather name="search" size={22} color="black" />
+            </TouchableOpacity> */}
+            <TouchableOpacity
+              style={{
+                paddingLeft: 15,
+                paddingVertical: 12,
+                paddingRight: 20,
+              }}
+              onPress={() => {
+                openLogoutActionSheet();
+              }}
+            >
+              <Feather name="log-out" size={22} color="black" />
+            </TouchableOpacity>
+          </View>
         );
       },
     });
@@ -58,8 +74,7 @@ export default function Home(props) {
       setHasPermission(status === "granted");
     })();
     setHeaderOptions();
-    dispach(getScannedData());
-  }, []);
+  }, [showSearchBar]);
 
   const scnaCode = () => {
     if (hasPermission) {
@@ -83,7 +98,7 @@ export default function Home(props) {
       (buttonIndex) => {
         if (buttonIndex == 0) {
           console.log({ index, id: data._id });
-          dispach(removeScannedData(index, data._id));
+          dispatch(removeScannedData(index, data._id));
           return;
         }
         if (buttonIndex == 1) {
@@ -115,78 +130,118 @@ export default function Home(props) {
       },
       (buttonIndex) => {
         if (buttonIndex == 0) {
-          dispach(logoutUser());
+          dispatch(logoutUser());
           return;
         }
       }
     );
   };
 
-  const copyToClipboard = (data) => {
-    Clipboard.setString(data.scannedData.data);
-    toast("Copied to clipboard.");
+  const _renderContent = () => {
+    return (
+      <View>
+        <TextInput
+          value={searchKey}
+          onChangeText={(text) => setSearchKey(text)}
+          placeholder={"Search here"}
+          style={{
+            backgroundColor: "#f2f2f2",
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            fontSize: 17,
+          }}
+        />
+      </View>
+    );
   };
 
-  const openUrl = (url) => {
-    Linking.openURL(url);
+  const _updateSections = (activeSections) => {
+    console.log(activeSections);
+    setShowSearchBar(activeSections);
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      <Accordion
+        sections={[1]}
+        activeSections={showSearchBar}
+        renderHeader={() => null}
+        renderContent={() => _renderContent()}
+        onChange={_updateSections}
+      />
       {scannedData.isLoading ? <CustomActivityIndicator /> : null}
       <FlatList
         data={scannedData.data}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => {
           const text = item.scannedData.data;
+          console.log("here is data", text);
           const isUrl = validateUrl(text);
           return (
-            <View style={styles.scannedData}>
-              <View style={{ flex: 16 }}>
-                {item.title ? (
-                  <Text
-                    style={{
-                      fontSize: 17,
-                      fontWeight: "700",
-                      color: "#666",
-                      marginVertical: 5,
-                    }}
-                  >
-                    {item.title}
-                  </Text>
-                ) : null}
-                {item?.scannedData?.data ? (
-                  <Text
-                    onPress={() => (isUrl ? openUrl(text) : null)}
-                    numberOfLines={2}
-                    style={{
-                      fontSize: 15,
-                      fontWeight: "700",
-                      color: isUrl ? primaryColor : "#666",
-                      marginVertical: 5,
-                    }}
-                  >
-                    {text}
-                  </Text>
-                ) : null}
-                {item?.scannedData?.type ? (
-                  <Text
-                    style={{ color: "#888" }}
-                  >{`Type: ${item.scannedData.type}`}</Text>
-                ) : null}
+            <View style={styles.scannedDataContainer}>
+              <View style={styles.scannedData}>
+                <TouchableOpacity
+                  onPress={() => {
+                    props.navigation.navigate("ScannedDataDetail", {
+                      scannedData: {
+                        text,
+                        isUrl,
+                        title: item?.title || null,
+                        id: item._id,
+                      },
+                    });
+                  }}
+                  style={{ flex: 5 }}
+                >
+                  {item.title ? (
+                    <Text
+                      style={{
+                        fontSize: 17,
+                        fontWeight: "700",
+                        color: "#444",
+                        marginVertical: 5,
+                      }}
+                    >
+                      {item.title}
+                    </Text>
+                  ) : null}
+                  {item?.scannedData?.data ? (
+                    <Text
+                      numberOfLines={2}
+                      style={{
+                        fontSize: 15,
+                        fontWeight: "700",
+                        color: "#888",
+                        marginVertical: 5,
+                      }}
+                    >
+                      {text}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{ flex: 1, paddingVertical: 10 }}
+                  onPress={() =>
+                    openActionSheet(
+                      item,
+                      index,
+                      item.title ? "Edit title" : "Add title"
+                    )
+                  }
+                >
+                  <Feather name="more-vertical" color={"#444"} size={20} />
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={{ flex: 1 }}
-                onPress={() =>
-                  openActionSheet(
-                    item,
-                    index,
-                    item.title ? "Edit title" : "Add title"
-                  )
-                }
-              >
-                <Feather name="more-vertical" color={"#444"} size={20} />
-              </TouchableOpacity>
+              {isUrl ? (
+                <View style={styles.openURLView}>
+                  <Text
+                    style={{ color: primaryColor, fontWeight: "700" }}
+                    onPress={() => (isUrl ? Linking.openURL(text) : null)}
+                  >
+                    Open URL
+                  </Text>
+                </View>
+              ) : null}
             </View>
           );
         }}
@@ -233,14 +288,28 @@ const styles = StyleSheet.create({
   },
   scannedData: {
     flex: 1,
-    backgroundColor: "#fff",
-    marginTop: 3,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    // height: 80,
     justifyContent: "space-between",
     flexDirection: "row",
     alignItems: "center",
     width: SCREEN_WIDTH,
+  },
+  scannedDataContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+    marginVertical: 2,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    width: SCREEN_WIDTH,
+  },
+  openURLView: {
+    alignSelf: "flex-end",
+    marginHorizontal: 5,
+    marginTop: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 3,
+    // backgroundColor: "#f9f9f9",
+    borderWidth: 1,
+    borderColor: "#efefef",
   },
 });

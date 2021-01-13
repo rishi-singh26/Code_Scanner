@@ -1,6 +1,6 @@
 import * as ActionTypes from "./ActionTypes";
 import { auth, firestore } from "../../Constants/Api";
-import { toast } from "../../Shared/Functions";
+import { sortArrayOfObjs, toast } from "../../Shared/Functions";
 
 export const addScannedData = (data) => (dispatch) => {
   // console.log("Addin in ACTION");
@@ -31,7 +31,8 @@ export const removeScannedData = (index, dataId) => (dispatch) => {
   firestore
     .collection("scannedCodes")
     .doc(dataId)
-    .update({ isDeleted: true, deletionDate: new Date() })
+    // .update({ isDeleted: true, deletionDate: new Date() })
+    .delete()
     .then((resp) => {
       dispatch(removeData(index));
       dispatch(getScannedData());
@@ -54,8 +55,8 @@ export const getScannedData = () => (dispatch) => {
   console.log("Getting all data");
   firestore
     .collection("scannedCodes")
+    // .orderBy("creationDate", "asc")
     .where("userId", "==", auth.currentUser.uid)
-    .where("isDeleted", "==", false)
     .get()
     .then((resp) => {
       let scannedCodes = [];
@@ -64,7 +65,11 @@ export const getScannedData = () => (dispatch) => {
         const _id = codeData.id;
         scannedCodes.push({ _id, ...data });
       });
-      dispatch(addAllData(scannedCodes));
+      const sortedScannedCodes = sortArrayOfObjs(
+        [...scannedCodes],
+        "creationDate"
+      );
+      dispatch(addAllData(sortedScannedCodes));
     })
     .catch((err) => {
       console.log("Erron in getting all Data\n", err.message);

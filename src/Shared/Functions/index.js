@@ -1,10 +1,18 @@
 import Toast from "react-native-simple-toast";
-
+import { Alert, Clipboard } from "react-native";
 export function validateEmail(email) {
+  // this is also an option for email regx
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
   const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  if (email !== "" && emailRe.test(String(email).toLowerCase())) return true;
-  else return false;
+  return emailRe.test(String(email).toLowerCase());
+}
+
+// Validated whatsapp text links for indian phone numbers ie starting with 91
+export function validateWaLinkForINNum(link) {
+  const regex = /https:\/\/wa\.me\/91(?:\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$)/;
+  return regex.test(String(link).toLowerCase());
 }
 
 export function validateUrl(value) {
@@ -15,4 +23,41 @@ export function validateUrl(value) {
 
 export function toast(message) {
   Toast.show(message);
+}
+
+export function customAlert(message, text, onOkPress, cancelable = true) {
+  Alert.alert(
+    message,
+    text,
+    [
+      {
+        text: "Cancel",
+        onPress: () => console.log("Cancel pressed"),
+        style: "cancel",
+      },
+      {
+        text: "Yes",
+        onPress: () => onOkPress(),
+        style: "default",
+      },
+    ],
+    { cancelable: cancelable }
+  );
+}
+
+export function sortArrayOfObjs(array, sortingKey) {
+  const sortedArray = [...array];
+
+  sortedArray.sort((a, b) =>
+    a[sortingKey] < b[sortingKey] ? 1 : b[sortingKey] < a[sortingKey] ? -1 : 0
+  );
+
+  // console.log("Here is the sorted array", sortedArray);
+
+  return sortedArray;
+}
+
+export function copyToClipboard(data) {
+  Clipboard.setString(data.scannedData.data);
+  toast("Copied to clipboard.");
 }
