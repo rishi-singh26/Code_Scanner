@@ -97,7 +97,7 @@ export default function Home(props) {
       },
       (buttonIndex) => {
         if (buttonIndex == 0) {
-          console.log({ index, id: data._id });
+          // console.log({ index, id: data._id });
           dispatch(removeScannedData(index, data._id));
           return;
         }
@@ -156,7 +156,7 @@ export default function Home(props) {
   };
 
   const _updateSections = (activeSections) => {
-    console.log(activeSections);
+    // console.log(activeSections);
     setShowSearchBar(activeSections);
   };
 
@@ -175,7 +175,7 @@ export default function Home(props) {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => {
           const text = item.scannedData.data;
-          console.log("here is data", text);
+          // console.log("here is data", text);
           const isUrl = validateUrl(text);
           return (
             <View style={styles.scannedDataContainer}>

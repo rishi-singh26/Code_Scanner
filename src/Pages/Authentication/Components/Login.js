@@ -41,7 +41,7 @@ export default function Login(props) {
           name="plus-square"
           style={styles.iconStyle}
         />
-        <Text style={styles.headerText}>Docto</Text>
+        <Text style={styles.headerText}>Scanner</Text>
       </View>
       <TextInput
         style={styles.textInput}
