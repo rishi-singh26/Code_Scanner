@@ -3,7 +3,6 @@ import {
   StyleSheet,
   SafeAreaView,
   Dimensions,
-  Platform,
   TouchableOpacity,
   Linking,
   Alert,
@@ -12,9 +11,12 @@ import { BarCodeScanner } from "expo-barcode-scanner";
 import { useDispatch } from "react-redux";
 import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
 import { auth } from "../../Constants/Api";
-import * as ImagePicker from "expo-image-picker";
 import { Feather } from "@expo/vector-icons";
-import { validateEmail, validateWaLinkForINNum } from "../../Shared/Functions";
+import {
+  pickImage,
+  validateEmail,
+  validateWaLinkForINNum,
+} from "../../Shared/Functions";
 
 export default function Scanner(props) {
   const [scanned, setScanned] = useState(false);
@@ -22,13 +24,14 @@ export default function Scanner(props) {
   const dispatch = useDispatch();
 
   const handleBarCodeScanned = ({ type, data }) => {
+    // console.log({ type, data });
     setScanned(true);
     checkForURLs(type, data);
   };
 
   const checkForURLs = (type, data) => {
     if (validateEmail(data)) {
-      console.log("it is an email");
+      // console.log("it is an email");
       Alert.alert(
         `Email detected`,
         `Do you want to send email to ${data}?`,
@@ -55,7 +58,7 @@ export default function Scanner(props) {
         { cancelable: false }
       );
     } else if (validateWaLinkForINNum(data)) {
-      console.log("it is a whatsapp link", data.split("/").pop());
+      // console.log("it is a whatsapp link", data.split("/").pop());
       Alert.alert(
         `Whatsapp chat link detected`,
         `Do you want to open chat with +${data.split("/").pop()}?`,
@@ -98,38 +101,24 @@ export default function Scanner(props) {
     props.navigation.goBack();
   };
 
-  const pickImage = async () => {
-    if (Platform.OS === "web") {
-      alert("Device not supported.");
-      return;
-    }
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      alert("Sorry, we need camera roll permissions to make this work!");
-      return;
-    }
+  const scanFromImage = async () => {
     try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-      // console.log(result);
-      if (!result.cancelled) {
-        console.log(result.uri);
-        const data = await BarCodeScanner.scanFromURLAsync(result.uri);
+      const imageData = await pickImage();
+      // console.log("Data from image", imageData);
+      if (!imageData.cancelled) {
+        const data = await BarCodeScanner.scanFromURLAsync(imageData.uri);
         // console.log("Data from code", data);
         if (data.length > 0) {
           const firstScannedCode = data[0];
+          // console.log(firstScannedCode);
           handleBarCodeScanned({
             type: firstScannedCode.type,
             data: firstScannedCode.data,
           });
         } else alert("No code detected. Select a picture with good resolution");
       }
-    } catch (err) {
-      console.log(err.message);
+    } catch (error) {
+      console.log(error.message);
     }
   };
 
@@ -140,7 +129,7 @@ export default function Scanner(props) {
           <TouchableOpacity
             style={{ marginHorizontal: 20 }}
             onPress={() => {
-              pickImage();
+              scanFromImage();
             }}
           >
             <Feather name="image" size={23} color="black" />

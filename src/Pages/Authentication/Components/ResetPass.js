@@ -24,7 +24,7 @@ export default function ResetPassword(props) {
     auth
       .sendPasswordResetEmail(email)
       .then(() => {
-        console.log("Password reset link sent");
+        // console.log("Password reset link sent");
         toast("Password reset link sent");
       })
       .catch((err) => {

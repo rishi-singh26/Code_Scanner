@@ -34,6 +34,20 @@ export const ScannedData = (
         isLoading: true,
       };
 
+    case ActionTypes.DELETE_DATA_LOCALLY:
+      return {
+        ...state,
+        data: [],
+        isLoading: false,
+        errMess: null,
+      };
+
+    case ActionTypes.DATA_LOADING:
+      return {
+        ...state,
+        isLoading: true,
+      };
+
     default:
       return state;
   }

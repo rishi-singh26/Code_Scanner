@@ -8,21 +8,20 @@ import {
   TouchableOpacity,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import Accordion from "../../Components/Accordian/Accordian";
-import { FontAwesome, Feather } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
-import { toast } from "../../Shared/Functions";
-import { useActionSheet } from "@expo/react-native-action-sheet";
+import { isContactInfo, toast } from "../../Shared/Functions";
+import RenderContactInfo from "../../Shared/Components/RenderContactInfo";
+import Collapsible from "../../Components/Accordian/Collapsable";
+import ShareQRBar from "../../Shared/Components/ShareQRBar";
 
 export default function ScannedDataDetail(props) {
   const { scannedData } = props.route.params;
-  const [activeSections, setActiveSections] = useState([]);
+  const [isQrCollapsed, setIsQrCollapsed] = useState(true);
   // console.log(scannedData);
-  // *Action sheet provider
-  const { showActionSheetWithOptions } = useActionSheet();
   // *Qrcode ref
   const shareQrRef = useRef(null);
 
@@ -30,65 +29,34 @@ export default function ScannedDataDetail(props) {
     props.navigation.setOptions({
       headerRight: () => {
         return (
-          <View style={{ flexDirection: "row" }}>
-            {activeSections.length > 0 ? (
-              <TouchableOpacity
-                style={{ paddingHorizontal: 15, paddingVertical: 12 }}
-                onPress={() => {
-                  openActionSheet();
-                }}
-              >
-                <Feather name="share" size={22} color="black" />
-              </TouchableOpacity>
-            ) : null}
-            <TouchableOpacity
-              style={{
-                paddingLeft: 15,
-                paddingVertical: 12,
-                paddingRight: 20,
-              }}
-              onPress={() => {
-                activeSections.length > 0
-                  ? setActiveSections([])
-                  : setActiveSections([0]);
-              }}
-            >
-              <FontAwesome name="qrcode" size={23} color={"black"} />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={{
+              paddingVertical: 12,
+              paddingHorizontal: 25,
+            }}
+            onPress={() => {
+              setIsQrCollapsed(!isQrCollapsed);
+            }}
+          >
+            <FontAwesome name="qrcode" size={23} color={"black"} />
+          </TouchableOpacity>
         );
       },
+      headerTitle: scannedData?.title || "Detail",
     });
   };
 
-  const openActionSheet = () => {
-    const options = ["Save to gallery", "Share", "Cancel"];
-    const cancelButtonIndex = 3;
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-      },
-      (buttonIndex) => {
-        if (buttonIndex == 0) {
-          onSave();
-          return;
-        }
-        if (buttonIndex == 1) {
-          shareQrCode();
-          return;
-        }
-      }
-    );
-  };
+  useEffect(() => {
+    setHeaderOptions();
+  }, [isQrCollapsed]);
 
-  let onSave = async () => {
+  const onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {
-      console.log("do something with ", uri);
+      // console.log("do something with ", uri);
       const mediaLibPermission = await MediaLibrary.requestPermissionsAsync();
       if (mediaLibPermission.status === "granted") {
         const asset = await MediaLibrary.createAssetAsync(uri);
-        console.log(asset);
+        // console.log(asset);
         toast("Saved to gallery");
       }
     });
@@ -105,46 +73,34 @@ export default function ScannedDataDetail(props) {
     });
   };
 
-  useEffect(() => {
-    setHeaderOptions();
-  }, [activeSections]);
-
-  const _renderContent = (qrValue) => {
-    return (
-      <ViewShot
-        style={styles.qrView}
-        ref={shareQrRef}
-        options={{ format: "jpg", quality: 1.0 }}
-      >
-        <QRCode size={280} value={qrValue} backgroundColor="#f2f2f2" />
-      </ViewShot>
-    );
-  };
-
-  const _updateSections = (activeSections) => {
-    console.log(activeSections);
-    setActiveSections(activeSections);
-  };
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Accordion
-          sections={[1]}
-          activeSections={activeSections}
-          renderHeader={() => null}
-          renderContent={() => _renderContent(scannedData?.text || "Empty")}
-          onChange={_updateSections}
-        />
-        <Text
-          onPress={() => {
-            scannedData?.title ? null : setShowTitleTextBox(true);
-          }}
-          style={styles.title}
-        >
-          {scannedData?.title || "No title"}
-        </Text>
-        <Text style={styles.text}>{scannedData?.text || ""}</Text>
+        <Collapsible collapsed={isQrCollapsed}>
+          <View>
+            <ViewShot
+              style={styles.qrView}
+              ref={shareQrRef}
+              options={{ format: "jpg", quality: 1.0 }}
+            >
+              <QRCode
+                size={280}
+                value={scannedData?.text || "Empty"}
+                backgroundColor="#fff"
+              />
+            </ViewShot>
+            <ShareQRBar
+              backgroundColor="#f2f2f2"
+              shareQrCode={shareQrCode}
+              onSave={onSave}
+            />
+          </View>
+        </Collapsible>
+        {isContactInfo(scannedData.text) ? (
+          <RenderContactInfo data={scannedData.text} />
+        ) : (
+          <Text style={styles.text}>{scannedData?.text || ""}</Text>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -183,8 +139,17 @@ const styles = StyleSheet.create({
   qrView: {
     height: SCREEN_WIDTH - 20,
     // width: SCREEN_WIDTH - 20,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: 12,
+  },
+  sliderView: {
+    backgroundColor: "#f2f2f2",
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 10,
+    marginTop: 0,
+    marginHorizontal: 20,
   },
 });

@@ -1,30 +1,17 @@
-import React, { useState, useRef } from "react";
-import {
-  SafeAreaView,
-  TextInput,
-  StyleSheet,
-  ScrollView,
-  View,
-} from "react-native";
+import React, { useRef, useState } from "react";
+import { SafeAreaView, View, StyleSheet } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
-import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
+import { primaryColor, SCREEN_WIDTH } from "../../../Shared/Styles";
 import * as MediaLibrary from "expo-media-library";
-import { toast } from "../../Shared/Functions";
-import { useDispatch } from "react-redux";
-import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
-import { auth } from "../../Constants/Api";
-import Header from "../../Shared/Components/Header";
-import ShareQRBar from "../../Shared/Components/ShareQRBar";
+import { toast } from "../../../Shared/Functions";
+import ShareQRBar from "../../../Shared/Components/ShareQRBar";
 
-export default function QrGenerator() {
-  // *Local state
-  const [qrcodeVal, setQrcodeVal] = useState("");
+export default function ContactQR(props) {
+  const { qrcodeVal } = props.route.params;
   // *Qrcode ref
   const shareQrRef = useRef(null);
-
-  const dispatch = useDispatch();
 
   let onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {
@@ -39,10 +26,6 @@ export default function QrGenerator() {
   };
 
   const shareQrCode = () => {
-    if (qrcodeVal === "") {
-      toast("Enter some text");
-      return;
-    }
     shareQrRef.current.capture().then(async (uri) => {
       console.log("shareQrCode ", uri);
       if (!(await Sharing.isAvailableAsync())) {
@@ -53,39 +36,18 @@ export default function QrGenerator() {
     });
   };
 
-  const uploadScannedData = () => {
-    if (qrcodeVal === "") {
-      toast("Enter some text");
-      return;
-    }
-    dispatch(
-      addScannedData({
-        scannedData: { type: "Not available", data: qrcodeVal },
-        creationDate: new Date(),
-        userId: auth.currentUser.uid,
-      })
-    );
-    toast("Added to list");
-  };
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Header title={"Generator"} />
-      <ScrollView
+    <SafeAreaView
+      style={{
+        flex: 1,
+      }}
+    >
+      <View
         style={{
           flex: 1,
           backgroundColor: "#fff",
         }}
       >
-        <View style={{ backgroundColor: "#f2f2f2" }}>
-          <TextInput
-            value={qrcodeVal}
-            onChangeText={(text) => setQrcodeVal(text)}
-            placeholder="Write your text here"
-            style={styles.textInput}
-            multiline={true}
-          />
-        </View>
         <ViewShot
           style={styles.qrView}
           ref={shareQrRef}
@@ -97,24 +59,13 @@ export default function QrGenerator() {
             value={qrcodeVal === "" ? "Empty" : qrcodeVal}
           />
         </ViewShot>
-        <ShareQRBar
-          shareQrCode={shareQrCode}
-          onSave={onSave}
-          uploadScannedData={uploadScannedData}
-        />
-      </ScrollView>
+        <ShareQRBar onSave={onSave} shareQrCode={shareQrCode} />
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  textInput: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 10,
-    margin: 10,
-    backgroundColor: "#fff",
-  },
   qrView: {
     borderRadius: 15,
     backgroundColor: "#fff",

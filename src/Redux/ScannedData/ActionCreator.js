@@ -52,7 +52,7 @@ export const getScannedData = () => (dispatch) => {
   if (!auth.currentUser) {
     return;
   }
-  console.log("Getting all data");
+  // console.log("Getting all data");
   firestore
     .collection("scannedCodes")
     // .orderBy("creationDate", "asc")
@@ -100,3 +100,15 @@ export const editTitle = (title, dataId) => (dispatch) => {
 };
 
 const editData = (index) => ({ type: ActionTypes.EDIT_DATA });
+
+export const removeDataOnLogout = () => (dispatch) => {
+  dispatch(deleteLocalData());
+};
+
+const deleteLocalData = () => ({
+  type: ActionTypes.DELETE_DATA_LOCALLY,
+});
+
+export const startLoading = () => (dispatch) => {
+  dispatch({ type: ActionTypes.DATA_LOADING });
+};

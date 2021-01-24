@@ -16,7 +16,7 @@ export default function TitleDilogue(props) {
   const dispatch = useDispatch();
 
   const editThisTitle = (selectedData, titel) => {
-    console.log({ selectedData, titel });
+    // console.log({ selectedData, titel });
     dispatch(editTitle(titel, selectedData._id));
     props.closeDilogue();
     setTitle("");

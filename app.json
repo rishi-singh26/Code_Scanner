@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "bar-code-scanner",
-    "slug": "snack-da70e91a-d5c8-4f14-9694-b89778f3b794",
+    "name": "Code Scanner",
+    "slug": "code_scanner",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -29,6 +29,6 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "description": "A very basic bar code scanner. toasts the scanned data."
+    "description": "A very basic bar code and QR code scanner. toasts the scanned data."
   }
 }

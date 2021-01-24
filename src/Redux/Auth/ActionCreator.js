@@ -54,7 +54,7 @@ const getUserData = (user) => (dispatch) => {
         const _id = user.id;
         userData.push({ _id, ...data });
       });
-      console.log("User data successfully fetched after login", userData);
+      // console.log("User data successfully fetched after login", userData);
       dispatch(receiveLogin(userData[0]));
       // toast("Sign up successfull");
     })
