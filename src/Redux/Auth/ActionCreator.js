@@ -1,6 +1,6 @@
 import * as ActionTypes from "./ActionTypes";
 import { auth, firestore } from "../../Constants/Api";
-import { toast } from "../../Shared/Functions";
+import { showSnack } from "../Snack/ActionCreator";
 
 export const signUpUser = (userData) => (dispatch) => {
   dispatch(requestLogin());
@@ -19,7 +19,7 @@ export const signUpUser = (userData) => (dispatch) => {
     .catch((err) => {
       console.log("Error in signup", err.message);
       dispatch(loginError(err.message));
-      toast("Sign up failed");
+      dispatch(showSnack("Sign up failed"));
     });
 };
 
@@ -33,12 +33,12 @@ const saveUserData = (userData, user) => (dispatch) => {
       //   data: userData,
       // });
       dispatch(receiveLogin(userData));
-      toast("Sign up successfull");
+      dispatch(showSnack("Sign up successfull"));
     })
     .catch((error) => {
       console.log("Error in saving user data ", error.message);
       dispatch(loginError(err.message));
-      toast("Sign up failed");
+      dispatch(showSnack("Sign up failed"));
     });
 };
 
@@ -56,12 +56,12 @@ const getUserData = (user) => (dispatch) => {
       });
       // console.log("User data successfully fetched after login", userData);
       dispatch(receiveLogin(userData[0]));
-      // toast("Sign up successfull");
+      dispatch(showSnack("Login successfull"));
     })
     .catch((error) => {
       console.log("Error in adding chat ", error.message);
       dispatch(loginError(err.message));
-      // toast("Sign up failed");
+      dispatch(showSnack("Sign up failed"));
     });
 };
 
@@ -79,14 +79,14 @@ export const loginUser = (creds) => (dispatch) => {
     .signInWithEmailAndPassword(creds.username, creds.password)
     .then(() => {
       var user = auth.currentUser;
-      toast("Loging Successfull");
+      // dispatch(showSnack("Login successfull"));
       dispatch(getUserData(user));
       // console.log("Login success getting user data now");
       // dispatch(receiveLogin(user));
     })
     .catch((error) => {
       dispatch(loginError(error.message));
-      toast(error.message);
+      dispatch(showSnack("Login failed"));
     });
 };
 
@@ -99,7 +99,7 @@ export const logoutUser = () => (dispatch) => {
   auth
     .signOut()
     .then(() => {
-      // toast("Logout successfull")
+      dispatch(showSnack("Logout successfull"));
     })
     .catch((error) => {
       // An error happened.

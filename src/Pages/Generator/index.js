@@ -11,12 +11,12 @@ import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
 import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
 import * as MediaLibrary from "expo-media-library";
-import { toast } from "../../Shared/Functions";
 import { useDispatch } from "react-redux";
 import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
 import { auth } from "../../Constants/Api";
 import Header from "../../Shared/Components/Header";
 import ShareQRBar from "../../Shared/Components/ShareQRBar";
+import { showSnack } from "../../Redux/Snack/ActionCreator";
 
 export default function QrGenerator() {
   // *Local state
@@ -33,14 +33,14 @@ export default function QrGenerator() {
       if (mediaLibPermission.status === "granted") {
         const asset = await MediaLibrary.createAssetAsync(uri);
         // console.log(asset);
-        toast("Saved to gallery");
+        dispatch(showSnack("Saved to Gallery"));
       }
     });
   };
 
   const shareQrCode = () => {
     if (qrcodeVal === "") {
-      toast("Enter some text");
+      dispatch(showSnack("Enter some text"));
       return;
     }
     shareQrRef.current.capture().then(async (uri) => {
@@ -55,7 +55,7 @@ export default function QrGenerator() {
 
   const uploadScannedData = () => {
     if (qrcodeVal === "") {
-      toast("Enter some text");
+      dispatch(showSnack("Enter some text"));
       return;
     }
     dispatch(
@@ -65,7 +65,7 @@ export default function QrGenerator() {
         userId: auth.currentUser.uid,
       })
     );
-    toast("Added to list");
+    dispatch(showSnack("Added to list"));
   };
 
   return (

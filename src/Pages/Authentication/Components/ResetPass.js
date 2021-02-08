@@ -9,11 +9,15 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { primaryColor, primaryErrColor } from "../../../Shared/Styles/index";
 import { auth } from "../../../Constants/Api";
-import { toast, validateEmail } from "../../../Shared/Functions";
+import { validateEmail } from "../../../Shared/Functions";
+import { useDispatch } from "react-redux";
+import { showSnack } from "../../../Redux/Snack/ActionCreator";
 
 export default function ResetPassword(props) {
   const [email, setEmail] = useState("");
   const [emailErr, setEmailErr] = useState("");
+
+  const dispatch = useDispatch();
 
   const sendPasswordResetLink = (email) => {
     if (!validateEmail(username)) {
@@ -25,7 +29,7 @@ export default function ResetPassword(props) {
       .sendPasswordResetEmail(email)
       .then(() => {
         // console.log("Password reset link sent");
-        toast("Password reset link sent");
+        dispatch(showSnack("Password reset link sent"));
       })
       .catch((err) => {
         console.log(

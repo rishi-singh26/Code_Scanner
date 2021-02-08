@@ -5,13 +5,16 @@ import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
 import { primaryColor, SCREEN_WIDTH } from "../../../Shared/Styles";
 import * as MediaLibrary from "expo-media-library";
-import { toast } from "../../../Shared/Functions";
 import ShareQRBar from "../../../Shared/Components/ShareQRBar";
+import { useDispatch } from "react-redux";
+import { showSnack } from "../../../Redux/Snack/ActionCreator";
 
 export default function ContactQR(props) {
   const { qrcodeVal } = props.route.params;
   // *Qrcode ref
   const shareQrRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   let onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {
@@ -20,7 +23,7 @@ export default function ContactQR(props) {
       if (mediaLibPermission.status === "granted") {
         const asset = await MediaLibrary.createAssetAsync(uri);
         // console.log(asset);
-        toast("Saved to gallery");
+        dispatch(showSnack("Saved to gallery"));
       }
     });
   };

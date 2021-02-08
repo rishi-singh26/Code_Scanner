@@ -13,14 +13,19 @@ import { SCREEN_WIDTH } from "../../Shared/Styles";
 import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
 import * as MediaLibrary from "expo-media-library";
-import { isContactInfo, toast } from "../../Shared/Functions";
+import { isContactInfo } from "../../Shared/Functions";
 import RenderContactInfo from "../../Shared/Components/RenderContactInfo";
 import Collapsible from "../../Components/Accordian/Collapsable";
 import ShareQRBar from "../../Shared/Components/ShareQRBar";
+import { useDispatch } from "react-redux";
+import { showSnack } from "../../Redux/Snack/ActionCreator";
 
 export default function ScannedDataDetail(props) {
   const { scannedData } = props.route.params;
   const [isQrCollapsed, setIsQrCollapsed] = useState(true);
+
+  const dispatch = useDispatch();
+
   // console.log(scannedData);
   // *Qrcode ref
   const shareQrRef = useRef(null);
@@ -57,7 +62,7 @@ export default function ScannedDataDetail(props) {
       if (mediaLibPermission.status === "granted") {
         const asset = await MediaLibrary.createAssetAsync(uri);
         // console.log(asset);
-        toast("Saved to gallery");
+        dispatch(showSnack("Svaed to Gallery"));
       }
     });
   };

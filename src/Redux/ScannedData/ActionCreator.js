@@ -1,6 +1,7 @@
 import * as ActionTypes from "./ActionTypes";
 import { auth, firestore } from "../../Constants/Api";
-import { sortArrayOfObjs, toast } from "../../Shared/Functions";
+import { sortArrayOfObjs } from "../../Shared/Functions";
+import { showSnack } from "../Snack/ActionCreator";
 
 export const addScannedData = (data) => (dispatch) => {
   // console.log("Addin in ACTION");
@@ -36,7 +37,7 @@ export const removeScannedData = (index, dataId) => (dispatch) => {
     .then((resp) => {
       dispatch(removeData(index));
       dispatch(getScannedData());
-      toast("Deleted");
+      dispatch(showSnack("Deleted"));
     })
     .catch((err) => {
       console.log("Erron in deleting One Data\n", err.message);
@@ -92,7 +93,7 @@ export const editTitle = (title, dataId) => (dispatch) => {
     .update({ title: title })
     .then((resp) => {
       dispatch(getScannedData());
-      toast("Edited");
+      dispatch(showSnack("Edited"));
     })
     .catch((err) => {
       console.log("Erron in editing One data title\n", err.message);

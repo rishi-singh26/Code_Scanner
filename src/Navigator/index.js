@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "react-native";
+import { Snackbar } from "react-native-paper";
 import Home from "../Pages/Home/index";
 import Scanner from "../Pages/Scanner/index";
 import Authentication from "../Pages/Authentication/index";
@@ -15,6 +16,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { primaryColor } from "../Shared/Styles";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { isContactsApiAvailable } from "../Shared/Functions";
+import { hideSnack } from "../Redux/Snack/ActionCreator";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -68,6 +70,9 @@ function MyBottomTabs() {
 
 export default function Navigator() {
   const auth = useSelector((state) => state.auth);
+  const snack = useSelector((state) => state.snack);
+
+  const dispatch = useDispatch();
 
   return (
     <NavigationContainer>
@@ -102,6 +107,23 @@ export default function Navigator() {
           />
         )}
       </Stack.Navigator>
+      <Snackbar
+        visible={snack.isVisible}
+        onDismiss={() => dispatch(hideSnack())}
+        action={
+          snack.actionTxt
+            ? {
+                label: snack.actionTxt,
+                onPress: () => {
+                  snack.actionFunc();
+                  dispatch(hideSnack());
+                },
+              }
+            : null
+        }
+      >
+        {snack.message}
+      </Snackbar>
     </NavigationContainer>
   );
 }

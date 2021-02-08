@@ -37,6 +37,7 @@ import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { auth } from "../../Constants/Api";
+import { showSnack } from "../../Redux/Snack/ActionCreator";
 
 export default function Home(props) {
   // Global state
@@ -51,7 +52,7 @@ export default function Home(props) {
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
-  console.log("Here is user data\n", auth.currentUser);
+  // console.log("Here is user data\n", auth.currentUser);
 
   const dispatch = useDispatch();
 
@@ -118,6 +119,7 @@ export default function Home(props) {
         }
         if (buttonIndex == 1) {
           copyToClipboard(data);
+          dispatch(showSnack("Copied to clipboard"));
           return;
         }
         if (buttonIndex == 2) {
