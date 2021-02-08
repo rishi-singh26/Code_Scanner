@@ -32,7 +32,6 @@ import {
 } from "../../Shared/Functions";
 import { Feather, AntDesign } from "@expo/vector-icons";
 import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
-import TitleDilogue from "./Components/TitleDilogue";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
@@ -44,8 +43,6 @@ export default function Home(props) {
   const scannedData = useSelector((state) => state.scannedData);
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
-  const [showTitleDilogue, setShowTitleDilogue] = useState(false);
-  const [selectedData, setSelectedData] = useState(null);
   const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
   const [searchKey, setSearchKey] = useState("");
   const [dataList, setDataList] = useState(scannedData.data);
@@ -76,8 +73,8 @@ export default function Home(props) {
     }
   };
 
-  const openActionSheet = (data, index, titleText) => {
-    const options = ["Delete", "Copy", titleText, "Cancel"];
+  const openActionSheet = (data, index) => {
+    const options = ["Delete", "Copy", "Edit", "Cancel"];
     const destructiveButtonIndex = 0;
     const cancelButtonIndex = 3;
     const icons = [
@@ -123,8 +120,12 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex == 2) {
-          setSelectedData({ ...data });
-          setShowTitleDilogue(true);
+          props.navigation.navigate("Editor", {
+            title: data?.title || "",
+            data: data?.scannedData?.data || "",
+            id: data?._id,
+            isEditing: true,
+          });
           return;
         }
       }
@@ -132,15 +133,16 @@ export default function Home(props) {
   };
 
   const openScannerOptionsSheet = () => {
-    const options = ["Pick Image", "Open Camera", "Cancel"];
-    const destructiveButtonIndex = 2;
-    const cancelButtonIndex = 2;
+    const options = ["Pick Image", "Open Camera", "Add note", "Cancel"];
+    const destructiveButtonIndex = 3;
+    const cancelButtonIndex = 3;
     // const message = "Do you want to logout?";
     // const messageTextStyle = { fontSize: 17, fontWeight: "700" };
     // const icons = ["camera", "image"];
     const icons = [
       <Feather name={"image"} size={20} color={"#000"} />,
       <Feather name={"camera"} size={20} color={"#000"} />,
+      <Feather name={"file-text"} size={20} color={"#000"} />,
       <Feather name={"x"} size={20} color={"#000"} />,
     ];
     showActionSheetWithOptions(
@@ -159,6 +161,10 @@ export default function Home(props) {
         }
         if (buttonIndex == 1) {
           scnaCode();
+          return;
+        }
+        if (buttonIndex == 2) {
+          props.navigation.navigate("Editor", { isEditing: false });
           return;
         }
       }
@@ -355,6 +361,7 @@ export default function Home(props) {
               <View style={styles.scannedData}>
                 <TouchableOpacity
                   onPress={() => {
+                    // console.log(item);
                     props.navigation.navigate("ScannedDataDetail", {
                       scannedData: {
                         text,
@@ -391,13 +398,7 @@ export default function Home(props) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, paddingVertical: 10 }}
-                  onPress={() =>
-                    openActionSheet(
-                      item,
-                      index,
-                      item.title ? "Edit title" : "Add title"
-                    )
-                  }
+                  onPress={() => openActionSheet(item, index)}
                 >
                   <Feather name="more-vertical" color={"#444"} size={20} />
                 </TouchableOpacity>
@@ -423,14 +424,6 @@ export default function Home(props) {
         onPress={() => {
           openScannerOptionsSheet();
         }}
-      />
-      <TitleDilogue
-        isVisible={showTitleDilogue}
-        closeDilogue={() => {
-          setShowTitleDilogue(false);
-          setSelectedData(null);
-        }}
-        selectedData={selectedData}
       />
     </SafeAreaView>
   );

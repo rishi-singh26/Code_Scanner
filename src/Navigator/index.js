@@ -8,6 +8,7 @@ import QrGenerator from "../Pages/Generator/index";
 import ScannedDataDetail from "../Pages/ScannedDataDetail/index";
 import Contacts from "../Pages/ShareContacts/index";
 import ContactQR from "../Pages/ShareContacts/Components/ContactQR";
+import Editor from "../Pages/Editor/index";
 
 import { useSelector, useDispatch } from "react-redux";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -97,6 +98,11 @@ export default function Navigator() {
               name="ContactQR"
               component={ContactQR}
               options={{ title: "Detail" }}
+            />
+            <Stack.Screen
+              name="Editor"
+              component={Editor}
+              options={{ title: "Editor" }}
             />
           </>
         ) : (

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Animated, Easing } from "react-native";
-import { ViewPropTypes } from "./Config";
+import { ViewPropTypes } from "../../Shared/Config";
 
 const ANIMATED_EASING_PREFIXES = ["easeInOut", "easeOut", "easeIn"];
 

@@ -14,6 +14,7 @@ export const addScannedData = (data) => (dispatch) => {
     .then((resp) => {
       dispatch(addData(data));
       dispatch(getScannedData());
+      dispatch(showSnack("Added to list"));
     })
     .catch((err) => {
       console.log("Erron in adding One Data\n", err.message);
@@ -82,7 +83,7 @@ const addAllData = (allData) => ({
   payload: allData,
 });
 
-export const editTitle = (title, dataId) => (dispatch) => {
+export const editScannedData = (dataToBeUpdated, dataId) => (dispatch) => {
   if (!auth.currentUser) {
     return;
   }
@@ -90,7 +91,7 @@ export const editTitle = (title, dataId) => (dispatch) => {
   firestore
     .collection("scannedCodes")
     .doc(dataId)
-    .update({ title: title })
+    .update(dataToBeUpdated)
     .then((resp) => {
       dispatch(getScannedData());
       dispatch(showSnack("Edited"));

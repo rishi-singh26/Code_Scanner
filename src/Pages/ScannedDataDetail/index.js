@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
-import { FontAwesome } from "@expo/vector-icons";
+import { Feather, FontAwesome } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
@@ -19,6 +19,7 @@ import Collapsible from "../../Components/Accordian/Collapsable";
 import ShareQRBar from "../../Shared/Components/ShareQRBar";
 import { useDispatch } from "react-redux";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
+import HorizontalView from "../../Shared/Components/HorizontalView";
 
 export default function ScannedDataDetail(props) {
   const { scannedData } = props.route.params;
@@ -34,20 +35,35 @@ export default function ScannedDataDetail(props) {
     props.navigation.setOptions({
       headerRight: () => {
         return (
-          <TouchableOpacity
-            style={{
-              paddingVertical: 12,
-              paddingHorizontal: 25,
-            }}
-            onPress={() => {
-              setIsQrCollapsed(!isQrCollapsed);
-            }}
-          >
-            <FontAwesome name="qrcode" size={23} color={"black"} />
-          </TouchableOpacity>
+          <HorizontalView style={{ alignItems: "center" }}>
+            {isContactInfo(scannedData.text) ? null : (
+              <TouchableOpacity
+                onPress={() => {
+                  props.navigation.navigate("Editor", {
+                    title: scannedData?.title || "",
+                    data: scannedData?.text || "",
+                    id: scannedData?.id,
+                    isEditing: true,
+                  });
+                }}
+                style={styles.headerEditIconStyle}
+              >
+                <Feather name="edit" size={23} color={"black"} />
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                setIsQrCollapsed(!isQrCollapsed);
+              }}
+              style={styles.headerQRIconStyle}
+            >
+              <FontAwesome name="qrcode" size={23} color={"black"} />
+            </TouchableOpacity>
+          </HorizontalView>
         );
       },
       headerTitle: scannedData?.title || "Detail",
+      headerTitleStyle: { width: SCREEN_WIDTH / 2, fontWeight: "700" },
     });
   };
 
@@ -156,5 +172,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     marginTop: 0,
     marginHorizontal: 20,
+  },
+  headerEditIconStyle: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  headerQRIconStyle: {
+    paddingVertical: 12,
+    paddingRight: 25,
+    paddingLeft: 10,
   },
 });
