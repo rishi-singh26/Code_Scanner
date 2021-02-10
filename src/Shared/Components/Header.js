@@ -18,9 +18,9 @@ export default function Header({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 20,
-        marginBottom: 1,
         height: 60,
         backgroundColor: theme.colors.backOne,
+        elevation: 2,
       }}
     >
       <Text

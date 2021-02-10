@@ -9,12 +9,11 @@ import {
 import QRCode from "react-native-qrcode-svg";
 import * as Sharing from "expo-sharing";
 import ViewShot from "react-native-view-shot";
-import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
+import { SCREEN_WIDTH } from "../../Shared/Styles";
 import * as MediaLibrary from "expo-media-library";
 import { useDispatch, useSelector } from "react-redux";
 import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
 import { auth } from "../../Constants/Api";
-import Header from "../../Shared/Components/Header";
 import ShareQRBar from "../../Shared/Components/ShareQRBar";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 
@@ -73,26 +72,12 @@ export default function QrGenerator() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
-      <Header title={"Generator"} />
       <ScrollView
         style={{
           flex: 1,
           backgroundColor: colors.backOne,
         }}
       >
-        <View style={{ backgroundColor: colors.backTwo }}>
-          <TextInput
-            value={qrcodeVal}
-            onChangeText={(text) => setQrcodeVal(text)}
-            placeholder="Write your text here"
-            placeholderTextColor={colors.textTwo}
-            style={[
-              styles.textInput,
-              { backgroundColor: colors.backOne, color: colors.textOne },
-            ]}
-            multiline={true}
-          />
-        </View>
         <ViewShot
           style={[styles.qrView, { backgroundColor: colors.backTwo }]}
           ref={shareQrRef}
@@ -105,6 +90,25 @@ export default function QrGenerator() {
             backgroundColor={colors.backTwo}
           />
         </ViewShot>
+        <View
+          style={{
+            backgroundColor: colors.backTwo,
+            borderRadius: 8,
+            marginHorizontal: 20,
+          }}
+        >
+          <TextInput
+            value={qrcodeVal}
+            onChangeText={(text) => setQrcodeVal(text)}
+            placeholder="Write your text here"
+            placeholderTextColor={colors.textTwo}
+            style={[
+              styles.textInput,
+              { backgroundColor: colors.backOne, color: colors.textOne },
+            ]}
+            multiline={true}
+          />
+        </View>
         <ShareQRBar
           shareQrCode={shareQrCode}
           onSave={onSave}
@@ -118,8 +122,7 @@ export default function QrGenerator() {
 
 const styles = StyleSheet.create({
   textInput: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    padding: 10,
     borderRadius: 10,
     margin: 10,
   },

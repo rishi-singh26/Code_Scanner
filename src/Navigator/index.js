@@ -9,76 +9,28 @@ import ScannedDataDetail from "../Pages/ScannedDataDetail/index";
 import Contacts from "../Pages/ShareContacts/index";
 import ContactQR from "../Pages/ShareContacts/Components/ContactQR";
 import Editor from "../Pages/Editor/index";
+import Images from "../Pages/Images/index";
+import UploadImages from "../Pages/Images/Components/UploadImages";
+import ImageViewer from "../Pages/Images/Components/ImageViewer/index";
+import Pdfs from "../Pages/PDFs/index";
+// import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
 import {
   CardStyleInterpolators,
   createStackNavigator,
 } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
-import { primaryColor } from "../Shared/Styles";
-import { Feather, FontAwesome } from "@expo/vector-icons";
+import {
+  NavigationContainer,
+  DarkTheme,
+  DefaultTheme,
+} from "@react-navigation/native";
 import { isContactsApiAvailable } from "../Shared/Functions";
 import { hideSnack } from "../Redux/Snack/ActionCreator";
 import CustomAlert from "../Shared/Components/CustomAlert";
+import ThreeBtnAlert from "../Shared/Components/ThreeBtnAlert";
 
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
-
-function MyBottomTabs() {
-  const [APIAvailable, setAPIAvailable] = useState(false);
-  const theme = useSelector((state) => state.theme);
-  const { colors } = theme;
-
-  const checkContactsAPIAvailablity = async () => {
-    setAPIAvailable(isContactsApiAvailable());
-  };
-
-  useEffect(() => {
-    checkContactsAPIAvailablity();
-  }, []);
-
-  return (
-    <Tab.Navigator
-      tabBarOptions={{
-        activeTintColor: primaryColor,
-        keyboardHidesTabBar: true,
-        style: {
-          elevation: 0,
-          backgroundColor: colors.backOne,
-          borderTopWidth: 0,
-          borderTopColor: colors.backOne,
-        },
-      }}
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          if (route.name === "Home") {
-            return <Feather name={"home"} size={23} color={color} />;
-          } else if (route.name === "QrGenerator") {
-            return <FontAwesome name={"qrcode"} size={23} color={color} />;
-          } else if (route.name === "ContactSharing") {
-            return <Feather name={"user"} size={23} color={color} />;
-          }
-        },
-      })}
-    >
-      <Tab.Screen name="Home" component={Home} />
-      <Tab.Screen
-        options={{ title: "QR Generator" }}
-        name="QrGenerator"
-        component={QrGenerator}
-      />
-      {APIAvailable ? (
-        <Tab.Screen
-          options={{ title: "Contacts" }}
-          name="ContactSharing"
-          component={Contacts}
-        />
-      ) : null}
-    </Tab.Navigator>
-  );
-}
 
 export default function Navigator() {
   const auth = useSelector((state) => state.auth);
@@ -89,8 +41,18 @@ export default function Navigator() {
 
   const dispatch = useDispatch();
 
+  const [APIAvailable, setAPIAvailable] = useState(false);
+
+  const checkContactsAPIAvailablity = async () => {
+    setAPIAvailable(isContactsApiAvailable());
+  };
+
+  useEffect(() => {
+    checkContactsAPIAvailablity();
+  }, []);
+
   return (
-    <NavigationContainer>
+    <NavigationContainer theme={mode ? DefaultTheme : DarkTheme}>
       <StatusBar
         barStyle={mode ? "dark-content" : "light-content"}
         backgroundColor={colors.backOne}
@@ -107,9 +69,21 @@ export default function Navigator() {
           <>
             <Stack.Screen
               name="Home"
-              component={MyBottomTabs}
+              component={Home}
               options={{ headerShown: false }}
             />
+            <Stack.Screen
+              options={{ title: "QR Generator" }}
+              name="QrGenerator"
+              component={QrGenerator}
+            />
+            {APIAvailable ? (
+              <Stack.Screen
+                options={{ title: "Contacts" }}
+                name="ContactSharing"
+                component={Contacts}
+              />
+            ) : null}
             <Stack.Screen name="Scanner" component={Scanner} />
             <Stack.Screen
               name="ScannedDataDetail"
@@ -126,6 +100,34 @@ export default function Navigator() {
               component={Editor}
               options={{ title: "Editor" }}
             />
+            <Stack.Screen
+              name="Images"
+              component={Images}
+              options={{ title: "Images" }}
+            />
+            <Stack.Screen
+              name="UploadImages"
+              component={UploadImages}
+              options={{ title: "Upload images" }}
+            />
+            <Stack.Screen
+              name="ImageViewer"
+              component={ImageViewer}
+              options={{
+                headerShown: false,
+                cardStyleInterpolator: CardStyleInterpolators.forVerticalIOS,
+              }}
+            />
+            <Stack.Screen
+              name="Pdfs"
+              component={Pdfs}
+              options={{ title: "Pdfs" }}
+            />
+            {/* <Stack.Screen
+              name="PdfViewer"
+              component={PdfViewer}
+              options={{ title: "Pdf Viewer" }}
+            /> */}
           </>
         ) : (
           <Stack.Screen
@@ -153,6 +155,7 @@ export default function Navigator() {
         {snack.message}
       </Snackbar>
       <CustomAlert isVisible={alert.isVisible} />
+      <ThreeBtnAlert isVisible={alert.is3BtnAlertVisible} />
     </NavigationContainer>
   );
 }

@@ -43,7 +43,8 @@ const styles = StyleSheet.create({
   transparentView: {
     height: "100%",
     width: "100%",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 50,
     // backgroundColor: "#0003",
   },
   container: {

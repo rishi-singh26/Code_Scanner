@@ -5,6 +5,7 @@ import * as ContactsAPI from "expo-contacts";
 import { createQRString, searchContacts } from "../../Shared/Functions";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { useSelector } from "react-redux";
+import { Feather } from "@expo/vector-icons";
 
 export default function Contacts(props) {
   const [contacts, setContacts] = useState([]);
@@ -52,9 +53,30 @@ export default function Contacts(props) {
     searchKey.length > 0 ? getContacts() : null;
   };
 
+  const setHeaderOptions = () => {
+    props.navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity
+            style={{ paddingVertical: 14, paddingHorizontal: 20 }}
+            onPress={() => {
+              setIsSearchBarCollapsed(!isSearchBarCollapsed);
+            }}
+          >
+            <Feather name="search" size={23} color={colors.textOne} />
+          </TouchableOpacity>
+        );
+      },
+    });
+  };
+
   useEffect(() => {
     getContacts();
   }, []);
+
+  useEffect(() => {
+    setHeaderOptions();
+  }, [isSearchBarCollapsed]);
 
   const searchContactsData = (searchKey) => {
     setSearchKey(searchKey);
@@ -68,12 +90,6 @@ export default function Contacts(props) {
 
   return (
     <SafeAreaView style={{ backgroundColor: colors.backOne }}>
-      <Header
-        title={"Contacts"}
-        showSearchIcon
-        onSearchIconPress={() => setIsSearchBarCollapsed(!isSearchBarCollapsed)}
-      />
-      {/* Search bar */}
       <CollapsibleSearchBar
         collapsed={isSearchBarCollapsed}
         onTextChange={(text) => searchContactsData(text)}

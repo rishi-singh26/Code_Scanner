@@ -9,6 +9,7 @@ import {
 import { addToContacts, getDataObj } from "../Functions/index";
 import { Feather } from "@expo/vector-icons";
 import { primaryColor } from "../Styles";
+import { useSelector } from "react-redux";
 
 function IconBtn({
   iconName,
@@ -36,11 +37,14 @@ function IconBtn({
 export default function RenderContactInfo({ data }) {
   const [contactInfo, setContactInfo] = useState(getDataObj(data));
   // console.log(contactInfo);
+  const theme = useSelector((state) => state.theme);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.backOne }]}>
       <View style={{ alignItems: "center" }}>
         {contactInfo?.fullName?.name ? (
-          <Text style={styles.name}>{contactInfo.fullName.name}</Text>
+          <Text style={[styles.name, { color: theme.colors.textTwo }]}>
+            {contactInfo.fullName.name}
+          </Text>
         ) : null}
         {/* <Text>{data}</Text> */}
         {contactInfo?.organisation?.org ? (
@@ -107,7 +111,7 @@ export default function RenderContactInfo({ data }) {
               backColor={primaryColor}
               onPress={() => {
                 const PHONE_NUMBER = contactInfo.phoneNumbers[0].phoneNumber;
-                var URL = `https://wa.me/${PHONE_NUMBER}`;
+                var URL = `whatsapp://send?phone=${PHONE_NUMBER}`;
                 Linking.canOpenURL(URL) ? Linking.openURL(URL) : null;
               }}
             />
@@ -120,7 +124,6 @@ export default function RenderContactInfo({ data }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f7f7f7",
     marginVertical: 10,
     marginHorizontal: 20,
     borderRadius: 12,
@@ -130,7 +133,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 25,
     fontWeight: "700",
-    color: "#333",
   },
   organisation: {
     marginTop: 5,

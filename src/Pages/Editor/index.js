@@ -143,6 +143,7 @@ export default function Editor(props) {
         value={title}
         onChangeText={(text) => setTitle(text)}
         placeholder="Enter title"
+        placeholderTextColor={colors.textTwo}
         style={[
           styles.textInput,
           { fontSize: 19, fontWeight: "700", color: colors.textOne },
@@ -150,6 +151,7 @@ export default function Editor(props) {
       />
       <TextInput
         placeholder="Note"
+        placeholderTextColor={colors.textTwo}
         autoFocus
         value={data}
         onChangeText={(text) => setData(text)}

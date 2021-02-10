@@ -5,7 +5,14 @@ export const Alert = (
     head: "",
     subHead: "",
     isVisible: false,
-    actionFunc: null,
+    actionFunc: () => {},
+    threeBtnHead: "", // header text for three button alert
+    threeBtnSubHead: "", // sub header text  for three button alert
+    actionOne: () => {}, // neutral action function for three button alert
+    actionTwo: () => {}, // positive action function for three button alert
+    actionOneText: "", // neutral action btn text for three button alert
+    actionTwoText: "", // positive action btn text for three button alert
+    is3BtnAlertVisible: false, // visiblity toggel for three button alert
   },
   action
 ) => {
@@ -25,6 +32,30 @@ export const Alert = (
         subHead: "",
         actionFunc: null,
         isVisible: false,
+      };
+
+    case ActionTypes.SHOW_THREE_BTN_ALERT:
+      return {
+        ...state,
+        threeBtnHead: action.payload.head,
+        threeBtnSubHead: action.payload.subHead,
+        actionOne: action.payload.actionOne,
+        actionTwo: action.payload.actionTwo,
+        actionOneText: action.payload.actionOneText,
+        actionTwoText: action.payload.actionTwoText,
+        is3BtnAlertVisible: true,
+      };
+
+    case ActionTypes.HIDE_THREE_BTN_ALERT:
+      return {
+        ...state,
+        threeBtnHead: "",
+        threeBtnSubHead: "",
+        actionOne: null,
+        actionTwo: null,
+        actionOneText: "",
+        actionTwoText: "",
+        is3BtnAlertVisible: false,
       };
     default:
       return state;

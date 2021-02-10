@@ -7,7 +7,6 @@ import {
   FlatList,
   View,
   Linking,
-  Alert,
   RefreshControl,
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
@@ -24,13 +23,16 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
   copyToClipboard,
   isContactInfo,
+  isContactsApiAvailable,
   pickImage,
   searchScannedDataTitle,
+  shareScannedDataPdf,
+  shareThings,
   validateEmail,
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { Feather, AntDesign, Fontisto } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
@@ -38,21 +40,13 @@ import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { auth } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { changeToDark, changeToLight } from "../../Redux/Theme/ActionCreator";
-import { showAlert } from "../../Redux/Alert/ActionCreator";
+import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
 
 export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
   const theme = useSelector((state) => state.theme);
-
-  const {
-    primaryColor,
-    backOne,
-    backTwo,
-    textOne,
-    textTwo,
-    textThree,
-  } = theme.colors;
+  const { primaryColor, backTwo, backThree, textOne, textTwo } = theme.colors;
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
@@ -108,9 +102,8 @@ export default function Home(props) {
         containerStyle,
         textStyle,
       },
-      (buttonIndex) => {
+      async (buttonIndex) => {
         if (buttonIndex == 0) {
-          // console.log({ index, id: data._id });
           dispatch(
             showAlert(
               "Do you want to delete this text?",
@@ -123,7 +116,7 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex == 1) {
-          copyToClipboard(data);
+          copyToClipboard(data.scannedData.data);
           dispatch(showSnack("Copied to clipboard"));
           return;
         }
@@ -137,7 +130,10 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex == 3) {
-          dispatch(showAlert("No implemented yet!", "Wait for it"));
+          const pdfuri = await shareScannedDataPdf(
+            `<h3>${data.title}</h3><p>${data.scannedData.data}</p>`
+          );
+          pdfuri.status ? shareThings(pdfuri.pdfUri) : null;
           return;
         }
       }
@@ -145,16 +141,29 @@ export default function Home(props) {
   };
 
   const openScannerOptionsSheet = () => {
-    const options = ["Pick Image", "Open Camera", "Add note", "Cancel"];
-    const destructiveButtonIndex = 3;
-    const cancelButtonIndex = 3;
+    const options = [
+      "Scan Image",
+      "Open Camera",
+      "Add note",
+      "Create QR code",
+      "Images",
+      "PDFs",
+      "Share contacts",
+      "Cancel",
+    ];
+    const destructiveButtonIndex = 7;
+    const cancelButtonIndex = 7;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
       <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"camera"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
-      <Feather name={"x"} size={20} color={textOne} />,
+      <Fontisto name="qrcode" size={17} color={textOne} />,
+      <Feather name={"image"} size={20} color={textOne} />,
+      <AntDesign name={"pdffile1"} size={20} color={textOne} />,
+      <Feather name={"users"} size={20} color={textOne} />,
+      <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
       {
@@ -166,16 +175,39 @@ export default function Home(props) {
         textStyle,
       },
       (buttonIndex) => {
-        if (buttonIndex == 0) {
+        if (buttonIndex === 0) {
           scanFromImage();
           return;
         }
-        if (buttonIndex == 1) {
+        if (buttonIndex === 1) {
           scnaCode();
           return;
         }
-        if (buttonIndex == 2) {
+        if (buttonIndex === 2) {
           props.navigation.navigate("Editor", { isEditing: false });
+          return;
+        }
+        if (buttonIndex === 3) {
+          props.navigation.navigate("QrGenerator");
+          return;
+        }
+        if (buttonIndex === 4) {
+          props.navigation.navigate("Images");
+          return;
+        }
+        if (buttonIndex === 5) {
+          props.navigation.navigate("Pdfs");
+          return;
+        }
+        if (buttonIndex === 6) {
+          // const url =
+          //   "http://unec.edu.az/application/uploads/2014/12/pdf-sample.pdf";
+          // Linking.canOpenURL(url)
+          //   ? Linking.openURL(url)
+          //   : dispatch(showSnack("Oops, can't open url"));
+          isContactsApiAvailable()
+            ? props.navigation.navigate("ContactSharing")
+            : dispatch(showSnack("Oops, can't share contacts on this device!"));
           return;
         }
       }
@@ -246,15 +278,17 @@ export default function Home(props) {
   const scanFromImage = async () => {
     try {
       const imageData = await pickImage();
-      // console.log("Data from image", imageData);
-      if (!imageData.cancelled) {
-        const data = await BarCodeScanner.scanFromURLAsync(imageData.uri);
+      console.log("Data from image", imageData);
+      if (imageData.status && !imageData.result.cancelled) {
+        const data = await BarCodeScanner.scanFromURLAsync(
+          imageData.result.uri
+        );
         // console.log("Data from code", data);
         if (data.length > 0) {
           const firstScannedCode = data[0];
           console.log("Here is the scanned data", firstScannedCode);
           checkForURLs(firstScannedCode.type, firstScannedCode.data);
-        } else dispatch(showAlert("No code detected", "Try again"));
+        } else dispatch(showSnack("No code detected"));
       }
     } catch (error) {
       console.log(error.message);
@@ -264,55 +298,27 @@ export default function Home(props) {
   const checkForURLs = (type, data) => {
     if (validateEmail(data)) {
       console.log("it is an email");
-      Alert.alert(
-        `Email detected`,
-        `Do you want to send email to ${data}?`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => setScanned(false),
-            style: "cancel",
-          },
-          {
-            text: `Save`,
-            onPress: () => uploadScannedData(type, data),
-            style: "default",
-          },
-          {
-            text: `Send email`,
-            onPress: () => {
-              Linking.openURL(`mailto:${data}`);
-            },
-            style: "default",
-          },
-        ],
-        { cancelable: false }
+      dispatch(
+        show3BtnAlert(
+          "Email detected",
+          `Do you want to send email to ${data}?`,
+          () => uploadScannedData(type, data),
+          "Save",
+          () => Linking.openURL(`mailto:${data}`),
+          "Send email"
+        )
       );
     } else if (validateWaLinkForINNum(data)) {
       console.log("it is a whatsapp link", data.split("/").pop());
-      Alert.alert(
-        `Whatsapp chat link detected`,
-        `Do you want to open chat with +${data.split("/").pop()}?`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => {},
-            style: "cancel",
-          },
-          {
-            text: `Save`,
-            onPress: () => uploadScannedData(type, data),
-            style: "default",
-          },
-          {
-            text: `Open chat`,
-            onPress: () => {
-              Linking.openURL(`${data}`);
-            },
-            style: "default",
-          },
-        ],
-        { cancelable: false }
+      dispatch(
+        show3BtnAlert(
+          "Whatsapp chat link detected",
+          `Do you want to open chat with +${data.split("/").pop()}?`,
+          () => uploadScannedData(type, data),
+          "Save",
+          () => Linking.openURL(`whatsapp://send?phone=${data}`),
+          "Open chat"
+        )
       );
     } else {
       console.log("Uploading data");
@@ -334,7 +340,7 @@ export default function Home(props) {
   const finalDataList = searchBarCollapsed ? scannedData.data : dataList;
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
+    <SafeAreaView style={styles.container}>
       {/* Header */}
       <Header
         title={"Scanner"}
@@ -383,8 +389,8 @@ export default function Home(props) {
                 {
                   borderTopWidth: index === 0 ? 0 : 1,
                   borderBottomWidth: index === finalDataList.length - 1 ? 2 : 0,
-                  borderColor: backTwo,
-                  backgroundColor: backOne,
+                  borderColor: backThree,
+                  backgroundColor: backTwo,
                 },
               ]}
             >
@@ -421,7 +427,7 @@ export default function Home(props) {
                           style={{ marginRight: 15 }}
                         />
                         <Text
-                          style={[styles.scannedDataText, { color: textThree }]}
+                          style={[styles.scannedDataText, { color: textTwo }]}
                         >
                           Contact Card
                         </Text>
@@ -446,7 +452,7 @@ export default function Home(props) {
               {isUrl ? (
                 <TouchableOpacity
                   onPress={() => (isUrl ? Linking.openURL(text) : null)}
-                  style={[styles.openURLView, { borderColor: backTwo }]}
+                  style={[styles.openURLView, { borderColor: backThree }]}
                 >
                   <Text style={{ color: primaryColor, fontWeight: "700" }}>
                     Open URL

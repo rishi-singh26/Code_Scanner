@@ -14,7 +14,8 @@ import { validateEmail } from "../../../Shared/Functions/index";
 
 export default function Login(props) {
   // Global state
-  const auth = useSelector((state) => state.auth);
+  const theme = useSelector((state) => state.theme);
+  const { colors } = theme;
   // local state
   const [email, setEmail] = useState("");
   const [pass, setPass] = useState("");
@@ -41,10 +42,15 @@ export default function Login(props) {
           name="plus-square"
           style={styles.iconStyle}
         />
-        <Text style={styles.headerText}>Scanner</Text>
+        <Text style={[styles.headerText, { color: colors.textOne }]}>
+          Scanner
+        </Text>
       </View>
       <TextInput
-        style={styles.textInput}
+        style={[
+          styles.textInput,
+          { backgroundColor: colors.backTwo, color: colors.textOne },
+        ]}
         placeholder="Email"
         placeholderTextColor="#aaa"
         value={email}
@@ -57,7 +63,14 @@ export default function Login(props) {
       {emailErr.length > 0 ? (
         <Text style={styles.errTxt}>{emailErr}</Text>
       ) : null}
-      <View style={[styles.textInput, styles.textInputView]}>
+      <View
+        style={[
+          styles.textInput,
+          styles.textInputView,
+          ,
+          { backgroundColor: colors.backTwo, paddingVertical: 7 },
+        ]}
+      >
         <TextInput
           placeholder="Password"
           placeholderTextColor="#aaa"
@@ -65,34 +78,43 @@ export default function Login(props) {
           onChangeText={(text) => {
             setPass(text);
           }}
-          style={{ flex: 1 }}
+          style={{ flex: 1, color: colors.textOne }}
           secureTextEntry={shouldShowPassword}
         />
         <Feather
-          color={"#333"}
+          color={colors.textThree}
           size={18}
           name={shouldShowPassword ? "eye" : "eye-off"}
           onPress={() => {
             setShouldShowPassword(!shouldShowPassword);
           }}
+          style={{ padding: 8 }}
         />
       </View>
       <TouchableOpacity
         onPress={() => loginUserOnDataValidation(email, pass)}
-        style={styles.loginBtn}
+        style={[styles.loginBtn, { backgroundColor: colors.primaryColor }]}
       >
         <Text style={styles.loginBtnTxt}>Login</Text>
       </TouchableOpacity>
       <View style={styles.btnsView}>
         <Text
           onPress={() => props.onForgotPassPress()}
-          style={[styles.loginBtnTxt, styles.forgotPasswordBtn]}
+          style={[
+            styles.loginBtnTxt,
+            styles.forgotPasswordBtn,
+            { color: colors.textOne, borderRightColor: colors.textOne },
+          ]}
         >
           Forgot Password
         </Text>
         <Text
           onPress={() => props.onSignupPress()}
-          style={[styles.loginBtnTxt, styles.signUpBtn]}
+          style={[
+            styles.loginBtnTxt,
+            styles.signUpBtn,
+            { color: colors.textOne },
+          ]}
         >
           SignUp
         </Text>
@@ -109,7 +131,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   forgotPasswordBtn: {
-    color: "#000",
     alignSelf: "center",
     marginTop: 15,
     marginHorizontal: 5,
@@ -118,7 +139,6 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
   },
   signUpBtn: {
-    color: "#000",
     alignSelf: "center",
     marginTop: 15,
     marginHorizontal: 5,
@@ -139,10 +159,8 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 27,
     fontWeight: "700",
-    color: "#000",
   },
   textInput: {
-    backgroundColor: "#f2f2f2",
     marginHorizontal: 25,
     marginVertical: 13,
     borderRadius: 10,
@@ -159,7 +177,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     margin: 40,
     alignItems: "center",
-    backgroundColor: "#000",
     borderRadius: 10,
   },
   loginBtnTxt: {

@@ -17,6 +17,42 @@ import * as ActionTypes from "./ActionTypes";
 //   borderColor,
 // }
 
+// const lightMode = {
+//   primaryColor: "#3071ff",
+//   primaryLightColor: "#5c8bf2",
+//   primaryErrColor: "#f25246",
+//   primarySuperFadedColor: "#95b5fc",
+//   secondaryColor: "",
+//   thirdColor: "",
+//   backOne: "#fff",
+//   transparentBackOne: "#fffd",
+//   backTwo: "#ddd",
+//   backThree: "#f9f9f9",
+//   textOne: "#000",
+//   textTwo: "#777",
+//   textThree: "#fff",
+//   borderColor: "#efefef",
+// };
+
+// const darkMode = {
+//   primaryColor: "#3071ff",
+//   primaryLightColor: "#5c8bf2",
+//   primaryErrColor: "#f25246",
+//   primarySuperFadedColor: "#95b5fc",
+//   secondaryColor: "",
+//   thirdColor: "",
+//   // backOne: "#060606",
+//   backOne: "#2c2f3d",
+//   transparentBackOne: "#000a",
+//   backTwo: "#323545",
+//   // backThree: "#222",
+//   backThree: "#262a36",
+//   textOne: "#ddd",
+//   textTwo: "#aaa",
+//   textThree: "#000",
+//   borderColor: "#444",
+// };
+
 const lightMode = {
   primaryColor: "#3B73FF",
   primaryLightColor: "#5c8bf2",
@@ -43,14 +79,14 @@ const darkMode = {
   primarySuperFadedColor: "#95b5fc",
   secondaryColor: "",
   thirdColor: "",
-  backOne: "#222",
-  backTwo: "#333",
-  backThree: "#555",
+  backOne: "#2c2f3d",
+  backTwo: "#323545",
+  backThree: "#3b3e52",
   backFour: "#fff",
   transparentBackOne: "#0005",
-  textOne: "#ddd",
-  textTwo: "#aaa",
-  textThree: "#888",
+  textOne: "#ccc",
+  textTwo: "#999",
+  textThree: "#777",
   textFour: "#000",
   borderColor: "#555",
 };

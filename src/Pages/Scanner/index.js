@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { addScannedData } from "../../Redux/ScannedData/ActionCreator";
 import { auth } from "../../Constants/Api";
 import { Feather } from "@expo/vector-icons";
@@ -20,6 +20,8 @@ import {
 
 export default function Scanner(props) {
   const [scanned, setScanned] = useState(false);
+
+  const theme = useSelector((state) => state.theme);
 
   const dispatch = useDispatch();
 
@@ -105,8 +107,10 @@ export default function Scanner(props) {
     try {
       const imageData = await pickImage();
       // console.log("Data from image", imageData);
-      if (!imageData.cancelled) {
-        const data = await BarCodeScanner.scanFromURLAsync(imageData.uri);
+      if (imageData.status && !imageData.result.cancelled) {
+        const data = await BarCodeScanner.scanFromURLAsync(
+          imageData.result.uri
+        );
         // console.log("Data from code", data);
         if (data.length > 0) {
           const firstScannedCode = data[0];
@@ -127,12 +131,12 @@ export default function Scanner(props) {
       headerRight: () => {
         return (
           <TouchableOpacity
-            style={{ marginHorizontal: 20 }}
+            style={{ paddingVertical: 14, paddingHorizontal: 20 }}
             onPress={() => {
               scanFromImage();
             }}
           >
-            <Feather name="image" size={23} color="black" />
+            <Feather name="image" size={20} color={theme.colors.textOne} />
           </TouchableOpacity>
         );
       },
