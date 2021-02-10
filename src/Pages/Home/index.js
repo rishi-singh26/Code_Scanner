@@ -31,16 +31,28 @@ import {
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
 import { Feather, AntDesign } from "@expo/vector-icons";
-import { primaryColor, SCREEN_WIDTH } from "../../Shared/Styles";
+import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { auth } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
+import { changeToDark, changeToLight } from "../../Redux/Theme/ActionCreator";
+import { showAlert } from "../../Redux/Alert/ActionCreator";
 
 export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
+  const theme = useSelector((state) => state.theme);
+
+  const {
+    primaryColor,
+    backOne,
+    backTwo,
+    textOne,
+    textTwo,
+    textThree,
+  } = theme.colors;
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
@@ -74,14 +86,17 @@ export default function Home(props) {
   };
 
   const openActionSheet = (data, index) => {
-    const options = ["Delete", "Copy", "Edit", "Cancel"];
+    const options = ["Delete", "Copy", "Edit", "Share as pdf", "Cancel"];
     const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 3;
+    const cancelButtonIndex = 4;
+    const containerStyle = { backgroundColor: backTwo };
+    const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"trash"} size={20} color={"#000"} />,
-      <Feather name={"copy"} size={20} color={"#000"} />,
-      <Feather name={"edit"} size={20} color={"#000"} />,
-      <Feather name={"x"} size={20} color={"#000"} />,
+      <Feather name={"trash"} size={20} color={textOne} />,
+      <Feather name={"copy"} size={20} color={textOne} />,
+      <Feather name={"edit"} size={20} color={textOne} />,
+      <Feather name={"share"} size={20} color={textOne} />,
+      <Feather name={"x"} size={20} color={textOne} />,
     ];
 
     showActionSheetWithOptions(
@@ -90,27 +105,20 @@ export default function Home(props) {
         cancelButtonIndex,
         destructiveButtonIndex,
         icons,
+        containerStyle,
+        textStyle,
       },
       (buttonIndex) => {
         if (buttonIndex == 0) {
           // console.log({ index, id: data._id });
-          Alert.alert(
-            "Do you want to delete this text?",
-            "It can not be recovered later!",
-            [
-              {
-                text: "Cancel",
-                onPress: () => {},
-                style: "cancel",
-              },
-              {
-                text: `Delete`,
-                onPress: () => {
-                  dispatch(removeScannedData(index, data._id));
-                },
-                style: "default",
-              },
-            ]
+          dispatch(
+            showAlert(
+              "Do you want to delete this text?",
+              "It can not be recovered later!",
+              () => {
+                dispatch(removeScannedData(index, data._id));
+              }
+            )
           );
           return;
         }
@@ -128,6 +136,10 @@ export default function Home(props) {
           });
           return;
         }
+        if (buttonIndex == 3) {
+          dispatch(showAlert("No implemented yet!", "Wait for it"));
+          return;
+        }
       }
     );
   };
@@ -136,14 +148,13 @@ export default function Home(props) {
     const options = ["Pick Image", "Open Camera", "Add note", "Cancel"];
     const destructiveButtonIndex = 3;
     const cancelButtonIndex = 3;
-    // const message = "Do you want to logout?";
-    // const messageTextStyle = { fontSize: 17, fontWeight: "700" };
-    // const icons = ["camera", "image"];
+    const containerStyle = { backgroundColor: backTwo };
+    const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"image"} size={20} color={"#000"} />,
-      <Feather name={"camera"} size={20} color={"#000"} />,
-      <Feather name={"file-text"} size={20} color={"#000"} />,
-      <Feather name={"x"} size={20} color={"#000"} />,
+      <Feather name={"image"} size={20} color={textOne} />,
+      <Feather name={"camera"} size={20} color={textOne} />,
+      <Feather name={"file-text"} size={20} color={textOne} />,
+      <Feather name={"x"} size={20} color={textOne} />,
     ];
     showActionSheetWithOptions(
       {
@@ -151,8 +162,8 @@ export default function Home(props) {
         cancelButtonIndex,
         destructiveButtonIndex,
         icons,
-        // message,
-        // messageTextStyle,
+        containerStyle,
+        textStyle,
       },
       (buttonIndex) => {
         if (buttonIndex == 0) {
@@ -171,29 +182,45 @@ export default function Home(props) {
     );
   };
 
-  const openLogoutActionSheet = () => {
-    const options = ["Logout", "Cancel"];
-    const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 1;
-    const message = "Do you want to logout?";
-    const messageTextStyle = { fontSize: 17, fontWeight: "700" };
+  const settingsActionSheet = () => {
+    const themeToggleBtnTxt = theme.mode
+      ? "Enable dark mode"
+      : "Disable dark mode";
+    const options = [themeToggleBtnTxt, "Logout", "Cancel"];
+    const destructiveButtonIndex = 1;
+    const cancelButtonIndex = 2;
+    const containerStyle = { backgroundColor: backTwo };
+    const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"log-out"} size={20} color={"#000"} />,
-      <Feather name={"x"} size={20} color={"#000"} />,
+      <Feather
+        name={theme.mode ? "sunset" : "sunrise"}
+        size={20}
+        color={textOne}
+      />,
+      <Feather name={"log-out"} size={20} color={textOne} />,
+      <Feather name={"x"} size={20} color={textOne} />,
     ];
     showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
         destructiveButtonIndex,
-        message,
-        messageTextStyle,
         icons,
+        containerStyle,
+        textStyle,
       },
       (buttonIndex) => {
         if (buttonIndex == 0) {
-          dispatch(logoutUser());
-          dispatch(removeDataOnLogout());
+          theme.mode ? dispatch(changeToDark()) : dispatch(changeToLight());
+          return;
+        }
+        if (buttonIndex == 1) {
+          dispatch(
+            showAlert("Do you want to log-out?", "", () => {
+              dispatch(logoutUser());
+              dispatch(removeDataOnLogout());
+            })
+          );
           return;
         }
       }
@@ -227,7 +254,7 @@ export default function Home(props) {
           const firstScannedCode = data[0];
           console.log("Here is the scanned data", firstScannedCode);
           checkForURLs(firstScannedCode.type, firstScannedCode.data);
-        } else alert("No code detected. Select a picture with good resolution");
+        } else dispatch(showAlert("No code detected", "Try again"));
       }
     } catch (error) {
       console.log(error.message);
@@ -307,13 +334,13 @@ export default function Home(props) {
   const finalDataList = searchBarCollapsed ? scannedData.data : dataList;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
       {/* Header */}
       <Header
         title={"Scanner"}
         iconRightName={"settings"}
         onRightIconPress={() => {
-          openLogoutActionSheet();
+          settingsActionSheet();
         }}
         showSearchIcon
         onSearchIconPress={() => {
@@ -338,6 +365,7 @@ export default function Home(props) {
               dispatch(startLoading());
               dispatch(getScannedData());
             }}
+            progressBackgroundColor={backTwo}
             colors={[primaryColor]}
           />
         }
@@ -353,8 +381,10 @@ export default function Home(props) {
               style={[
                 styles.scannedDataContainer,
                 {
-                  marginTop: index === 0 ? 0 : 3,
-                  marginBottom: index === finalDataList.length - 1 ? 2 : 0,
+                  borderTopWidth: index === 0 ? 0 : 1,
+                  borderBottomWidth: index === finalDataList.length - 1 ? 2 : 0,
+                  borderColor: backTwo,
+                  backgroundColor: backOne,
                 },
               ]}
             >
@@ -371,10 +401,13 @@ export default function Home(props) {
                       },
                     });
                   }}
+                  onLongPress={() => openActionSheet(item, index)}
                   style={{ flex: 5 }}
                 >
                   {item.title ? (
-                    <Text style={styles.scannedDataTitle}>{item.title}</Text>
+                    <Text style={[styles.scannedDataTitle, { color: textOne }]}>
+                      {item.title}
+                    </Text>
                   ) : null}
                   {item?.scannedData?.data ? (
                     isContact ? (
@@ -387,10 +420,17 @@ export default function Home(props) {
                           color={primaryColor}
                           style={{ marginRight: 15 }}
                         />
-                        <Text style={styles.scannedDataText}>Contact Card</Text>
+                        <Text
+                          style={[styles.scannedDataText, { color: textThree }]}
+                        >
+                          Contact Card
+                        </Text>
                       </View>
                     ) : (
-                      <Text numberOfLines={2} style={styles.scannedDataText}>
+                      <Text
+                        numberOfLines={2}
+                        style={[styles.scannedDataText, { color: textTwo }]}
+                      >
                         {text}
                       </Text>
                     )
@@ -400,13 +440,13 @@ export default function Home(props) {
                   style={{ flex: 1, paddingVertical: 10 }}
                   onPress={() => openActionSheet(item, index)}
                 >
-                  <Feather name="more-vertical" color={"#444"} size={20} />
+                  <Feather name="more-vertical" color={textOne} size={20} />
                 </TouchableOpacity>
               </View>
               {isUrl ? (
                 <TouchableOpacity
                   onPress={() => (isUrl ? Linking.openURL(text) : null)}
-                  style={styles.openURLView}
+                  style={[styles.openURLView, { borderColor: backTwo }]}
                 >
                   <Text style={{ color: primaryColor, fontWeight: "700" }}>
                     Open URL
@@ -419,7 +459,7 @@ export default function Home(props) {
       />
       {/* FAB */}
       <FAB
-        style={styles.fab}
+        style={[styles.fab, { backgroundColor: primaryColor }]}
         icon="qrcode-scan"
         onPress={() => {
           openScannerOptionsSheet();
@@ -433,14 +473,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  button: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: "#3071ff",
-    alignItems: "center",
-    marginLeft: 20,
-  },
   scannedData: {
     flex: 1,
     justifyContent: "space-between",
@@ -450,7 +482,6 @@ const styles = StyleSheet.create({
   },
   scannedDataContainer: {
     flex: 1,
-    backgroundColor: "#fff",
     paddingHorizontal: 20,
     paddingVertical: 10,
     width: SCREEN_WIDTH,
@@ -463,32 +494,21 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 3,
     borderWidth: 1,
-    borderColor: "#efefef",
   },
   fab: {
     position: "absolute",
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: primaryColor,
-  },
-  fab2: {
-    position: "absolute",
-    margin: 16,
-    right: 70,
-    bottom: 0,
-    backgroundColor: primaryColor,
   },
   scannedDataTitle: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#444",
     marginVertical: 5,
   },
   scannedDataText: {
     fontSize: 15,
     fontWeight: "700",
-    color: "#999",
     marginVertical: 5,
   },
 });

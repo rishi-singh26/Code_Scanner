@@ -1,0 +1,3 @@
+export const SWITCH_TO_DARK = "SWITCH_TO_DARK";
+export const SWITCH_TO_LIGHT = "SWITCH_TO_LIGHT";
+export const TOGGEL_THEME = "TOGGEL_THEME";

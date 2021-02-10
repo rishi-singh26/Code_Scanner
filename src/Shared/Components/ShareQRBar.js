@@ -2,6 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { primaryColor } from "../../Shared/Styles";
 import { Feather } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
 
 export default function ShareQRBar({
   shareQrCode,
@@ -9,6 +10,8 @@ export default function ShareQRBar({
   uploadScannedData,
   backgroundColor,
 }) {
+  const theme = useSelector((state) => state.theme);
+  const { colors } = theme;
   return (
     <View
       style={[
@@ -18,16 +21,16 @@ export default function ShareQRBar({
     >
       <TouchableOpacity onPress={shareQrCode} style={styles.btn}>
         <Feather name="share-2" color={primaryColor} size={26} />
-        <Text>Share</Text>
+        <Text style={{ color: colors.textOne }}>Share</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={onSave} style={styles.btn}>
         <Feather name="download" color={primaryColor} size={26} />
-        <Text>Save to Gallery</Text>
+        <Text style={{ color: colors.textOne }}>Save to Gallery</Text>
       </TouchableOpacity>
       {uploadScannedData ? (
         <TouchableOpacity onPress={uploadScannedData} style={styles.btn}>
           <Feather name="plus-square" color={primaryColor} size={26} />
-          <Text>Add to list</Text>
+          <Text style={{ color: colors.textOne }}>Add to list</Text>
         </TouchableOpacity>
       ) : null}
     </View>

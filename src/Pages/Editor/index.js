@@ -7,7 +7,7 @@ import {
   Keyboard,
   Text,
 } from "react-native";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { auth } from "../../Constants/Api";
 import {
   addScannedData,
@@ -16,6 +16,8 @@ import {
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 
 export default function Editor(props) {
+  const theme = useSelector((state) => state.theme);
+  const { colors, mode } = theme;
   // console.log(props);
   const [testWidth, setTestWidth] = useState("99%");
   const [title, setTitle] = useState(props?.route?.params?.title || "");
@@ -130,14 +132,21 @@ export default function Editor(props) {
         setInputHeight(fullHeight);
         setInputFullHeight(fullHeight);
       }}
-      style={{ flex: 1, backgroundColor: "#fff", alignItems: "stretch" }}
+      style={{
+        flex: 1,
+        backgroundColor: colors.backTwo,
+        alignItems: "stretch",
+      }}
     >
       {/* <ScrollView> */}
       <TextInput
         value={title}
         onChangeText={(text) => setTitle(text)}
         placeholder="Enter title"
-        style={[styles.textInput, { fontSize: 19, fontWeight: "700" }]}
+        style={[
+          styles.textInput,
+          { fontSize: 19, fontWeight: "700", color: colors.textOne },
+        ]}
       />
       <TextInput
         placeholder="Note"
@@ -151,6 +160,7 @@ export default function Editor(props) {
             fontSize: 16,
             height: inputHeight,
             textAlignVertical: "top",
+            color: colors.textTwo,
           },
         ]}
         multiline

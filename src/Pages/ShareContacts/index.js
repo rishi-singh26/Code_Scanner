@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
+import { SafeAreaView, Text, FlatList, TouchableOpacity } from "react-native";
 import Header from "../../Shared/Components/Header";
 import * as ContactsAPI from "expo-contacts";
 import { createQRString, searchContacts } from "../../Shared/Functions";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
+import { useSelector } from "react-redux";
 
 export default function Contacts(props) {
   const [contacts, setContacts] = useState([]);
   const [isSearchBarCollapsed, setIsSearchBarCollapsed] = useState(true);
   const [searchKey, setSearchKey] = useState("");
+
+  const theme = useSelector((state) => state.theme);
+  const { colors } = theme;
 
   const getContacts = async () => {
     const { status } = await ContactsAPI.requestPermissionsAsync();
@@ -38,12 +36,12 @@ export default function Contacts(props) {
           });
         }}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: colors.backOne,
           paddingVertical: 20,
           paddingHorizontal: 20,
         }}
       >
-        <Text style={{ fontSize: 16 }}>{item.name}</Text>
+        <Text style={{ fontSize: 16, color: colors.textOne }}>{item.name}</Text>
       </TouchableOpacity>
     );
   };
@@ -69,12 +67,11 @@ export default function Contacts(props) {
   };
 
   return (
-    <SafeAreaView>
+    <SafeAreaView style={{ backgroundColor: colors.backOne }}>
       <Header
         title={"Contacts"}
         showSearchIcon
         onSearchIconPress={() => setIsSearchBarCollapsed(!isSearchBarCollapsed)}
-        // iconRightName={"refresh-cw"}
       />
       {/* Search bar */}
       <CollapsibleSearchBar

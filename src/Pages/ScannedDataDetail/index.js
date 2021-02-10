@@ -17,13 +17,16 @@ import { isContactInfo } from "../../Shared/Functions";
 import RenderContactInfo from "../../Shared/Components/RenderContactInfo";
 import Collapsible from "../../Components/Accordian/Collapsable";
 import ShareQRBar from "../../Shared/Components/ShareQRBar";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import HorizontalView from "../../Shared/Components/HorizontalView";
 
 export default function ScannedDataDetail(props) {
   const { scannedData } = props.route.params;
   const [isQrCollapsed, setIsQrCollapsed] = useState(true);
+  const theme = useSelector((state) => state.theme);
+
+  const { backOne, backTwo, backThree, textOne, textTwo } = theme.colors;
 
   const dispatch = useDispatch();
 
@@ -48,7 +51,7 @@ export default function ScannedDataDetail(props) {
                 }}
                 style={styles.headerEditIconStyle}
               >
-                <Feather name="edit" size={23} color={"black"} />
+                <Feather name="edit" size={23} color={textOne} />
               </TouchableOpacity>
             )}
             <TouchableOpacity
@@ -57,7 +60,7 @@ export default function ScannedDataDetail(props) {
               }}
               style={styles.headerQRIconStyle}
             >
-              <FontAwesome name="qrcode" size={23} color={"black"} />
+              <FontAwesome name="qrcode" size={23} color={textOne} />
             </TouchableOpacity>
           </HorizontalView>
         );
@@ -95,23 +98,24 @@ export default function ScannedDataDetail(props) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: backTwo }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Collapsible collapsed={isQrCollapsed}>
           <View>
             <ViewShot
-              style={styles.qrView}
+              style={[styles.qrView, { backgroundColor: backTwo }]}
               ref={shareQrRef}
               options={{ format: "jpg", quality: 1.0 }}
             >
               <QRCode
                 size={280}
                 value={scannedData?.text || "Empty"}
-                backgroundColor="#fff"
+                backgroundColor={backTwo}
+                color={textOne}
               />
             </ViewShot>
             <ShareQRBar
-              backgroundColor="#f2f2f2"
+              backgroundColor={backOne}
               shareQrCode={shareQrCode}
               onSave={onSave}
             />
@@ -120,7 +124,9 @@ export default function ScannedDataDetail(props) {
         {isContactInfo(scannedData.text) ? (
           <RenderContactInfo data={scannedData.text} />
         ) : (
-          <Text style={styles.text}>{scannedData?.text || ""}</Text>
+          <Text style={[styles.text, { color: textOne }]}>
+            {scannedData?.text || ""}
+          </Text>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -132,46 +138,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     fontSize: 16,
-    color: "#666",
-  },
-  title: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#333",
-  },
-  textInputView: {
-    padding: 7,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  textInput: {
-    flex: 1,
-    paddingVertical: 8,
-    fontSize: 18,
-    fontWeight: "700",
-    backgroundColor: "#f2f2f2",
-    marginHorizontal: 10,
-    marginVertical: 5,
-    borderRadius: 8,
   },
   qrView: {
     height: SCREEN_WIDTH - 20,
     // width: SCREEN_WIDTH - 20,
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 12,
-  },
-  sliderView: {
-    backgroundColor: "#f2f2f2",
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 10,
-    marginTop: 0,
-    marginHorizontal: 20,
   },
   headerEditIconStyle: {
     paddingVertical: 12,

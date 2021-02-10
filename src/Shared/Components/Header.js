@@ -1,6 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import React from "react";
 import { View, TouchableOpacity, Text } from "react-native";
+import { useSelector } from "react-redux";
 
 export default function Header({
   title,
@@ -9,6 +10,7 @@ export default function Header({
   showSearchIcon,
   onSearchIconPress,
 }) {
+  const theme = useSelector((state) => state.theme);
   return (
     <View
       style={{
@@ -18,10 +20,14 @@ export default function Header({
         paddingHorizontal: 20,
         marginBottom: 1,
         height: 60,
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.backOne,
       }}
     >
-      <Text style={{ fontSize: 24, fontWeight: "700" }}>{title}</Text>
+      <Text
+        style={{ fontSize: 24, fontWeight: "700", color: theme.colors.textOne }}
+      >
+        {title}
+      </Text>
       <View
         style={{
           flexDirection: "row",
@@ -34,12 +40,16 @@ export default function Header({
             onPress={onSearchIconPress}
             style={{ padding: 8, marginRight: iconRightName ? 10 : 0 }}
           >
-            <Feather name={"search"} size={20} color="black" />
+            <Feather name={"search"} size={20} color={theme.colors.textOne} />
           </TouchableOpacity>
         ) : null}
         {iconRightName ? (
           <TouchableOpacity onPress={onRightIconPress} style={{ padding: 8 }}>
-            <Feather name={iconRightName} size={20} color="black" />
+            <Feather
+              name={iconRightName}
+              size={20}
+              color={theme.colors.textOne}
+            />
           </TouchableOpacity>
         ) : null}
       </View>

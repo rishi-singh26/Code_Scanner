@@ -6,11 +6,13 @@ import ViewShot from "react-native-view-shot";
 import { primaryColor, SCREEN_WIDTH } from "../../../Shared/Styles";
 import * as MediaLibrary from "expo-media-library";
 import ShareQRBar from "../../../Shared/Components/ShareQRBar";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showSnack } from "../../../Redux/Snack/ActionCreator";
 
 export default function ContactQR(props) {
   const { qrcodeVal } = props.route.params;
+  const theme = useSelector((state) => state.theme);
+  const { colors } = theme;
   // *Qrcode ref
   const shareQrRef = useRef(null);
 
@@ -40,19 +42,15 @@ export default function ContactQR(props) {
   };
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-      }}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       <View
         style={{
           flex: 1,
-          backgroundColor: "#fff",
+          backgroundColor: colors.backOne,
         }}
       >
         <ViewShot
-          style={styles.qrView}
+          style={[styles.qrView, { backgroundColor: colors.backTwo }]}
           ref={shareQrRef}
           options={{ format: "jpg", quality: 1.0 }}
         >
@@ -60,9 +58,15 @@ export default function ContactQR(props) {
             size={280}
             color={primaryColor}
             value={qrcodeVal === "" ? "Empty" : qrcodeVal}
+            backgroundColor={colors.backTwo}
+            color={theme.mode ? colors.primaryColor : colors.textOne}
           />
         </ViewShot>
-        <ShareQRBar onSave={onSave} shareQrCode={shareQrCode} />
+        <ShareQRBar
+          onSave={onSave}
+          shareQrCode={shareQrCode}
+          backgroundColor={colors.backTwo}
+        />
       </View>
     </SafeAreaView>
   );
@@ -71,15 +75,12 @@ export default function ContactQR(props) {
 const styles = StyleSheet.create({
   qrView: {
     borderRadius: 15,
-    backgroundColor: "#fff",
     width: SCREEN_WIDTH - 40,
     height: SCREEN_WIDTH - 40,
     margin: 20,
     elevation: 0.1,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 0.5,
-    borderColor: "#dfdfdf",
   },
   sliderView: {
     backgroundColor: "#f2f2f2",

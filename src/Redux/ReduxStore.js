@@ -2,6 +2,8 @@ import { createStore, combineReducers, applyMiddleware } from "redux";
 import { ScannedData } from "./ScannedData/index";
 import { Auth } from "./Auth/Auth";
 import { Snack } from "./Snack/Snack";
+import { Theme } from "./Theme/Theame";
+import { Alert } from "./Alert/Alert";
 
 import thunk from "redux-thunk";
 import logger from "redux-logger";
@@ -14,13 +16,15 @@ export const ConfigureStore = () => {
     key: "root",
     storage: AsyncStorage,
     debug: true,
-    blacklist: [],
+    blacklist: ["snack", "alert"],
   };
   const store = createStore(
     persistCombineReducers(config, {
       scannedData: ScannedData,
       auth: Auth,
       snack: Snack,
+      theme: Theme,
+      alert: Alert,
     }),
     applyMiddleware(thunk)
   );

@@ -2,6 +2,8 @@ import { Alert, Platform } from "react-native";
 import * as Contacts from "expo-contacts";
 import * as ImagePicker from "expo-image-picker";
 import Clipboard from "expo-clipboard";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 
 export function validateEmail(email) {
   // this is also an option for email regx

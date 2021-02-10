@@ -2,6 +2,7 @@ import React from "react";
 import Collapsible from "../../Components/Accordian/Collapsable";
 import { View, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
 
 export default function CollapsibleSearchBar({
   collapsed,
@@ -9,18 +10,23 @@ export default function CollapsibleSearchBar({
   onXPress,
   searchKey,
 }) {
+  const theme = useSelector((state) => state.theme);
+  const { colors, mode } = theme;
   return (
-    <Collapsible collapsed={collapsed} style={{ backgroundColor: "#f00" }}>
+    <Collapsible
+      collapsed={collapsed}
+      style={{ backgroundColor: colors.backOne }}
+    >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          backgroundColor: "#fff",
+          backgroundColor: colors.backOne,
           padding: 5,
           paddingLeft: 8,
           height: 65,
-          borderBottomColor: "#f2f2f2",
+          borderBottomColor: colors.backTwo,
           borderBottomWidth: 0.8,
         }}
       >
@@ -28,13 +34,14 @@ export default function CollapsibleSearchBar({
           value={searchKey}
           onChangeText={(text) => onTextChange(text)}
           placeholder={"Search here"}
+          placeholderTextColor={colors.textTwo}
           style={{
-            backgroundColor: "#f2f2f2",
+            backgroundColor: colors.backTwo,
             paddingVertical: 10,
             paddingHorizontal: 20,
             fontSize: 17,
             flex: 1,
-            color: "#555",
+            color: colors.textOne,
             borderRadius: 8,
           }}
         />
@@ -45,6 +52,7 @@ export default function CollapsibleSearchBar({
           onPress={() => {
             onXPress();
           }}
+          color={colors.textOne}
         />
       </View>
     </Collapsible>

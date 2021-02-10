@@ -11,19 +11,25 @@ import ContactQR from "../Pages/ShareContacts/Components/ContactQR";
 import Editor from "../Pages/Editor/index";
 
 import { useSelector, useDispatch } from "react-redux";
-import { createStackNavigator } from "@react-navigation/stack";
+import {
+  CardStyleInterpolators,
+  createStackNavigator,
+} from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { primaryColor } from "../Shared/Styles";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { isContactsApiAvailable } from "../Shared/Functions";
 import { hideSnack } from "../Redux/Snack/ActionCreator";
+import CustomAlert from "../Shared/Components/CustomAlert";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MyBottomTabs() {
   const [APIAvailable, setAPIAvailable] = useState(false);
+  const theme = useSelector((state) => state.theme);
+  const { colors } = theme;
 
   const checkContactsAPIAvailablity = async () => {
     setAPIAvailable(isContactsApiAvailable());
@@ -38,7 +44,12 @@ function MyBottomTabs() {
       tabBarOptions={{
         activeTintColor: primaryColor,
         keyboardHidesTabBar: true,
-        style: { elevation: 0, borderTopColor: "#fff", borderTopWidth: 0 },
+        style: {
+          elevation: 0,
+          backgroundColor: colors.backOne,
+          borderTopWidth: 0,
+          borderTopColor: colors.backOne,
+        },
       }}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
@@ -72,14 +83,25 @@ function MyBottomTabs() {
 export default function Navigator() {
   const auth = useSelector((state) => state.auth);
   const snack = useSelector((state) => state.snack);
+  const theme = useSelector((state) => state.theme);
+  const alert = useSelector((state) => state.alert);
+  const { colors, mode } = theme;
 
   const dispatch = useDispatch();
 
   return (
     <NavigationContainer>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar
+        barStyle={mode ? "dark-content" : "light-content"}
+        backgroundColor={colors.backOne}
+      />
       <Stack.Navigator
-        screenOptions={{ headerTitleStyle: { fontWeight: "700" } }}
+        screenOptions={{
+          headerTitleStyle: { fontWeight: "700" },
+          headerStyle: { backgroundColor: colors.backOne },
+          headerTintColor: colors.textOne,
+          cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+        }}
       >
         {auth.isAuthenticated ? (
           <>
@@ -130,6 +152,7 @@ export default function Navigator() {
       >
         {snack.message}
       </Snackbar>
+      <CustomAlert isVisible={alert.isVisible} />
     </NavigationContainer>
   );
 }

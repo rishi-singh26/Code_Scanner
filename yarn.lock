@@ -3171,6 +3171,11 @@
   "resolved" "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-10.0.0.tgz"
   "version" "10.0.0"
 
+"expo-print@~9.2.0":
+  "integrity" "sha512-cRrvfU2Xmy/aFBqbvvrEPM/iLmShEiBbVEpiFi4meZtoSnrIcuJAipp7sMOe7q1aOZkSxzTTaXs64PBL8tMkaw=="
+  "resolved" "https://registry.npmjs.org/expo-print/-/expo-print-9.2.0.tgz"
+  "version" "9.2.0"
+
 "expo-secure-store@~9.3.0":
   "integrity" "sha512-dNhKcoUUn+1kmEfFVxSU7h+YsqODqlExZQJcQgxgeiuCeeDvJWkE10t3jjrO6aNfrdM5i/X2l3oh401EDslWsQ=="
   "resolved" "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-9.3.0.tgz"
