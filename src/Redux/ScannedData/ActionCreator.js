@@ -83,7 +83,7 @@ const addAllData = (allData) => ({
   payload: allData,
 });
 
-export const editScannedData = (dataToBeUpdated, dataId) => (dispatch) => {
+export const editScannedData = (dataToBeUpdated, dataId, message="Edited") => (dispatch) => {
   if (!auth.currentUser) {
     return;
   }
@@ -94,7 +94,7 @@ export const editScannedData = (dataToBeUpdated, dataId) => (dispatch) => {
     .update(dataToBeUpdated)
     .then((resp) => {
       dispatch(getScannedData());
-      dispatch(showSnack("Edited"));
+      dispatch(showSnack(message));
     })
     .catch((err) => {
       console.log("Erron in editing One data title\n", err.message);

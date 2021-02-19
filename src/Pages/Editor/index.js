@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  Keyboard,
   Text,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,10 +13,11 @@ import {
   editScannedData,
 } from "../../Redux/ScannedData/ActionCreator";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
+import { encryptText } from "../../Shared/Functions";
 
 export default function Editor(props) {
   const theme = useSelector((state) => state.theme);
-  const { colors, mode } = theme;
+  const { colors } = theme;
   // console.log(props);
   const [testWidth, setTestWidth] = useState("99%");
   const [title, setTitle] = useState(props?.route?.params?.title || "");
@@ -59,27 +59,47 @@ export default function Editor(props) {
     });
   };
 
-  const saveData = (title, data, id, isEditing) => {
+  const saveData = async (title, textData, id, isEditing) => {
     if (isEditing) {
       if (id) {
-        dispatch(
-          editScannedData(
-            {
-              title: title,
-              scannedData: { data: data },
-              updatedDate: new Date(),
-            },
-            id
-          )
-        );
+        const {isLockaed, notePass} = props?.route?.params;
+        if(isLockaed){
+          const { status, data } = await encryptText(textData, notePass);
+          console.log({status, data});
+          if(status){
+            dispatch(
+              editScannedData(
+                {
+                  title: title,
+                  scannedData: { data: data },
+                  updatedDate: new Date(),
+                },
+                id
+              )
+            );
+          }else{
+            dispatch(showSnack("Error while editing, please try again"))
+          }
+        }else{
+          dispatch(
+            editScannedData(
+              {
+                title: title,
+                scannedData: { data: textData },
+                updatedDate: new Date(),
+              },
+              id
+            )
+          );
+        }
         props.navigation.navigate("Home");
       } else {
-        dispatch(showSnack("Error while editing"));
+        dispatch(showSnack("Error while editing, please try again"));
       }
     } else {
       dispatch(
         addScannedData({
-          scannedData: { data },
+          scannedData: { data: textData },
           creationDate: new Date(),
           isDeleted: false,
           userId: auth.currentUser.uid,
@@ -90,34 +110,8 @@ export default function Editor(props) {
     }
   };
 
-  const onMount = () => {
-    Keyboard.addListener("keyboardDidShow", updateKeyboardSpace);
-    Keyboard.addListener("keyboardDidHide", resetKeyboardSpace);
-  };
-
-  const onUnMount = () => {
-    Keyboard.removeAllListeners("keyboardDidShow");
-    Keyboard.removeAllListeners("keyboardDidHide");
-  };
-
-  const updateKeyboardSpace = (frames) => {
-    console.log(`Keyboard showm\n${JSON.stringify(frames, null, 2)}`);
-    var change;
-    if (frames.endCoordinates) change = frames.endCoordinates.height;
-    else change = frames.end.height;
-    setInputHeight(inputHeight - change);
-  };
-  const resetKeyboardSpace = (frames) => {
-    setInputHeight(inputFullHeight);
-    console.log(`Keyboard hidden\n${JSON.stringify(frames, null, 2)}`);
-  };
-
   useEffect(() => {
     setTestWidth("100%");
-    // onMount();
-    return () => {
-      //   onUnMount();
-    };
   }, []);
 
   useEffect(() => {

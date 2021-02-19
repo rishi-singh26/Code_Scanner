@@ -47,6 +47,8 @@ export default function ScannedDataDetail(props) {
                     data: scannedData?.text || "",
                     id: scannedData?.id,
                     isEditing: true,
+                    isLockaed: scannedData?.isLockaed,
+                    notePass: scannedData?.notePass
                   });
                 }}
                 style={styles.headerEditIconStyle}

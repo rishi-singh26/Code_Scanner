@@ -17,6 +17,7 @@ import {
   validateEmail,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
+import { show3BtnAlert } from "../../Redux/Alert/ActionCreator";
 
 export default function Scanner(props) {
   const [scanned, setScanned] = useState(false);
@@ -30,6 +31,37 @@ export default function Scanner(props) {
     setScanned(true);
     checkForURLs(type, data);
   };
+
+  // const checkForURLs = (type, data) => {
+  //   if (validateEmail(data)) {
+  //     // console.log("it is an email");
+  //     dispatch(
+  //       show3BtnAlert(
+  //         "Email detected",
+  //         `Do you want to send email to ${data}?`,
+  //         () => uploadScannedData(type, data),
+  //         "Save",
+  //         () => Linking.openURL(`mailto:${data}`),
+  //         "Send email"
+  //       )
+  //     );
+  //   } else if (validateWaLinkForINNum(data)) {
+  //     console.log("it is a whatsapp link", data.split("/").pop());
+  //     dispatch(
+  //       show3BtnAlert(
+  //         "Whatsapp chat link detected",
+  //         `Do you want to open chat with +${data.split("/").pop()}?`,
+  //         () => uploadScannedData(type, data),
+  //         "Save",
+  //         () => Linking.openURL(`whatsapp://send?phone=${data}`),
+  //         "Open chat"
+  //       )
+  //     );
+  //   } else {
+  //     console.log("Uploading data");
+  //     uploadScannedData(type, data);
+  //   }
+  // };
 
   const checkForURLs = (type, data) => {
     if (validateEmail(data)) {

@@ -6,6 +6,7 @@ import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
 import { cloudStorage, firestore } from "../../Constants/Api";
 import * as DocumentPicker from "expo-document-picker";
+import CryptoJS from "react-native-crypto-js";
 
 export function validateEmail(email) {
   // this is also an option for email regx
@@ -71,7 +72,7 @@ export async function isContactsApiAvailable() {
 }
 
 export function isContactInfo(string) {
-  const isContact = string.includes("BEGIN:VCARD");
+  const isContact = string ? string.includes("BEGIN:VCARD") : false;
   return isContact;
 }
 
@@ -254,7 +255,7 @@ export async function pickImage(optionalFunc = () => {}) {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
-      aspect: [1, 1],
+      // aspect: [1, 1],
       quality: 0.5,
     });
     // console.log(result);
@@ -444,4 +445,35 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
       console.log("Err in uploading pdf", err.message);
       optionalFunc("Pdf NOT uploaded!!!");
     });
+}
+
+/**
+ * 
+ * @param {String} text 
+ * @param {String} pass 
+ * pass in the text and the encryption key
+ */
+export async function encryptText(text, pass){
+  try {
+    const encryptedData = await CryptoJS.AES.encrypt(text, pass).toString();
+    return {status: true, data: encryptedData};
+  } catch (error) {
+    return {status: false, data: null};
+  }
+}
+
+/**
+ * 
+ * @param {String} text 
+ * @param {String} pass 
+ * pass in the text and the decryption key
+ */
+export async function decryptText(text, pass){
+  try {
+    let bytes  = await CryptoJS.AES.decrypt(text, pass);
+    const decryptedData = await bytes.toString(CryptoJS.enc.Utf8);
+    return {status: true, data: decryptedData};
+  } catch (error) {
+    return {status: false, data: null};
+  }
 }
