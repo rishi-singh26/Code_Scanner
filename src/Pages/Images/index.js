@@ -14,11 +14,15 @@ import RenderImage from "./Components/RenderImage";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Feather } from "@expo/vector-icons";
 import { showAlert } from "../../Redux/Alert/ActionCreator";
+import RenameImgDilogue from "./Components/RenameImgDilogue";
 
 export default function Images(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
   const [images, setImages] = useState([]);
+  const [imageName, setImageName] = useState("");
+  const [renameImgDilogVisible, setRenameImgDilogVisible] = useState(false);
+  const [selectedImg, setSelectedImg] = useState(null);
 
   const dispatch = useDispatch();
   const { showActionSheetWithOptions } = useActionSheet();
@@ -63,15 +67,16 @@ export default function Images(props) {
   };
 
   const openImageOptions = (image) => {
-    const options = ["Delete", "Copy url", "Share", "Cancel"];
+    const options = ["Delete", "Copy url", "Share", "Rename", "Cancel"];
     const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 3;
+    const cancelButtonIndex = 4;
     const containerStyle = { backgroundColor: colors.backTwo };
     const textStyle = { color: colors.textOne };
     const icons = [
-      <Feather name={"trash"} size={20} color={colors.textOne} />,
+      <Feather name={"trash"} size={19} color={colors.primaryErrColor} />,
       <Feather name={"copy"} size={20} color={colors.textOne} />,
       <Feather name={"share"} size={20} color={colors.textOne} />,
+      <Feather name={"edit"} size={19} color={colors.textOne} />,
       <Feather name={"x"} size={20} color={colors.textOne} />,
     ];
 
@@ -114,6 +119,11 @@ export default function Images(props) {
           // pdfuri.status ? shareThings(pdfuri.pdfUri) : null;
           return;
         }
+        if (buttonIndex == 3) {
+          setRenameImgDilogVisible(true);
+          setSelectedImg(image);
+          return;
+        }
       }
     );
   };
@@ -124,6 +134,7 @@ export default function Images(props) {
       firestore
         .collection("scannerImages")
         .where("isDeleted", "==", false)
+        .where("userId", "==", auth.currentUser.uid)
         // .orderBy("uploadDate", "asc")
         .limit(100)
         .get()
@@ -144,6 +155,19 @@ export default function Images(props) {
     }
   };
 
+  const editImage = (data, docId) => {
+    console.log("Editing Image");
+    firestore
+      .collection("scannerImages")
+      .doc(docId)
+      .update(data)
+      .then(() => {
+        dispatch(showSnack("Renaming successfull, now updating"));
+        getImages();
+      })
+      .catch((err) => console.log(err.message));
+  };
+
   useEffect(() => {
     setHeaderOptions();
     getImages();
@@ -153,13 +177,30 @@ export default function Images(props) {
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
       <RenderImage
         images={images}
-        onPress={(source) =>
+        onPress={(imgData) =>
           props.navigation.navigate("ImageViewer", {
-            source,
+            imgData,
             removeImage: null,
           })
         }
         onLongPress={(image) => openImageOptions(image)}
+      />
+      <RenameImgDilogue
+        title={"Rename Image"}
+        visible={renameImgDilogVisible}
+        imgName={imageName}
+        setImgName={(name) => setImageName(name)}
+        onOkPress={() => {
+          dispatch(showSnack("Renaming image."));
+          setRenameImgDilogVisible(false);
+          setImageName("");
+          // console.log({ pdfName: pdfName }, selectedPdf._id);
+          editImage({ imageName: imageName }, selectedImg._id);
+        }}
+        onCancelPress={() => {
+          setRenameImgDilogVisible(false);
+          setImageName("");
+        }}
       />
     </SafeAreaView>
   );

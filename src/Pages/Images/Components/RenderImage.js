@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  Text,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { SCREEN_WIDTH } from "../../../Shared/Styles";
@@ -24,7 +25,7 @@ export default function RenderImage({ images, onPress, onLongPress }) {
         return (
           <TouchableOpacity
             onPress={() =>
-              item.isAddBtn ? item.onPress() : onPress(item.image)
+              item.isAddBtn ? item.onPress() : onPress(item)
             }
             onLongPress={() => onLongPress(item)}
           >
@@ -42,10 +43,13 @@ export default function RenderImage({ images, onPress, onLongPress }) {
                 <Feather name="plus" size={50} color={"#fff"} />
               </View>
             ) : (
+              <View style={styles.viewBox}>
               <Image
                 source={{ uri: item.image }}
-                style={[styles.viewBox, { backgroundColor: colors.backThree }]}
+                style={[styles.image, { backgroundColor: colors.backThree }]}
               />
+              <Text numberOfLines={1} style={{color: colors.textOne, alignSelf: "center",marginTop: 5}}>{item.imageName}</Text>
+              </View>
             )}
           </TouchableOpacity>
         );
@@ -60,6 +64,11 @@ const styles = StyleSheet.create({
     height: SCREEN_WIDTH / 3 - 16,
     marginTop: 12,
     marginLeft: 12,
-    borderRadius: 4,
+    marginBottom: 30,
   },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 4,
+  }
 });

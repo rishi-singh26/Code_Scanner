@@ -50,7 +50,7 @@ export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
   const theme = useSelector((state) => state.theme);
-  const { primaryColor, backTwo, backThree, textOne, textTwo, primaryErrColor } = theme.colors;
+  const { primaryColor, backTwo, backThree, textOne, textTwo, primaryErrColor, backOne } = theme.colors;
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
@@ -467,7 +467,7 @@ export default function Home(props) {
   const finalDataList = searchBarCollapsed ? scannedData.data : dataList;
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: backTwo}]}>
       {/* Header */}
       <Header
         title={"Scanner"}
@@ -517,8 +517,8 @@ export default function Home(props) {
                 {
                   borderTopWidth: index === 0 ? 0 : 1,
                   borderBottomWidth: index === finalDataList.length - 1 ? 2 : 0,
-                  borderColor: backThree,
-                  backgroundColor: backTwo,
+                  borderColor: backTwo,
+                  backgroundColor: backOne,
                 },
               ]}
             >

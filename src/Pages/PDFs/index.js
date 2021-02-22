@@ -11,12 +11,16 @@ import {
 } from "../../Shared/Functions";
 import RenderPdfTile from "./Components/RenderPdfTile";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import RenamePdfDilogue from "./Components/RenamePdfDilogue";
 
 export default function Pdfs(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
   const dispatch = useDispatch();
   const [pdfs, setPdfs] = useState([]);
+  const [pdfName, setPdfName] = useState("");
+  const [renamePdfDilogueVisible, setRenamePdfDilogueVisible] = useState(false);
+  const [selectedPdf, setSelectedPdf] = useState(null);
   const { showActionSheetWithOptions } = useActionSheet();
 
   const setHeaderOptions = () => {
@@ -52,6 +56,7 @@ export default function Pdfs(props) {
     firestore
       .collection("scannedPdfs")
       .where("isDeleted", "==", false)
+      .where("userId", "==", auth.currentUser.uid)
       .get()
       .then((pdfs) => {
         let pdfSnapShot = [];
@@ -70,16 +75,18 @@ export default function Pdfs(props) {
   };
 
   const openPdfOptions = (pdf) => {
-    const options = ["Copy url", "Download", "Cancel"];
-    const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 2;
+    const options = ["Copy url", "Download", "Rename", "Cancel"];
+    const destructiveButtonIndex = 3;
+    const cancelButtonIndex = 3;
     const containerStyle = { backgroundColor: colors.backTwo };
     const textStyle = { color: colors.textOne };
-    const message = "Cant open pdf files, will work in future updates.";
+    const message = `Cant open pdf files, will work in future updates.\n${pdf.pdfName}`;
+    const messageTextStyle = { color: colors.textOne, fontSize: 16 };
     const icons = [
       <Feather name={"copy"} size={20} color={colors.textOne} />,
       <Feather name={"download"} size={20} color={colors.textOne} />,
-      <Feather name={"x"} size={20} color={colors.textOne} />,
+      <Feather name={"edit"} size={20} color={colors.textOne} />,
+      <Feather name={"x"} size={20} color={colors.primaryErrColor} />,
     ];
 
     showActionSheetWithOptions(
@@ -91,6 +98,7 @@ export default function Pdfs(props) {
         containerStyle,
         textStyle,
         message,
+        messageTextStyle,
       },
       async (buttonIndex) => {
         if (buttonIndex == 0) {
@@ -102,8 +110,28 @@ export default function Pdfs(props) {
           Linking.canOpenURL(pdf.pdf) ? Linking.openURL(pdf.pdf) : null;
           return;
         }
+        if (buttonIndex == 2) {
+          setSelectedPdf(pdf);
+          setRenamePdfDilogueVisible(true);
+          return;
+        }
       }
     );
+  };
+
+  const editPdf = (data, docId) => {
+    console.log("Editing pdf");
+    if (auth.currentUser) {
+      firestore
+        .collection("scannedPdfs")
+        .doc(docId)
+        .update(data)
+        .then(() => {
+          dispatch(showSnack("Renaming successfull, now updating"));
+          getPdfs();
+        })
+        .catch((err) => console.log(err.message));
+    }
   };
 
   useEffect(() => {
@@ -113,6 +141,23 @@ export default function Pdfs(props) {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
       <RenderPdfTile pdfs={pdfs} onPress={(pdf) => openPdfOptions(pdf)} />
+      <RenamePdfDilogue
+        title={"Rename PDF"}
+        pdfName={pdfName}
+        setPdfName={(name) => setPdfName(name)}
+        visible={renamePdfDilogueVisible}
+        onOkPress={() => {
+          dispatch(showSnack("Renaming pdf."));
+          setRenamePdfDilogueVisible(false);
+          setPdfName("");
+          // console.log({ pdfName: pdfName }, selectedPdf._id);
+          editPdf({ pdfName: pdfName }, selectedPdf._id);
+        }}
+        onCancelPress={() => {
+          setRenamePdfDilogueVisible(false);
+          setPdfName("");
+        }}
+      />
     </SafeAreaView>
   );
 }

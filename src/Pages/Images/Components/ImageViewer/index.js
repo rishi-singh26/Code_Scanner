@@ -16,8 +16,8 @@ import { SCREEN_WIDTH } from "../../../../Shared/Styles";
 export default function ImageViewer(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
-  const { source, removeImage } = props.route.params;
-  // console.log(source);
+  const { imgData, removeImage } = props.route.params;
+  // console.log(imgData.image);
 
   const scale = React.useRef(new Animated.Value(1)).current;
 
@@ -34,17 +34,17 @@ export default function ImageViewer(props) {
         </TouchableOpacity>
       </View>
       <View style={styles.imageContainer}>
-        <Text style={{ fontSize: 30, color: colors.textOne, marginBottom: 60 }}>
-          Image viewer
-        </Text>
         {/* image here */}
 
         <PinchGestureHandler onGestureEvent={handlePinch}>
           <Animated.Image
-            source={{ uri: source }}
+            source={{ uri: imgData.image }}
             style={[styles.image, { transform: [{ scale }] }]}
           />
         </PinchGestureHandler>
+        <Text style={{ fontSize: 20, color: colors.textOne, marginHorizontal: 15}}>
+          {imgData.imageName}
+        </Text>
 
         {removeImage ? (
           <TouchableOpacity

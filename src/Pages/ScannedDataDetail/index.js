@@ -56,14 +56,14 @@ export default function ScannedDataDetail(props) {
                 <Feather name="edit" size={23} color={textOne} />
               </TouchableOpacity>
             )}
-            <TouchableOpacity
+            {scannedData?.text.length > 2000 ? null : <TouchableOpacity
               onPress={() => {
                 setIsQrCollapsed(!isQrCollapsed);
               }}
               style={styles.headerQRIconStyle}
             >
               <FontAwesome name="qrcode" size={23} color={textOne} />
-            </TouchableOpacity>
+            </TouchableOpacity>}
           </HorizontalView>
         );
       },
@@ -73,8 +73,12 @@ export default function ScannedDataDetail(props) {
   };
 
   useEffect(() => {
+    scannedData?.text.length > 2000 ? dispatch(showSnack("Data too big to fit in a QR code!!")) : null;
+  }, []);
+
+  useEffect(() => {
     setHeaderOptions();
-  }, [isQrCollapsed]);
+  }, []);
 
   const onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {
@@ -109,12 +113,13 @@ export default function ScannedDataDetail(props) {
               ref={shareQrRef}
               options={{ format: "jpg", quality: 1.0 }}
             >
-              <QRCode
+              {scannedData?.text.length > 2000 ? null : <QRCode
                 size={280}
                 value={scannedData?.text || "Empty"}
                 backgroundColor={backTwo}
                 color={textOne}
-              />
+                onError={(err) => console.log("An error occured while making qr code", err)}
+              />}
             </ViewShot>
             <ShareQRBar
               backgroundColor={backOne}

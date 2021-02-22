@@ -146,7 +146,7 @@ export default function Editor(props) {
       <TextInput
         placeholder="Note"
         placeholderTextColor={colors.textTwo}
-        autoFocus
+        // autoFocus
         value={data}
         onChangeText={(text) => setData(text)}
         style={[
