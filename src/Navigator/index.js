@@ -13,6 +13,8 @@ import Images from "../Pages/Images/index";
 import UploadImages from "../Pages/Images/Components/UploadImages";
 import ImageViewer from "../Pages/Images/Components/ImageViewer/index";
 import Pdfs from "../Pages/PDFs/index";
+import Passwords from "../Pages/Passwords/index";
+import AddPassword from "../Pages/Passwords/Components/AddPassword";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -123,6 +125,12 @@ export default function Navigator() {
               component={Pdfs}
               options={{ title: "Pdfs" }}
             />
+            <Stack.Screen
+              name="Passwords"
+              component={Passwords}
+              options={{ title: "Passwords" }}
+            />
+            <Stack.Screen name="AddPassword" component={AddPassword} />
             {/* <Stack.Screen
               name="PdfViewer"
               component={PdfViewer}

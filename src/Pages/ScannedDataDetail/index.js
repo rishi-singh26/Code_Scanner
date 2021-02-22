@@ -78,7 +78,7 @@ export default function ScannedDataDetail(props) {
 
   useEffect(() => {
     setHeaderOptions();
-  }, []);
+  }, [isQrCollapsed]);
 
   const onSave = async () => {
     shareQrRef.current.capture().then(async (uri) => {

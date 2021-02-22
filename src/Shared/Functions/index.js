@@ -4,9 +4,10 @@ import * as ImagePicker from "expo-image-picker";
 import Clipboard from "expo-clipboard";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { cloudStorage, firestore } from "../../Constants/Api";
+import { auth, cloudStorage, firestore } from "../../Constants/Api";
 import * as DocumentPicker from "expo-document-picker";
 import CryptoJS from "react-native-crypto-js";
+import * as LocalAuthentication from "expo-local-authentication";
 
 export function validateEmail(email) {
   // this is also an option for email regx
@@ -32,17 +33,29 @@ export function validateUrl(value) {
 export function sortArrayOfObjs(array, sortingKey) {
   const sortedArray = [...array];
 
-  sortedArray.sort((a, b) =>
-    a[sortingKey] < b[sortingKey] ? 1 : b[sortingKey] < a[sortingKey] ? -1 : 0
-  );
+  sortedArray.length > 1
+    ? sortedArray.sort((a, b) =>
+        a[sortingKey] < b[sortingKey]
+          ? 1
+          : b[sortingKey] < a[sortingKey]
+          ? -1
+          : 0
+      )
+    : null;
 
   // console.log("Here is the sorted array", sortedArray);
 
   return sortedArray;
 }
 
-export function copyToClipboard(data) {
-  Clipboard.setString(data);
+export async function copyToClipboard(data) {
+  try {
+    await Clipboard.setString(data);
+    return true;
+  } catch (error) {
+    console.log("Error in copying to clipboard FUNCTIONS", error.message);
+    return false;
+  }
 }
 
 export function createQRString(data) {
@@ -448,32 +461,118 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
 }
 
 /**
- * 
- * @param {String} text 
- * @param {String} pass 
+ *
+ * @param {String} text
+ * @param {String} pass
  * pass in the text and the encryption key
  */
-export async function encryptText(text, pass){
+export async function encryptText(text, pass) {
   try {
     const encryptedData = await CryptoJS.AES.encrypt(text, pass).toString();
-    return {status: true, data: encryptedData};
+    return { status: true, data: encryptedData };
   } catch (error) {
-    return {status: false, data: null};
+    return { status: false, data: null };
   }
 }
 
 /**
- * 
- * @param {String} text 
- * @param {String} pass 
+ *
+ * @param {String} text
+ * @param {String} pass
  * pass in the text and the decryption key
  */
-export async function decryptText(text, pass){
+export async function decryptText(text, pass) {
   try {
-    let bytes  = await CryptoJS.AES.decrypt(text, pass);
+    let bytes = await CryptoJS.AES.decrypt(text, pass);
     const decryptedData = await bytes.toString(CryptoJS.enc.Utf8);
-    return {status: true, data: decryptedData};
+    return { status: true, data: decryptedData };
   } catch (error) {
-    return {status: false, data: null};
+    return { status: false, data: null };
+  }
+}
+
+/**
+ * returns an object { status, passwords, numArr};
+ * status can be true of false, passwords is an array of objects
+ * numArr is an array of length equal to the length of the passwords arr and consists of booleans
+ */
+export async function getPasswordsData() {
+  try {
+    if (auth.currentUser) {
+      const data = await firestore
+        .collection("passwords")
+        .where("userId", "==", auth.currentUser.uid)
+        .get();
+
+      let allPasswords = [];
+      let numArr = [];
+      data.forEach((item) => {
+        const password = item.data();
+        const _id = item.id;
+        allPasswords.push({ ...password, _id });
+        numArr.push(false);
+      });
+      return { status: true, passwords: allPasswords, numArr: numArr };
+    } else return { status: false, passwords: null, numArr: null };
+  } catch (err) {
+    return { status: false, passwords: null, numArr: null };
+  }
+}
+
+/**
+ * returns a boolean ie true or false after local authentication
+ */
+export async function localAuth() {
+  try {
+    const authData = await LocalAuthentication.authenticateAsync({
+      promptMessage: "Authentication required",
+      fallbackLabel: "Use passcode",
+      disableDeviceFallback: false,
+      cancelLabel: "Cancel",
+    });
+    return authData.success;
+  } catch (err) {
+    console.log("Error in local auth FUNCTIONS", err.message);
+    return false;
+  }
+}
+
+/**
+ *
+ * @param {String} password
+ * encrypts the page name for passwords screen with the password being passed
+ * returns a boolean
+ */
+export async function addScannerPassPgName(password, successFunc) {
+  try {
+    if (auth.currentUser) {
+      const { status, data } = await encryptText("Passwords", password);
+      if (status) {
+        await firestore
+          .collection("scannerPassPgName")
+          .add({
+            pageName: data,
+            userId: auth.currentUser.uid,
+            createdDate: new Date(),
+          })
+          .then(() => {
+            successFunc();
+            return { status: true };
+          })
+          .catch((err) => {
+            console.log(
+              "Error in add scanner Passwords Page Name FUNCTIONS",
+              err.message
+            );
+            return { status: false };
+          });
+      }
+    }
+  } catch (err) {
+    console.log(
+      "Error in add scanner Passwords Page Name FUNCTIONS",
+      err.message
+    );
+    return { status: false };
   }
 }

@@ -16,11 +16,13 @@ import {
   getScannedData,
   removeDataOnLogout,
   removeScannedData,
-  startLoading,editScannedData
+  startLoading,
+  editScannedData,
 } from "../../Redux/ScannedData/ActionCreator";
 import { logoutUser } from "../../Redux/Auth/ActionCreator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
+  addScannerPassPgName,
   copyToClipboard,
   decryptText,
   encryptText,
@@ -39,18 +41,27 @@ import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
-import { auth } from "../../Constants/Api";
+import { auth, firestore } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { changeToDark, changeToLight } from "../../Redux/Theme/ActionCreator";
 import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
 import LockNoteDilogue from "./Components/LockNoteDilogue";
 import UnlockNoteDilogue from "./Components/UnlockNoteDilogue";
+import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 
 export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
   const theme = useSelector((state) => state.theme);
-  const { primaryColor, backTwo, backThree, textOne, textTwo, primaryErrColor, backOne } = theme.colors;
+  const {
+    primaryColor,
+    backTwo,
+    backThree,
+    textOne,
+    textTwo,
+    primaryErrColor,
+    backOne,
+  } = theme.colors;
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
@@ -62,6 +73,9 @@ export default function Home(props) {
   const [selectedData, setSelectedData] = useState(null);
   const [noteOpenerTitle, setNoteOpenerTitle] = useState("");
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isLodaingPassPgData, setIsLodaingPassPgData] = useState(false);
+  const [passInpHotBtnTxt, setPassInpHotBtnTxt] = useState("");
+  const [isOpeningPassowrds, setIsOpeningPassowrds] = useState(false);
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
@@ -112,33 +126,37 @@ export default function Home(props) {
       async (buttonIndex) => {
         if (buttonIndex == 0) {
           setSelectedData(data);
-          if(data.isLockaed){
+          if (data.isLockaed) {
             setNoteOpenerTitle("Unlock note");
+            setPassInpHotBtnTxt("Unlock");
             setIsUnlocking(true);
             setShowUnlockNoteDilogue(true);
             return;
-          }
-          else{
-            setShowLockNoteDilogue(true)
+          } else {
+            setShowLockNoteDilogue(true);
             return;
           }
-
         }
       }
     );
-
-  }
+  };
 
   const openUnlockedNoteActions = (data, index) => {
-    const lockNoteText = data.isLockaed ? "Unlock note" : "Lock note";
-    const options = ["Delete", lockNoteText, "Copy", "Edit", "Share as pdf", "Cancel"];
+    const options = [
+      "Delete",
+      "Lock note",
+      "Copy",
+      "Edit",
+      "Share as pdf",
+      "Cancel",
+    ];
     const destructiveButtonIndex = 0;
     const cancelButtonIndex = 5;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
       <Feather name={"trash"} size={20} color={textOne} />,
-      <Feather name={data.isLockaed ? "unlock" :"lock"} size={20} color={textOne} />,
+      <Feather name={"lock"} size={20} color={textOne} />,
       <Feather name={"copy"} size={20} color={textOne} />,
       <Feather name={"edit"} size={20} color={textOne} />,
       <Feather name={"share"} size={20} color={textOne} />,
@@ -169,16 +187,7 @@ export default function Home(props) {
         }
         if (buttonIndex == 1) {
           setSelectedData(data);
-          if(data.isLockaed){
-            setNoteOpenerTitle("Unlock note");
-            setIsUnlocking(true);
-            setShowUnlockNoteDilogue(true);
-            return;
-          }
-          else{
-            setShowLockNoteDilogue(true)
-            return;
-          }
+          setShowLockNoteDilogue(true);
           return;
         }
         if (buttonIndex == 2) {
@@ -206,6 +215,71 @@ export default function Home(props) {
     );
   };
 
+  const openPassowrds = () => {
+    setNoteOpenerTitle("Enter password");
+    setPassInpHotBtnTxt("Show passwords");
+    setIsOpeningPassowrds(true);
+    setShowUnlockNoteDilogue(true);
+  };
+
+  const resetPasswordsOpenerState = () => {
+    setNoteOpenerTitle("");
+    setPassInpHotBtnTxt("");
+    setIsOpeningPassowrds(false);
+    setShowUnlockNoteDilogue(false);
+    setIsLodaingPassPgData(false);
+    setNotePass("");
+  };
+
+  const navigateToPassowrds = async (password) => {
+    setIsLodaingPassPgData(true);
+    setShowUnlockNoteDilogue(false);
+    try {
+      firestore
+        .collection("scannerPassPgName")
+        .where("userId", "==", auth.currentUser.uid)
+        .get()
+        .then(async (resp) => {
+          if (resp.docs.length > 0) {
+            resp.forEach(async (passPgData) => {
+              const pageData = { ...passPgData.data(), _id: passPgData.id };
+              // console.log(data);
+              const { _id, pageName, userID } = pageData;
+              const { status, data } = await decryptText(pageName, password);
+              if (status) {
+                data !== "Passwords"
+                  ? dispatch(showSnack("Incorrect password, please try again"))
+                  : props.navigation.navigate("Passwords", { data: password });
+              }
+              resetPasswordsOpenerState();
+            });
+          } else {
+            console.log("Creatinfg pass pg name");
+            await addScannerPassPgName(password, () => {
+              dispatch(
+                showSnack(
+                  "You can now access your passwords with the same kay you provided now"
+                )
+              );
+              props.navigation.navigate("Passwords", { data: password });
+              resetPasswordsOpenerState();
+            });
+          }
+        });
+    } catch (error) {
+      resetPasswordsOpenerState();
+      console.log(
+        "Error occured while getting password page name on HOME",
+        error.message
+      );
+      dispatch(
+        showSnack(
+          "Error occured while opening passwords page, please try again!\nCheck your password"
+        )
+      );
+    }
+  };
+
   const openScannerOptionsSheet = () => {
     const options = [
       "Scan Image",
@@ -215,10 +289,11 @@ export default function Home(props) {
       "Images",
       "PDFs",
       "Share contacts",
+      "Passwords",
       "Cancel",
     ];
-    const destructiveButtonIndex = 7;
-    const cancelButtonIndex = 7;
+    const destructiveButtonIndex = 8;
+    const cancelButtonIndex = 8;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
@@ -229,6 +304,7 @@ export default function Home(props) {
       <Feather name={"image"} size={20} color={textOne} />,
       <AntDesign name={"pdffile1"} size={20} color={textOne} />,
       <Feather name={"users"} size={20} color={textOne} />,
+      <Feather name={"key"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
@@ -274,6 +350,11 @@ export default function Home(props) {
           isContactsApiAvailable()
             ? props.navigation.navigate("ContactSharing")
             : dispatch(showSnack("Oops, can't share contacts on this device!"));
+          return;
+        }
+        if (buttonIndex === 7) {
+          openPassowrds();
+          // navigateToPassowrds("MY12is0");
           return;
         }
       }
@@ -344,7 +425,7 @@ export default function Home(props) {
   const scanFromImage = async () => {
     try {
       const imageData = await pickImage();
-      console.log("Data from image", imageData);
+      // console.log("Data from image", imageData);
       if (imageData.status && !imageData.result.cancelled) {
         const data = await BarCodeScanner.scanFromURLAsync(
           imageData.result.uri
@@ -352,7 +433,7 @@ export default function Home(props) {
         // console.log("Data from code", data);
         if (data.length > 0) {
           const firstScannedCode = data[0];
-          console.log("Here is the scanned data", firstScannedCode);
+          // console.log("Here is the scanned data", firstScannedCode);
           checkForURLs(firstScannedCode.type, firstScannedCode.data);
         } else dispatch(showSnack("No code detected"));
       }
@@ -363,7 +444,7 @@ export default function Home(props) {
 
   const checkForURLs = (type, data) => {
     if (validateEmail(data)) {
-      console.log("it is an email");
+      // console.log("it is an email");
       dispatch(
         show3BtnAlert(
           "Email detected",
@@ -375,7 +456,7 @@ export default function Home(props) {
         )
       );
     } else if (validateWaLinkForINNum(data)) {
-      console.log("it is a whatsapp link", data.split("/").pop());
+      // console.log("it is a whatsapp link", data.split("/").pop());
       dispatch(
         show3BtnAlert(
           "Whatsapp chat link detected",
@@ -387,7 +468,7 @@ export default function Home(props) {
         )
       );
     } else {
-      console.log("Uploading data");
+      // console.log("Uploading data");
       uploadScannedData(type, data);
     }
   };
@@ -405,69 +486,89 @@ export default function Home(props) {
 
   const handleLockNote = async () => {
     const text = selectedData.scannedData.data;
-    const {status, data} = await encryptText(text, notePass);
-    if(status){
-      dispatch(editScannedData({scannedData: {data: data}, isLockaed: true}, selectedData._id, "Locked successfully"))
+    const { status, data } = await encryptText(text, notePass);
+    if (status) {
+      dispatch(
+        editScannedData(
+          { scannedData: { data: data }, isLockaed: true },
+          selectedData._id,
+          "Locked successfully"
+        )
+      );
       resetLockerState();
       return;
     }
     resetLockerState();
     dispatch(showSnack("Could not lock data, please try again"));
-  }
+  };
 
   const handleUnlockNote = async () => {
     const text = selectedData.scannedData.data;
-    const {status, data} = await decryptText(text, notePass);
-    if(status){
-      data.length === 0 ? dispatch(showSnack("Incorrect password, please try again")) :
-      dispatch(editScannedData({scannedData: {data: data}, isLockaed: false}, selectedData._id, "Unlocked successfully"))
+    const { status, data } = await decryptText(text, notePass);
+    if (status) {
+      data.length === 0
+        ? dispatch(showSnack("Incorrect password, please try again"))
+        : dispatch(
+            editScannedData(
+              { scannedData: { data: data }, isLockaed: false },
+              selectedData._id,
+              "Unlocked successfully"
+            )
+          );
       resetLockerState();
       return;
     }
     resetLockerState();
-    dispatch(showSnack("Could not unlock data, check your password and try again"));
-  }
+    dispatch(
+      showSnack("Could not unlock data, check your password and try again")
+    );
+  };
 
   const openNote = (data) => {
-    setSelectedData(data)
+    setSelectedData(data);
     setNoteOpenerTitle("Open note");
+    setPassInpHotBtnTxt("Open");
     setIsUnlocking(false);
     setShowUnlockNoteDilogue(true);
-  }
-  
+  };
+
   const handelOpenNote = async () => {
     const text = selectedData.scannedData.data;
-    const {status, data} = await decryptText(text, notePass);
-    if(status){
-      console.log(`Here is decrypted data ${data} and its length is ${data.length}`);
-      data.length === 0 ? dispatch(showSnack("Incorrect password, please try again")) :
-      props.navigation.navigate("ScannedDataDetail", {
-        scannedData: {
-          text: data,
-          title: selectedData?.title || null,
-          id: selectedData._id,
-          isLockaed: selectedData.isLockaed,
-          notePass: notePass
-        },
-      });
+    const { status, data } = await decryptText(text, notePass);
+    if (status) {
+      // console.log(`Here is decrypted data ${data} and its length is ${data.length}`);
+      data.length === 0
+        ? dispatch(showSnack("Incorrect password, please try again"))
+        : props.navigation.navigate("ScannedDataDetail", {
+            scannedData: {
+              text: data,
+              title: selectedData?.title || null,
+              id: selectedData._id,
+              isLockaed: selectedData.isLockaed,
+              notePass: notePass,
+            },
+          });
       resetLockerState();
       return;
     }
     resetLockerState();
-    dispatch(showSnack("Could not open data, check your password and try again"));
-  }
+    dispatch(
+      showSnack("Could not open data, check your password and try again")
+    );
+  };
 
   const resetLockerState = () => {
     setShowUnlockNoteDilogue(false);
     setNotePass("");
     setShowLockNoteDilogue(false);
     setSelectedData(null);
-  }
+  };
 
   const finalDataList = searchBarCollapsed ? scannedData.data : dataList;
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: backTwo}]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
+      {isLodaingPassPgData ? <CustomActivityIndicator /> : null}
       {/* Header */}
       <Header
         title={"Scanner"}
@@ -526,16 +627,22 @@ export default function Home(props) {
                 <TouchableOpacity
                   onPress={() => {
                     // console.log(item);
-                    item.isLockaed ? openNote(item) : props.navigation.navigate("ScannedDataDetail", {
-                      scannedData: {
-                        text,
-                        title: item?.title || null,
-                        id: item._id,
-                        isLockaed: false,
-                      },
-                    });
+                    item.isLockaed
+                      ? openNote(item)
+                      : props.navigation.navigate("ScannedDataDetail", {
+                          scannedData: {
+                            text,
+                            title: item?.title || null,
+                            id: item._id,
+                            isLockaed: false,
+                          },
+                        });
                   }}
-                  onLongPress={() => item.isLockaed ? lockedNoteActions(item) : openUnlockedNoteActions(item, index)}
+                  onLongPress={() =>
+                    item.isLockaed
+                      ? lockedNoteActions(item)
+                      : openUnlockedNoteActions(item, index)
+                  }
                   style={{ flex: 5 }}
                 >
                   {item.title ? (
@@ -543,13 +650,29 @@ export default function Home(props) {
                       {item.title}
                     </Text>
                   ) : null}
-                  {item?.scannedData?.data ? item.isLockaed ? 
-                  <View style={{flexDirection: "row", alignItems: "center", paddingVertical: 10}}>
-                    <Ionicons name="lock-closed-outline" color={primaryErrColor} size={23} style={{paddingRight: 10}} />
-                    <Text numberOfLines={2} style={[styles.scannedDataText, { color: textOne }]}>Note Locked</Text>
-                    </View>
-                  : (
-                    isContact ? (
+                  {item?.scannedData?.data ? (
+                    item.isLockaed ? (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          paddingVertical: 10,
+                        }}
+                      >
+                        <Ionicons
+                          name="lock-closed-outline"
+                          color={primaryErrColor}
+                          size={23}
+                          style={{ paddingRight: 10 }}
+                        />
+                        <Text
+                          numberOfLines={2}
+                          style={[styles.scannedDataText, { color: textOne }]}
+                        >
+                          Note Locked
+                        </Text>
+                      </View>
+                    ) : isContact ? (
                       <View
                         style={{ flexDirection: "row", alignItems: "center" }}
                       >
@@ -577,7 +700,11 @@ export default function Home(props) {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={{ flex: 1, paddingVertical: 10 }}
-                  onPress={() => item.isLockaed ? lockedNoteActions(item) : openUnlockedNoteActions(item, index)}
+                  onPress={() =>
+                    item.isLockaed
+                      ? lockedNoteActions(item)
+                      : openUnlockedNoteActions(item, index)
+                  }
                 >
                   <Feather name="more-vertical" color={textOne} size={20} />
                 </TouchableOpacity>
@@ -610,24 +737,47 @@ export default function Home(props) {
         setPassword={setNotePass}
         onCancelPress={() => {
           setNotePass("");
-          setShowLockNoteDilogue(false)
+          setShowLockNoteDilogue(false);
         }}
         onOkPress={handleLockNote}
-        visible={showLockNoteDilogue} />
-        {/* Unlock note dilogue */}
+        visible={showLockNoteDilogue}
+      />
+      {/* Unlock note dilogue */}
       <UnlockNoteDilogue
         title={noteOpenerTitle}
+        hotBtnText={passInpHotBtnTxt}
         password={notePass}
         setPassword={setNotePass}
         onCancelPress={() => {
-          setSelectedData(null)
+          setSelectedData(null);
           setNoteOpenerTitle("");
           setIsUnlocking(false);
           setNotePass("");
-          setShowUnlockNoteDilogue(false)
+          setShowUnlockNoteDilogue(false);
+          setIsOpeningPassowrds(false);
         }}
-        onOkPress={isUnlocking ? handleUnlockNote : handelOpenNote}
-        visible={showUnlockNoteDilogue} />
+        onOkPress={() => {
+          console.log({isOpeningPassowrds, isUnlocking});
+          if(isUnlocking && !isOpeningPassowrds){
+            handleUnlockNote();
+            return;
+          }
+          if(!isUnlocking && isOpeningPassowrds){
+            navigateToPassowrds(notePass);
+            return;
+          }
+          else {
+            handelOpenNote();
+          }
+          // isOpeningPassowrds
+          //   ? navigateToPassowrds(notePass)
+          //   : isUnlocking
+          //   ? handleUnlockNote
+          //   : handelOpenNote;
+        }}
+        showSubHead={isOpeningPassowrds}
+        visible={showUnlockNoteDilogue}
+      />
     </SafeAreaView>
   );
 }
