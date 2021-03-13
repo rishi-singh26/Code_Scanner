@@ -463,12 +463,12 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
 /**
  *
  * @param {String} text
- * @param {String} pass
+ * @param {String} password
  * pass in the text and the encryption key
  */
-export async function encryptText(text, pass) {
+export async function encryptText(text, password) {
   try {
-    const encryptedData = await CryptoJS.AES.encrypt(text, pass).toString();
+    const encryptedData = await CryptoJS.AES.encrypt(text, password).toString();
     return { status: true, data: encryptedData };
   } catch (error) {
     return { status: false, data: null };
@@ -478,12 +478,12 @@ export async function encryptText(text, pass) {
 /**
  *
  * @param {String} text
- * @param {String} pass
+ * @param {String} password
  * pass in the text and the decryption key
  */
-export async function decryptText(text, pass) {
+export async function decryptText(text, password) {
   try {
-    let bytes = await CryptoJS.AES.decrypt(text, pass);
+    let bytes = await CryptoJS.AES.decrypt(text, password);
     const decryptedData = await bytes.toString(CryptoJS.enc.Utf8);
     return { status: true, data: decryptedData };
   } catch (error) {
@@ -574,5 +574,73 @@ export async function addScannerPassPgName(password, successFunc) {
       err.message
     );
     return { status: false };
+  }
+}
+
+/**
+ * 
+ * @param {Array} passwordsArray
+ * An array of objects, [{ email:, password, description }]
+ * @param {String} encryptionKey
+ * The password used to encrypt the passwords
+ * Returns an array of objects in which email password and description is encrypted
+ */
+export async function encryptPasswords(passwordsArray, encryptionKey){
+  try {
+    let error = false;
+    const encryptedPassowordsArr = [];
+    for(var i = 0; i < passwordsArray.length; i++){
+      const { email, password, description } = passwordsArray[i];
+      const { status: emailEncryptionStat, data: encryptedEmail } = await encryptText(email, encryptionKey);
+      const {status: passEncryptionStatus, data: encryptedPassword} = await encryptText(password, encryptionKey)
+      const { status: descEncryptionStatus, data: enctyptedDesc} = await encryptText(description, encryptionKey);
+      if(!emailEncryptionStat || !passEncryptionStatus || !descEncryptionStatus){
+        error = true;
+      }
+      encryptedPassowordsArr.push(
+        {email: encryptedEmail, password: encryptedPassword, description: enctyptedDesc}
+      )
+    }
+    if(error){
+      return { status: false, data: null };
+    }
+    return { status: true, data: encryptedPassowordsArr }; 
+  } catch (err) {
+    console.log("Error in ENCRYPTING passwords on FUNCTIONS\n",err.message);
+    return { status: false, data: null };
+  }
+}
+
+/**
+ * 
+ * @param {Array} passwordsArray 
+ * An array of objects, [{ email, password, description }]
+ * @param {String} decryptionKey 
+ * The password used to decrypt the passwords
+ * Returns an array of objects in which email password and description is decrypted
+ */
+export async function decryptPasswords(passwordsArray, decryptionKey){
+  try {
+    let error = false;
+    const decryptedPassowordsArr = [];
+    for(var i = 0; i < passwordsArray.length; i++){
+      const { email, password, description } = passwordsArray[i];
+      const { status: emailDecryptionStat, data: decryptedEmail } = await decryptText(email, decryptionKey);
+      const {status: passDecryptionStatus, data: decryptedPassword} = await decryptText(password, decryptionKey)
+      const { status: descDecryptionStatus, data: dectyptedDesc} = await decryptText(description, decryptionKey);
+      if(!emailDecryptionStat || !passDecryptionStatus || !descDecryptionStatus){
+        error = true;
+      }
+      decryptedPassowordsArr.push(
+        {email: decryptedEmail, password: decryptedPassword, description: dectyptedDesc}
+      )
+    }
+    if(error){
+      return { status: false, data: null };
+    }
+    return { status: true, data: decryptedPassowordsArr }; 
+  } catch (err) {
+    console.log("Error in DECRYPTING passwords on FUNCTIONS\n",err.message);
+    return { status: false, data: null };
   }
 }

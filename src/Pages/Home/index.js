@@ -342,11 +342,6 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex === 6) {
-          // const url =
-          //   "http://unec.edu.az/application/uploads/2014/12/pdf-sample.pdf";
-          // Linking.canOpenURL(url)
-          //   ? Linking.openURL(url)
-          //   : dispatch(showSnack("Oops, can't open url"));
           isContactsApiAvailable()
             ? props.navigation.navigate("ContactSharing")
             : dispatch(showSnack("Oops, can't share contacts on this device!"));
@@ -354,7 +349,6 @@ export default function Home(props) {
         }
         if (buttonIndex === 7) {
           openPassowrds();
-          // navigateToPassowrds("MY12is0");
           return;
         }
       }

@@ -45,8 +45,7 @@ export default function Passwords(props) {
           >
             <TouchableOpacity
               onPress={() => {
-                props.navigation.navigate("AddPassword", { isEditing: false });
-                // setIsQrCollapsed(!isQrCollapsed);
+                props.navigation.navigate("ChangePassword");
               }}
               style={styles.headerQRIconStyle}
             >
@@ -55,7 +54,6 @@ export default function Passwords(props) {
             <TouchableOpacity
               onPress={() => {
                 props.navigation.navigate("AddPassword", { isEditing: false });
-                // setIsQrCollapsed(!isQrCollapsed);
               }}
               style={styles.headerQRIconStyle}
             >
@@ -200,11 +198,8 @@ export default function Passwords(props) {
                             <View
                               style={[
                                 styles.horizontalView,
-                                {
-                                  backgroundColor: colors.backTwo,
-                                  paddingLeft: 10,
-                                  marginVertical: 5,
-                                },
+                                styles.accountData,
+                                {backgroundColor: colors.backTwo}
                               ]}
                             >
                               <Text
@@ -226,10 +221,8 @@ export default function Passwords(props) {
                             <View
                               style={[
                                 styles.horizontalView,
-                                {
-                                  backgroundColor: colors.backTwo,
-                                  paddingLeft: 10,
-                                },
+                                styles.accountData,
+                                {backgroundColor: colors.backTwo}
                               ]}
                             >
                               <Text
@@ -347,4 +340,9 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#888"
   },
+  accountData: {
+    paddingLeft: 15,
+    marginVertical: 5,
+    borderRadius: 7
+  }
 });

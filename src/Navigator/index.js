@@ -15,6 +15,7 @@ import ImageViewer from "../Pages/Images/Components/ImageViewer/index";
 import Pdfs from "../Pages/PDFs/index";
 import Passwords from "../Pages/Passwords/index";
 import AddPassword from "../Pages/Passwords/Components/AddPassword";
+import ChangePassword from "../Pages/Passwords/Components/ChangePassword";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -131,6 +132,7 @@ export default function Navigator() {
               options={{ title: "Passwords" }}
             />
             <Stack.Screen name="AddPassword" component={AddPassword} />
+            <Stack.Screen name="ChangePassword" component={ChangePassword} />
             {/* <Stack.Screen
               name="PdfViewer"
               component={PdfViewer}

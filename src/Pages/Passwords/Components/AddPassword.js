@@ -1,26 +1,24 @@
-import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   SafeAreaView,
   Text,
   TextInput,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   View,
+  FlatList,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { auth, firestore } from "../../../Constants/Api";
 import { showSnack } from "../../../Redux/Snack/ActionCreator";
 
 export default function AddPassword(props) {
-    const { isEditing, data } = props.route.params;
+  const { isEditing, data } = props.route.params;
   const theme = useSelector((state) => state.theme);
-  const [showPass, setShowPass] = useState(false);
   const [title, setTitle] = useState(isEditing ? data.title : "");
-  const [passwords, setPasswords] = useState(isEditing ? data.passwords : [
-    { email: "", password: "", description: "" },
-  ]);
+  const [passwords, setPasswords] = useState(
+    isEditing ? data.passwords : [{ email: "", password: "", description: "" }]
+  );
 
   const dispatch = useDispatch();
 
@@ -32,71 +30,142 @@ export default function AddPassword(props) {
     setPasswords(allPasswords);
   };
 
-  const savePass = () => {
+  const isEmpty = () => {
+    return title === "";
+  };
+
+  const savePass = async () => {
+    if (isEmpty()) {
+      dispatch(showSnack("Enter a title"));
+      return;
+    }
+    if (!auth.currentUser) {
+      dispatch(
+        showSnack(
+          "You are not authorized to perform this operation, please login"
+        )
+      );
+      return;
+    }
+    // TODO: make the encryption key dynamic
+    // const encryptionKey = "rendomEncryptionKey";
+    // const { status, data } = await encryptPasswords([
+    //   {
+    //     email: "email@example.com",
+    //     password: "Nice password",
+    //     description: "A very nice description",
+    //   },
+    //   {
+    //     email: "email@exampletwo.com",
+    //     password: "Nice password two",
+    //     description: "A very nice description two",
+    //   },
+    //   {
+    //     email: "email@examplethree.com",
+    //     password: "Nice password three",
+    //     description: "A very nice description three",
+    //   },
+    // ], encryptionKey);
+    // console.log({ status, data });
+    // const { status: descyprionStat, data: decryptedData } = await decryptPasswords(data, "MY12is0");
+    // console.log({ descyprionStat, decryptedData });
+    firestore
+      .collection("passwords")
+      .add({
+        creationDate: new Date(),
+        title: title,
+        passwords: passwords,
+        userId: auth.currentUser.uid,
+        updationDate: new Date(),
+      })
+      .then(() => {
+        dispatch(showSnack("Password added successfully"));
+        props.navigation.goBack();
+      })
+      .catch((err) => {
+        dispatch(showSnack("Error in adding password, please try again"));
+        console.log("Error while adding password", err.message);
+      });
+  };
+
+  const editPass = () => {
+    if (isEmpty()) {
+      dispatch(showSnack("Enter a title"));
+      return;
+    }
     if (auth.currentUser) {
       firestore
         .collection("passwords")
-        .add({
-          creationDate: new Date(),
+        .doc(data._id)
+        .update({
           title: title,
           passwords: passwords,
-          userId: auth.currentUser.uid,
           updationDate: new Date(),
         })
         .then(() => {
-          dispatch(showSnack("Password added successfully"));
+          dispatch(showSnack("Password updated successfully"));
           props.navigation.goBack();
         })
         .catch((err) => {
-          dispatch(showSnack("Error in adding password, please try again"));
+          dispatch(showSnack("Error in updating password, please try again"));
           console.log("Error while adding password", err.message);
         });
     }
   };
 
-  const editPass = () => {
-      if(auth.currentUser){
-          firestore.collection("passwords").doc(data._id).update({
-              title: title,
-              passwords: passwords,
-              updationDate: new Date(),
-          }).then(() => {
-            dispatch(showSnack("Password updated successfully"));
-            props.navigation.goBack();
-          })
-          .catch((err) => {
-            dispatch(showSnack("Error in updating password, please try again"));
-            console.log("Error while adding password", err.message);
-          });
+  const addAccount = () => {
+    try {
+      const newPassData = {
+        email: "",
+        password: "",
+        description: "",
+      };
+      setPasswords([...passwords, newPassData]);
+    } catch (err) {
+      dispatch(showSnack("An error occured, please try again"))
+      console.log("Error while adding new account field on ADD PASSWORD");
+    }
+  }
+
+  const removeAccount = () => {
+    try {
+      if (passwords.length > 1) {
+        const allPass = [...passwords];
+        allPass.pop();
+        setPasswords(allPass);
       }
+      else{
+        dispatch(showSnack("Minimum one account is required"));
+      } 
+    } catch (err) {
+      dispatch(showSnack("An error occured, please try again"))
+      console.log("Error while removing account field on ADD PASSWORD");
+
+    }
   }
 
   const { colors } = theme;
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
-      <ScrollView>
-        <TextInput
-          placeholderTextColor={colors.textTwo}
-          placeholder={"Title"}
-          style={[
-            styles.textInput,
-            { backgroundColor: colors.backTwo, color: colors.textOne },
-          ]}
-          value={title}
-          onChangeText={(txt) => setTitle(txt)}
-        />
-        {passwords.map((pass, index) => {
+      <FlatList
+        ListHeaderComponent={
+          <TextInput
+            placeholderTextColor={colors.textTwo}
+            placeholder={"Title"}
+            style={[
+              styles.textInput,
+              { backgroundColor: colors.backTwo, color: colors.textOne },
+            ]}
+            value={title}
+            onChangeText={(txt) => setTitle(txt)}
+          />
+        }
+        data={passwords}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => {
           return (
-            <>
-              <Text
-                style={{
-                  fontSize: 15,
-                  fontWeight: "700",
-                  color: colors.textOne,
-                  marginTop: 15,
-                  marginHorizontal: 10,
-                }}
-              >
+            <View>
+              <Text style={[styles.accNumberTxt, { color: colors.textOne }]}>
                 Account {index + 1}
               </Text>
               <TextInput
@@ -108,7 +177,7 @@ export default function AddPassword(props) {
                 ]}
                 keyboardType="email-address"
                 textContentType="emailAddress"
-                value={pass.email}
+                value={item.email}
                 onChangeText={(txt) => setData("email", index, txt)}
               />
               <TextInput
@@ -119,8 +188,7 @@ export default function AddPassword(props) {
                   { backgroundColor: colors.backTwo, color: colors.textOne },
                 ]}
                 textContentType="password"
-                // secureTextEntry={!showPass}
-                value={pass.password}
+                value={item.password}
                 onChangeText={(txt) => setData("password", index, txt)}
               />
               <TextInput
@@ -135,71 +203,69 @@ export default function AddPassword(props) {
                   },
                 ]}
                 multiline
-                value={pass.description}
+                value={item.description}
                 onChangeText={(txt) => setData("description", index, txt)}
               />
-            </>
+            </View>
           );
-        })}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {passwords.length > 1 ? (
+        }}
+        ListFooterComponent={
+          <View style={styles.accAddedContainer}>
             <TouchableOpacity
               style={[
-                styles.addPassBtn,
-                { backgroundColor: `${colors.primaryColor}77` },
+                styles.accAddrSubrBtn,
+                {
+                  backgroundColor: colors.backOne,
+                  borderColor:
+                    passwords.length > 1
+                      ? colors.primaryColor
+                      : colors.backThree,
+                },
               ]}
-              onPress={() => {
-                const allPass = [...passwords];
-                allPass.pop();
-                setPasswords(allPass);
-              }}
+              onPress={removeAccount}
             >
-              <Feather name={"minus"} size={20} color={"#fff"} />
+              <Text
+                style={{
+                  fontSize: 17,
+                  color:
+                    passwords.length > 1
+                      ? colors.primaryColor
+                      : colors.backThree,
+                }}
+              >
+                Remove account
+              </Text>
             </TouchableOpacity>
-          ) : null}
-          <TouchableOpacity
-            style={[
-              styles.addPassBtn,
-              { backgroundColor: `${colors.primaryColor}77` },
-            ]}
-            onPress={() => {
-              const newPassData = { email: "", password: "", description: "" };
-              setPasswords([...passwords, newPassData]);
-            }}
-          >
-            <Feather name={"plus"} size={20} color={"#fff"} />
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+            <TouchableOpacity
+              style={[
+                styles.accAddrSubrBtn,
+                {
+                  backgroundColor: colors.backOne,
+                  borderColor: colors.primaryColor,
+                },
+              ]}
+              onPress={addAccount}
+            >
+              <Text style={{ fontSize: 17, color: colors.primaryColor }}>
+                Add account
+              </Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
+
       <TouchableOpacity
         style={[
           styles.addPassBtn,
           {
             backgroundColor: colors.primaryColor,
-            marginBottom: 10,
-            paddingVertical: 10,
-            marginTop: 10,
           },
         ]}
         onPress={() => {
-            isEditing ? editPass() : savePass();
+          isEditing ? editPass() : savePass();
         }}
       >
-        <Text
-          style={{
-            fontSize: 15,
-            fontWeight: "700",
-            color: "#fff",
-          }}
-        >
-          {isEditing ? "UPDATE" : "ADD"}
-        </Text>
+        <Text style={styles.addPassBtnTxt}>{isEditing ? "UPDATE" : "ADD"}</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -216,11 +282,40 @@ const styles = StyleSheet.create({
   },
   addPassBtn: {
     paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingVertical: 10,
     alignItems: "center",
     marginHorizontal: 20,
     marginTop: 20,
-    borderRadius: 4,
+    borderRadius: 7,
     minWidth: 160,
+    marginBottom: 10,
+    paddingVertical: 10,
+    marginTop: 10,
+  },
+  addPassBtnTxt: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  accAddrSubrBtn: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginHorizontal: 20,
+    borderRadius: 7,
+    minWidth: 160,
+    borderWidth: 1,
+  },
+  accAddedContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  accNumberTxt: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginTop: 15,
+    marginHorizontal: 10,
   },
 });
