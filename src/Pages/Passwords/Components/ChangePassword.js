@@ -141,6 +141,7 @@ export default function ChangePassword(props) {
           { backgroundColor: colors.backTwo, color: colors.textOne },
         ]}
         placeholder="Enter old password"
+        placeholderTextColor={colors.textTwo}
         value={oldPass}
         onChangeText={(txt) => setOldPass(txt)}
       />
@@ -150,6 +151,7 @@ export default function ChangePassword(props) {
           { backgroundColor: colors.backTwo, color: colors.textOne },
         ]}
         placeholder="Enter new password"
+        placeholderTextColor={colors.textTwo}
         value={newPass}
         onChangeText={(txt) => setNewPass(txt)}
       />
@@ -159,6 +161,7 @@ export default function ChangePassword(props) {
           { backgroundColor: colors.backTwo, color: colors.textOne },
         ]}
         placeholder="Retype new password"
+        placeholderTextColor={colors.textTwo}
         value={retypeNewPass}
         onChangeText={(txt) => setRetypeNewPass(txt)}
       />

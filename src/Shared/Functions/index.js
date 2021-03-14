@@ -523,17 +523,21 @@ export async function getPasswordsData() {
  * returns a boolean ie true or false after local authentication
  */
 export async function localAuth() {
-  try {
-    const authData = await LocalAuthentication.authenticateAsync({
-      promptMessage: "Authentication required",
-      fallbackLabel: "Use passcode",
-      disableDeviceFallback: false,
-      cancelLabel: "Cancel",
-    });
-    return authData.success;
-  } catch (err) {
-    console.log("Error in local auth FUNCTIONS", err.message);
-    return false;
+  if(await LocalAuthentication.isEnrolledAsync() && await LocalAuthentication.isEnrolledAsync()){
+    try {
+      const authData = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Authentication required",
+        fallbackLabel: "Use passcode",
+        cancelLabel: "Cancel",
+      });
+      return authData.success;
+    } catch (err) {
+      console.log("Error in local auth FUNCTIONS", err.message);
+      return false;
+    }
+  }
+  else {
+    return true
   }
 }
 
