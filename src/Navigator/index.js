@@ -16,6 +16,8 @@ import Pdfs from "../Pages/PDFs/index";
 import Passwords from "../Pages/Passwords/index";
 import AddPassword from "../Pages/Passwords/Components/AddPassword";
 import ChangePassword from "../Pages/Passwords/Components/ChangePassword";
+import FuelLog from "../Pages/FuelLog/index";
+import AddFuelLog from "../Pages/FuelLog/Components/AddFuelLog";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -131,8 +133,26 @@ export default function Navigator() {
               component={Passwords}
               options={{ title: "Passwords" }}
             />
-            <Stack.Screen name="AddPassword" component={AddPassword} />
-            <Stack.Screen name="ChangePassword" component={ChangePassword} />
+            <Stack.Screen
+              name="AddPassword"
+              options={{ title: "Add password" }}
+              component={AddPassword}
+            />
+            <Stack.Screen
+              name="ChangePassword"
+              options={{ title: "Change password" }}
+              component={ChangePassword}
+            />
+            <Stack.Screen
+              name="FuelLog"
+              options={{ title: "Fuel logs" }}
+              component={FuelLog}
+            />
+            <Stack.Screen
+              name="AddFuelLog"
+              options={{ title: "Add fuel log" }}
+              component={AddFuelLog}
+            />
             {/* <Stack.Screen
               name="PdfViewer"
               component={PdfViewer}

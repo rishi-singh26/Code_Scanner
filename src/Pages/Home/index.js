@@ -36,7 +36,7 @@ import {
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
-import { Feather, AntDesign, Fontisto, Ionicons } from "@expo/vector-icons";
+import { Feather, AntDesign, Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
@@ -290,10 +290,11 @@ export default function Home(props) {
       "PDFs",
       "Share contacts",
       "Passwords",
+      "Fuel Log",
       "Cancel",
     ];
-    const destructiveButtonIndex = 8;
-    const cancelButtonIndex = 8;
+    const destructiveButtonIndex = 9;
+    const cancelButtonIndex = 9;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
@@ -305,6 +306,7 @@ export default function Home(props) {
       <AntDesign name={"pdffile1"} size={20} color={textOne} />,
       <Feather name={"users"} size={20} color={textOne} />,
       <Feather name={"key"} size={20} color={textOne} />,
+      <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
@@ -349,6 +351,10 @@ export default function Home(props) {
         }
         if (buttonIndex === 7) {
           openPassowrds();
+          return;
+        }
+        if (buttonIndex === 8) {
+          props.navigation.navigate("FuelLog")
           return;
         }
       }

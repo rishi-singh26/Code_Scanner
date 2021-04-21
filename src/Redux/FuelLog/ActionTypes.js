@@ -1,0 +1,4 @@
+export const GET_FUEL_LOG = "GET_FUEL_LOG";
+export const FUEL_LOG_SUCCESS = "FUEL_LOG_SUCCESS";
+export const FUEL_LOG_LOADING = "FUEL_LOG_LOADING";
+export const FUEL_LOG_ERR = "FUEL_LOG_ERR";
