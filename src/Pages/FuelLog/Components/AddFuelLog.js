@@ -40,7 +40,7 @@ export default function AddFuelLog(props) {
     if (fuelVolume === "" || unitPrice === "" || odometerReading === "") {
       dispatch(showSnack("FUEL VOLUME, UNIT PRICE and ODOMETER READING are required and can NOT be empty!"));
     }
-    const fuelCost = fuelVolume * unitPrice;
+    const fuelCost = Math.round(fuelVolume * unitPrice).toFixed(2);
     const newLog = {
       fuelVolume,
       unitPrice,

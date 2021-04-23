@@ -130,11 +130,11 @@ export default function FuelLog(props) {
       //   milage is the average number of kilometers per litel of fuel
       let totalKilometes = fuelLogs[0].odometerReading;
       fuelLogs.map((item, index) => {
-        index === 0 ? null : totalFuel += parseFloat(item.fuelVolume);
+        totalFuel += parseFloat(item.fuelVolume);
         // console.log(parseFloat(item.fuelVolume));
-        totalCost += item.fuelCost;
+        totalCost += parseFloat(item.fuelCost);
       });
-      const milage = (totalKilometes / totalFuel).toFixed(3);
+      const milage = (totalKilometes / (totalFuel - parseFloat(fuelLogs[0].fuelVolume))).toFixed(2);
       return { totalCost, totalFuel, milage };
     }
     return { totalCost: 0, totalFuel: 0, milage: 0 };
@@ -326,7 +326,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     paddingHorizontal: 10,
-    paddingVertical: 20,
+    paddingVertical: 15,
   },
   dateContainer: {
     flexDirection: "row",
@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     paddingHorizontal: 10,
-    paddingBottom: 20,
+    paddingBottom: 15,
   },
   statsContainer: {
     padding: 10,
