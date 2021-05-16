@@ -14,12 +14,10 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addScannedData,
   getScannedData,
-  removeDataOnLogout,
   removeScannedData,
   startLoading,
   editScannedData,
 } from "../../Redux/ScannedData/ActionCreator";
-import { logoutUser } from "../../Redux/Auth/ActionCreator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
   addScannerPassPgName,
@@ -36,14 +34,19 @@ import {
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
-import { Feather, AntDesign, Fontisto, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Feather,
+  AntDesign,
+  Fontisto,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { auth, firestore } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
-import { changeToDark, changeToLight } from "../../Redux/Theme/ActionCreator";
 import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
 import LockNoteDilogue from "./Components/LockNoteDilogue";
 import UnlockNoteDilogue from "./Components/UnlockNoteDilogue";
@@ -64,7 +67,6 @@ export default function Home(props) {
   } = theme.colors;
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
-  const [searchBarCollapsed, setSearchBarCollapsed] = useState(true);
   const [searchKey, setSearchKey] = useState("");
   const [dataList, setDataList] = useState(scannedData.data);
   const [notePass, setNotePass] = useState("");
@@ -354,52 +356,7 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex === 8) {
-          props.navigation.navigate("FuelLog")
-          return;
-        }
-      }
-    );
-  };
-
-  const settingsActionSheet = () => {
-    const themeToggleBtnTxt = theme.mode
-      ? "Enable dark mode"
-      : "Disable dark mode";
-    const options = [themeToggleBtnTxt, "Logout", "Cancel"];
-    const destructiveButtonIndex = 1;
-    const cancelButtonIndex = 2;
-    const containerStyle = { backgroundColor: backTwo };
-    const textStyle = { color: textOne };
-    const icons = [
-      <Feather
-        name={theme.mode ? "sunset" : "sunrise"}
-        size={20}
-        color={textOne}
-      />,
-      <Feather name={"log-out"} size={20} color={textOne} />,
-      <Feather name={"x"} size={20} color={textOne} />,
-    ];
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        destructiveButtonIndex,
-        icons,
-        containerStyle,
-        textStyle,
-      },
-      (buttonIndex) => {
-        if (buttonIndex == 0) {
-          theme.mode ? dispatch(changeToDark()) : dispatch(changeToLight());
-          return;
-        }
-        if (buttonIndex == 1) {
-          dispatch(
-            showAlert("Do you want to log-out?", "", () => {
-              dispatch(logoutUser());
-              dispatch(removeDataOnLogout());
-            })
-          );
+          props.navigation.navigate("FuelLog");
           return;
         }
       }
@@ -414,12 +371,6 @@ export default function Home(props) {
     } else {
       setDataList(scannedData.data);
     }
-  };
-
-  const closeSearchBar = () => {
-    setSearchKey("");
-    setDataList(scannedData.data);
-    setSearchBarCollapsed(true);
   };
 
   const scanFromImage = async () => {
@@ -564,7 +515,12 @@ export default function Home(props) {
     setSelectedData(null);
   };
 
-  const finalDataList = searchBarCollapsed ? scannedData.data : dataList;
+  const closeSearch = () => {
+    setDataList(scannedData.data);
+    setSearchKey("");
+  };
+
+  const finalDataList = dataList;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
@@ -574,25 +530,18 @@ export default function Home(props) {
         title={"Scanner"}
         iconRightName={"settings"}
         onRightIconPress={() => {
-          // props.navigation.navigate("Settings");
-          settingsActionSheet();
-        }}
-        showSearchIcon
-        onSearchIconPress={() => {
-          searchBarCollapsed ? setSearchBarCollapsed(false) : closeSearchBar();
+          props.navigation.navigate("Settings");
         }}
       />
       {/* Search bar */}
       <CollapsibleSearchBar
-        collapsed={searchBarCollapsed}
         onTextChange={(text) => searchData(text)}
-        onXPress={() => {
-          closeSearchBar();
-        }}
         searchKey={searchKey}
+        onXPress={closeSearch}
       />
       {/* data liat */}
       <FlatList
+        contentContainerStyle={{ paddingBottom: 80 }}
         refreshControl={
           <RefreshControl
             refreshing={scannedData.isLoading}
@@ -757,16 +706,15 @@ export default function Home(props) {
           setIsOpeningPassowrds(false);
         }}
         onOkPress={() => {
-          console.log({isOpeningPassowrds, isUnlocking});
-          if(isUnlocking && !isOpeningPassowrds){
+          console.log({ isOpeningPassowrds, isUnlocking });
+          if (isUnlocking && !isOpeningPassowrds) {
             handleUnlockNote();
             return;
           }
-          if(!isUnlocking && isOpeningPassowrds){
+          if (!isUnlocking && isOpeningPassowrds) {
             navigateToPassowrds(notePass);
             return;
-          }
-          else {
+          } else {
             handelOpenNote();
           }
           // isOpeningPassowrds

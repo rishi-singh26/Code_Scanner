@@ -1,33 +1,36 @@
 import React from "react";
-import Collapsible from "../../Components/Accordian/Collapsable";
 import { View, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 
 export default function CollapsibleSearchBar({
-  collapsed,
   onTextChange,
-  onXPress,
   searchKey,
+  onXPress,
 }) {
   const theme = useSelector((state) => state.theme);
-  const { colors, mode } = theme;
+  const { colors } = theme;
   return (
-    <Collapsible
-      collapsed={collapsed}
-      style={{ backgroundColor: colors.backOne }}
+    <View
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: colors.backOne,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderBottomColor: colors.backTwo,
+        borderBottomWidth: 0.8,
+      }}
     >
       <View
         style={{
           flexDirection: "row",
-          alignItems: "center",
           justifyContent: "space-between",
-          backgroundColor: colors.backOne,
-          padding: 5,
-          paddingLeft: 8,
-          height: 65,
-          borderBottomColor: colors.backTwo,
-          borderBottomWidth: 0.8,
+          alignItems: "center",
+          backgroundColor: colors.backTwo,
+          paddingLeft: 20,
+          paddingRight: 0,
+          borderRadius: 8,
         }}
       >
         <TextInput
@@ -36,25 +39,22 @@ export default function CollapsibleSearchBar({
           placeholder={"Search here"}
           placeholderTextColor={colors.textTwo}
           style={{
-            backgroundColor: colors.backTwo,
-            paddingVertical: 10,
-            paddingHorizontal: 20,
             fontSize: 17,
             flex: 1,
             color: colors.textOne,
-            borderRadius: 8,
+            paddingVertical: 8,
           }}
         />
-        <Feather
-          name="x"
-          size={22}
-          style={{ paddingHorizontal: 20, paddingVertical: 5 }}
-          onPress={() => {
-            onXPress();
-          }}
-          color={colors.textOne}
-        />
+        {searchKey.length > 0 && (
+          <Feather
+            name={"x"}
+            size={20}
+            color={colors.textTwo}
+            style={{ padding: 10 }}
+            onPress={onXPress}
+          />
+        )}
       </View>
-    </Collapsible>
+    </View>
   );
 }

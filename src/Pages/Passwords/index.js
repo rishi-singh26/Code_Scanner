@@ -184,7 +184,7 @@ export default function Passwords(props) {
                   {item.passwords
                     ? item.passwords.map((pass, index) => {
                         return (
-                          <>
+                          <View key={index}>
                             <Text
                               style={{
                                 fontSize: 15,
@@ -199,7 +199,7 @@ export default function Passwords(props) {
                               style={[
                                 styles.horizontalView,
                                 styles.accountData,
-                                {backgroundColor: colors.backTwo}
+                                { backgroundColor: colors.backTwo },
                               ]}
                             >
                               <Text
@@ -222,7 +222,7 @@ export default function Passwords(props) {
                               style={[
                                 styles.horizontalView,
                                 styles.accountData,
-                                {backgroundColor: colors.backTwo}
+                                { backgroundColor: colors.backTwo },
                               ]}
                             >
                               <Text
@@ -248,7 +248,7 @@ export default function Passwords(props) {
                                 {pass.description}
                               </Text>
                             ) : null}
-                          </>
+                          </View>
                         );
                       })
                     : null}
@@ -338,11 +338,11 @@ const styles = StyleSheet.create({
     marginTop: 200,
     fontSize: 20,
     fontWeight: "700",
-    color: "#888"
+    color: "#888",
   },
   accountData: {
     paddingLeft: 15,
     marginVertical: 5,
-    borderRadius: 7
-  }
+    borderRadius: 7,
+  },
 });

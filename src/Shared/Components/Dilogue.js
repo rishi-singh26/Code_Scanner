@@ -23,7 +23,7 @@ export default function Dilogue(props) {
               ? props.transparentBackColor
               : "#0008",
           },
-          props.style ? props.style : null
+          props.style ? props.style : null,
         ]}
       >
         <Pressable

@@ -8,19 +8,23 @@ export default function CustomAlert({ isVisible }) {
   const theme = useSelector((state) => state.theme);
   const alert = useSelector((state) => state.alert);
   const dispatch = useDispatch();
-  const { backOne, backTwo, textOne, textTwo } = theme.colors;
+  const { colors } = theme;
   return (
     <Dilogue
       dilogueVisible={isVisible}
-      dilogueBackground={backTwo}
+      dilogueBackground={colors.backTwo}
       transparentBackColor={"#0004"}
       cancellable={false}
       closeDilogue={() => {
         dispatch(hideAlert());
       }}
     >
-      <Text style={[styles.header, { color: textOne }]}>{alert.head}</Text>
-      <Text style={[styles.subHead, { color: textOne }]}>{alert.subHead}</Text>
+      <Text style={[styles.header, { color: colors.textOne }]}>
+        {alert.head}
+      </Text>
+      <Text style={[styles.subHead, { color: colors.textOne }]}>
+        {alert.subHead}
+      </Text>
       <View
         style={{
           flexDirection: "row",
@@ -33,7 +37,9 @@ export default function CustomAlert({ isVisible }) {
           onPress={() => dispatch(hideAlert())}
           style={styles.actionBtn}
         >
-          <Text style={{ color: textOne, fontSize: 16, fontWeight: "700" }}>
+          <Text
+            style={{ color: colors.textOne, fontSize: 16, fontWeight: "700" }}
+          >
             Cancel
           </Text>
         </TouchableOpacity>
@@ -44,7 +50,9 @@ export default function CustomAlert({ isVisible }) {
             dispatch(hideAlert());
           }}
         >
-          <Text style={{ color: textOne, fontSize: 16, fontWeight: "700" }}>
+          <Text
+            style={{ color: colors.textOne, fontSize: 16, fontWeight: "700" }}
+          >
             OK
           </Text>
         </TouchableOpacity>

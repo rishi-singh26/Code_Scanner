@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaView, Text, FlatList, TouchableOpacity } from "react-native";
-import Header from "../../Shared/Components/Header";
 import * as ContactsAPI from "expo-contacts";
 import { createQRString, searchContacts } from "../../Shared/Functions";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 import { useSelector } from "react-redux";
-import { Feather } from "@expo/vector-icons";
 
 export default function Contacts(props) {
   const [contacts, setContacts] = useState([]);
-  const [isSearchBarCollapsed, setIsSearchBarCollapsed] = useState(true);
   const [searchKey, setSearchKey] = useState("");
 
   const theme = useSelector((state) => state.theme);
@@ -47,36 +44,9 @@ export default function Contacts(props) {
     );
   };
 
-  const closeSearchBar = () => {
-    setSearchKey("");
-    setIsSearchBarCollapsed(true);
-    searchKey.length > 0 ? getContacts() : null;
-  };
-
-  const setHeaderOptions = () => {
-    props.navigation.setOptions({
-      headerRight: () => {
-        return (
-          <TouchableOpacity
-            style={{ paddingVertical: 14, paddingHorizontal: 20 }}
-            onPress={() => {
-              setIsSearchBarCollapsed(!isSearchBarCollapsed);
-            }}
-          >
-            <Feather name="search" size={23} color={colors.textOne} />
-          </TouchableOpacity>
-        );
-      },
-    });
-  };
-
   useEffect(() => {
     getContacts();
   }, []);
-
-  useEffect(() => {
-    setHeaderOptions();
-  }, [isSearchBarCollapsed]);
 
   const searchContactsData = (searchKey) => {
     setSearchKey(searchKey);
@@ -88,17 +58,18 @@ export default function Contacts(props) {
     }
   };
 
+  const closeSearch = () => {
+    getContacts();
+    setSearchKey("");
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: colors.backOne }}>
       <CollapsibleSearchBar
-        collapsed={isSearchBarCollapsed}
         onTextChange={(text) => searchContactsData(text)}
-        onXPress={() => {
-          closeSearchBar();
-        }}
         searchKey={searchKey}
+        onXPress={closeSearch}
       />
-      {/* {isSearchBarCollapsed ? null : <Text>Hola</Text>} */}
       <FlatList
         data={contacts}
         keyExtractor={(item, index) => index.toString()}

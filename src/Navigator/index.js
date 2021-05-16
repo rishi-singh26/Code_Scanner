@@ -18,6 +18,8 @@ import AddPassword from "../Pages/Passwords/Components/AddPassword";
 import ChangePassword from "../Pages/Passwords/Components/ChangePassword";
 import FuelLog from "../Pages/FuelLog/index";
 import AddFuelLog from "../Pages/FuelLog/Components/AddFuelLog";
+import Settings from "../Pages/Settings/index";
+import EditProfile from "../Pages/Settings/Components/EditProfile";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -152,6 +154,16 @@ export default function Navigator() {
               name="AddFuelLog"
               options={{ title: "Add fuel log" }}
               component={AddFuelLog}
+            />
+            <Stack.Screen
+              name="Settings"
+              options={{ title: "Setting" }}
+              component={Settings}
+            />
+            <Stack.Screen
+              name="EditProfile"
+              options={{ title: "Profile" }}
+              component={EditProfile}
             />
             {/* <Stack.Screen
               name="PdfViewer"
