@@ -68,7 +68,7 @@ export default function Home(props) {
   // Local state
   const [hasPermission, setHasPermission] = useState(false);
   const [searchKey, setSearchKey] = useState("");
-  const [dataList, setDataList] = useState(scannedData.data);
+  const [dataList, setDataList] = useState([]);
   const [notePass, setNotePass] = useState("");
   const [showLockNoteDilogue, setShowLockNoteDilogue] = useState(false);
   const [showUnlockNoteDilogue, setShowUnlockNoteDilogue] = useState(false);
@@ -518,9 +518,10 @@ export default function Home(props) {
   const closeSearch = () => {
     setDataList(scannedData.data);
     setSearchKey("");
+    setDataList([]);
   };
 
-  const finalDataList = dataList;
+  const finalDataList = dataList.length > 0 ? dataList : scannedData.data;
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
