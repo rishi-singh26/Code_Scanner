@@ -6,7 +6,7 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, AntDesign } from "@expo/vector-icons";
 import { primaryColor, primaryErrColor } from "../../../Shared/Styles/index";
 import { useSelector, useDispatch } from "react-redux";
 import { loginUser } from "../../../Redux/Auth/ActionCreator";
@@ -36,10 +36,10 @@ export default function Login(props) {
   return (
     <View>
       <View style={styles.header}>
-        <Feather
-          color={"#fff"}
-          size={24}
-          name="plus-square"
+        <AntDesign
+          name="qrcode"
+          size={25}
+          color="#fff"
           style={styles.iconStyle}
         />
         <Text style={[styles.headerText, { color: colors.textOne }]}>
@@ -59,6 +59,7 @@ export default function Login(props) {
         }}
         keyboardType="email-address"
         textContentType="emailAddress"
+        autoCapitalize={"none"}
       />
       {emailErr.length > 0 ? (
         <Text style={styles.errTxt}>{emailErr}</Text>

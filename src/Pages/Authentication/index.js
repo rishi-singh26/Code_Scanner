@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { SafeAreaView, View, ScrollView } from "react-native";
+import React, { useRef, useState, useEffect } from "react";
+import { SafeAreaView, View, ScrollView, BackHandler } from "react-native";
 import Login from "./Components/Login";
 import Signup from "./Components/SignUp";
 import ResetPassword from "./Components/ResetPass";
@@ -22,7 +22,27 @@ export default function Authentication(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
 
+  // local state
+  const [screenIndex, setScreenIndex] = useState(0); // 0 means login screen, 1 means forgot password screen and 2 means signup screen. It is used for backHandler. Using this we always know which screen is the user on
+
   const scrollRef = useRef();
+
+  useEffect(() => {
+    const backAction = () => {
+      if (screenIndex === 1 || screenIndex === 2) {
+        scrollAuthPage(scrollRef, 0);
+        setScreenIndex(0);
+      } else BackHandler.exitApp();
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, [screenIndex]);
 
   return (
     <SafeAreaView
@@ -41,9 +61,11 @@ export default function Authentication(props) {
             <Login
               onSignupPress={() => {
                 scrollAuthPage(scrollRef, SCREEN_WIDTH);
+                setScreenIndex(2);
               }}
               onForgotPassPress={() => {
                 scrollAuthPage(scrollRef, SCREEN_WIDTH * 2);
+                setScreenIndex(1);
               }}
             />
           </View>
@@ -51,6 +73,7 @@ export default function Authentication(props) {
             <Signup
               onBackPress={() => {
                 scrollAuthPage(scrollRef, 0);
+                setScreenIndex(0);
               }}
             />
           </View>
@@ -58,6 +81,7 @@ export default function Authentication(props) {
             <ResetPassword
               onBackPress={() => {
                 scrollAuthPage(scrollRef, 0);
+                setScreenIndex(0);
               }}
             />
           </View>

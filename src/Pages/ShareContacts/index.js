@@ -64,7 +64,7 @@ export default function Contacts(props) {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: colors.backOne }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       <CollapsibleSearchBar
         onTextChange={(text) => searchContactsData(text)}
         searchKey={searchKey}

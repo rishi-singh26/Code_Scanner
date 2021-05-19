@@ -116,6 +116,7 @@ export default function Signup(props) {
           }}
           keyboardType="email-address"
           textContentType="emailAddress"
+          autoCapitalize={"none"}
         />
         {emailErr.length > 0 ? (
           <Text style={styles.errTxt}>{emailErr}</Text>

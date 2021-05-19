@@ -4,7 +4,9 @@ import { Auth } from "./Auth/Auth";
 import { Snack } from "./Snack/Snack";
 import { Theme } from "./Theme/Theame";
 import { Alert } from "./Alert/Alert";
-import  { FuelLogs } from "./FuelLog/FuelLog";
+import { FuelLogs } from "./FuelLog/FuelLog";
+import { UseAppLock } from "./AppLock/AppLock";
+import { UsePassPageLock } from "./PassPageLock/PassPageLock";
 
 import thunk from "redux-thunk";
 import logger from "redux-logger";
@@ -26,7 +28,9 @@ export const ConfigureStore = () => {
       snack: Snack,
       theme: Theme,
       alert: Alert,
-      fuelLogs: FuelLogs
+      fuelLogs: FuelLogs,
+      useAppLock: UseAppLock,
+      usePassPageLock: UsePassPageLock,
     }),
     applyMiddleware(thunk)
   );

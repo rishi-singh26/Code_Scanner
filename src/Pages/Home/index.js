@@ -20,12 +20,12 @@ import {
 } from "../../Redux/ScannedData/ActionCreator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import {
-  addScannerPassPgName,
   copyToClipboard,
   decryptText,
   encryptText,
   isContactInfo,
   isContactsApiAvailable,
+  localAuth,
   pickImage,
   searchScannedDataTitle,
   shareScannedDataPdf,
@@ -45,17 +45,21 @@ import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
 import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
-import { auth, firestore } from "../../Constants/Api";
+import { auth } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
 import LockNoteDilogue from "./Components/LockNoteDilogue";
 import UnlockNoteDilogue from "./Components/UnlockNoteDilogue";
 import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
+import ListEmpty from "./Components/ListEmpty";
+import AppLockDiloge from "./Components/AppLockDiloge";
 
 export default function Home(props) {
   // Global state
   const scannedData = useSelector((state) => state.scannedData);
   const theme = useSelector((state) => state.theme);
+  const useAppLock = useSelector((state) => state.useAppLock);
+  const usePassPageLock = useSelector((state) => state.usePassPageLock);
   const {
     primaryColor,
     backTwo,
@@ -77,7 +81,8 @@ export default function Home(props) {
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isLodaingPassPgData, setIsLodaingPassPgData] = useState(false);
   const [passInpHotBtnTxt, setPassInpHotBtnTxt] = useState("");
-  const [isOpeningPassowrds, setIsOpeningPassowrds] = useState(false);
+  const [isLocalAuthDone, setIsLocalAuthDone] = useState(false);
+  const [showLocAuthErrBox, setShowLocAuthErrBox] = useState(true);
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
@@ -87,8 +92,25 @@ export default function Home(props) {
 
   useEffect(() => {
     getCamPermission();
-    dispatch(getScannedData());
+    checkLocalAuth();
   }, []);
+
+  const checkLocalAuth = async () => {
+    if (useAppLock) {
+      const authenticated = await localAuth();
+      if (authenticated) {
+        setIsLocalAuthDone(true);
+        setShowLocAuthErrBox(false);
+        dispatch(getScannedData());
+      } else {
+        setIsLocalAuthDone(false);
+        setShowLocAuthErrBox(true);
+      }
+    } else {
+      setShowLocAuthErrBox(false);
+      dispatch(getScannedData());
+    }
+  };
 
   const getCamPermission = async (navigationFunc = () => {}) => {
     const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -217,68 +239,14 @@ export default function Home(props) {
     );
   };
 
-  const openPassowrds = () => {
-    setNoteOpenerTitle("Enter password");
-    setPassInpHotBtnTxt("Show passwords");
-    setIsOpeningPassowrds(true);
-    setShowUnlockNoteDilogue(true);
-  };
-
-  const resetPasswordsOpenerState = () => {
-    setNoteOpenerTitle("");
-    setPassInpHotBtnTxt("");
-    setIsOpeningPassowrds(false);
-    setShowUnlockNoteDilogue(false);
-    setIsLodaingPassPgData(false);
-    setNotePass("");
-  };
-
-  const navigateToPassowrds = async (password) => {
-    setIsLodaingPassPgData(true);
-    setShowUnlockNoteDilogue(false);
-    try {
-      firestore
-        .collection("scannerPassPgName")
-        .where("userId", "==", auth.currentUser.uid)
-        .get()
-        .then(async (resp) => {
-          if (resp.docs.length > 0) {
-            resp.forEach(async (passPgData) => {
-              const pageData = { ...passPgData.data(), _id: passPgData.id };
-              // console.log(data);
-              const { _id, pageName, userID } = pageData;
-              const { status, data } = await decryptText(pageName, password);
-              if (status) {
-                data !== "Passwords"
-                  ? dispatch(showSnack("Incorrect password, please try again"))
-                  : props.navigation.navigate("Passwords", { data: password });
-              }
-              resetPasswordsOpenerState();
-            });
-          } else {
-            console.log("Creatinfg pass pg name");
-            await addScannerPassPgName(password, () => {
-              dispatch(
-                showSnack(
-                  "You can now access your passwords with the same kay you provided now"
-                )
-              );
-              props.navigation.navigate("Passwords", { data: password });
-              resetPasswordsOpenerState();
-            });
-          }
-        });
-    } catch (error) {
-      resetPasswordsOpenerState();
-      console.log(
-        "Error occured while getting password page name on HOME",
-        error.message
-      );
-      dispatch(
-        showSnack(
-          "Error occured while opening passwords page, please try again!\nCheck your password"
-        )
-      );
+  const navigateToPass = async () => {
+    if (usePassPageLock) {
+      const isAuthneticated = await localAuth();
+      isAuthneticated
+        ? props.navigation.navigate("Passwords")
+        : dispatch(showSnack("Authentication required!"));
+    } else {
+      props.navigation.navigate("Passwords");
     }
   };
 
@@ -352,7 +320,7 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex === 7) {
-          openPassowrds();
+          navigateToPass();
           return;
         }
         if (buttonIndex === 8) {
@@ -369,7 +337,7 @@ export default function Home(props) {
       const result = searchScannedDataTitle(scannedData.data, searchKey);
       setDataList(result);
     } else {
-      setDataList(scannedData.data);
+      setDataList([]);
     }
   };
 
@@ -515,14 +483,20 @@ export default function Home(props) {
     setSelectedData(null);
   };
 
-  const closeSearch = () => {
-    setDataList(scannedData.data);
-    setSearchKey("");
-    setDataList([]);
+  const handleNodeDecryption = () => {
+    // console.log({ isUnlocking });
+    if (isUnlocking) {
+      handleUnlockNote();
+      // return;
+    } else {
+      handelOpenNote();
+    }
   };
 
-  const finalDataList = dataList.length > 0 ? dataList : scannedData.data;
-
+  const closeSearch = () => {
+    setDataList([]);
+    setSearchKey("");
+  };
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
       {isLodaingPassPgData ? <CustomActivityIndicator /> : null}
@@ -540,6 +514,18 @@ export default function Home(props) {
         searchKey={searchKey}
         onXPress={closeSearch}
       />
+      {/* List empty */}
+      {scannedData.data.length === 0 && !scannedData.isLoading && (
+        <ListEmpty
+          editorFunc={() =>
+            props.navigation.navigate("Editor", { isEditing: false })
+          }
+          qrFunc={() => props.navigation.navigate("QrGenerator")}
+          passwordsFunc={openPassowrds}
+          scanImgFunc={scanFromImage}
+          scannerFunc={scnaCode}
+        />
+      )}
       {/* data liat */}
       <FlatList
         contentContainerStyle={{ paddingBottom: 80 }}
@@ -554,7 +540,7 @@ export default function Home(props) {
             colors={[primaryColor]}
           />
         }
-        data={finalDataList}
+        data={dataList.length > 0 ? dataList : scannedData.data}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => {
           const text = item.scannedData.data;
@@ -567,7 +553,7 @@ export default function Home(props) {
                 styles.scannedDataContainer,
                 {
                   borderTopWidth: index === 0 ? 0 : 1,
-                  borderBottomWidth: index === finalDataList.length - 1 ? 2 : 0,
+                  borderBottomWidth: 0,
                   borderColor: backTwo,
                   backgroundColor: backOne,
                 },
@@ -704,28 +690,14 @@ export default function Home(props) {
           setIsUnlocking(false);
           setNotePass("");
           setShowUnlockNoteDilogue(false);
-          setIsOpeningPassowrds(false);
         }}
-        onOkPress={() => {
-          console.log({ isOpeningPassowrds, isUnlocking });
-          if (isUnlocking && !isOpeningPassowrds) {
-            handleUnlockNote();
-            return;
-          }
-          if (!isUnlocking && isOpeningPassowrds) {
-            navigateToPassowrds(notePass);
-            return;
-          } else {
-            handelOpenNote();
-          }
-          // isOpeningPassowrds
-          //   ? navigateToPassowrds(notePass)
-          //   : isUnlocking
-          //   ? handleUnlockNote
-          //   : handelOpenNote;
-        }}
-        showSubHead={isOpeningPassowrds}
+        onOkPress={handleNodeDecryption}
         visible={showUnlockNoteDilogue}
+      />
+      {/* Local auth error box */}
+      <AppLockDiloge
+        showAuthErrBox={showLocAuthErrBox}
+        checkLocalAuth={checkLocalAuth}
       />
     </SafeAreaView>
   );

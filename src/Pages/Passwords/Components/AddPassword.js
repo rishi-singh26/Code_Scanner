@@ -10,10 +10,12 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { auth, firestore } from "../../../Constants/Api";
+import { showAlert } from "../../../Redux/Alert/ActionCreator";
 import { showSnack } from "../../../Redux/Snack/ActionCreator";
+import { encryptPasswords } from "../../../Shared/Functions";
 
 export default function AddPassword(props) {
-  const { isEditing, data } = props.route.params;
+  const { isEditing, data, passKey } = props.route.params;
   const theme = useSelector((state) => state.theme);
   const [title, setTitle] = useState(isEditing ? data.title : "");
   const [passwords, setPasswords] = useState(
@@ -47,69 +49,69 @@ export default function AddPassword(props) {
       );
       return;
     }
-    // TODO: make the encryption key dynamic
-    // const encryptionKey = "rendomEncryptionKey";
-    // const { status, data } = await encryptPasswords([
-    //   {
-    //     email: "email@example.com",
-    //     password: "Nice password",
-    //     description: "A very nice description",
-    //   },
-    //   {
-    //     email: "email@exampletwo.com",
-    //     password: "Nice password two",
-    //     description: "A very nice description two",
-    //   },
-    //   {
-    //     email: "email@examplethree.com",
-    //     password: "Nice password three",
-    //     description: "A very nice description three",
-    //   },
-    // ], encryptionKey);
-    // console.log({ status, data });
-    // const { status: descyprionStat, data: decryptedData } = await decryptPasswords(data, "MY12is0");
-    // console.log({ descyprionStat, decryptedData });
-    firestore
-      .collection("passwords")
-      .add({
-        creationDate: new Date(),
-        title: title,
-        passwords: passwords,
-        userId: auth.currentUser.uid,
-        updationDate: new Date(),
-      })
-      .then(() => {
-        dispatch(showSnack("Password added successfully"));
-        props.navigation.goBack();
-      })
-      .catch((err) => {
-        dispatch(showSnack("Error in adding password, please try again"));
-        console.log("Error while adding password", err.message);
-      });
+    // console.log(passwords);
+    const { status: encryptionStatus, data: encryptedPasswords } =
+      await encryptPasswords(passwords, passKey);
+    // console.log({ encryptionStatus, encryptedPasswords });
+    encryptionStatus
+      ? firestore
+          .collection("passwords")
+          .add({
+            creationDate: new Date(),
+            title: title,
+            passwords: encryptedPasswords,
+            userId: auth.currentUser.uid,
+            updationDate: new Date(),
+          })
+          .then(() => {
+            dispatch(showSnack("Password added successfully"));
+            props.navigation.goBack();
+          })
+          .catch((err) => {
+            dispatch(showSnack("Error in adding password, please try again"));
+            console.log("Error while adding password", err.message);
+          })
+      : dispatch(
+          showAlert(
+            "Could not save this password because of error in encryption process. Please try again."
+          )
+        );
   };
 
-  const editPass = () => {
+  const editPass = async () => {
     if (isEmpty()) {
       dispatch(showSnack("Enter a title"));
       return;
     }
     if (auth.currentUser) {
-      firestore
-        .collection("passwords")
-        .doc(data._id)
-        .update({
-          title: title,
-          passwords: passwords,
-          updationDate: new Date(),
-        })
-        .then(() => {
-          dispatch(showSnack("Password updated successfully"));
-          props.navigation.goBack();
-        })
-        .catch((err) => {
-          dispatch(showSnack("Error in updating password, please try again"));
-          console.log("Error while adding password", err.message);
-        });
+      // console.log(passwords);
+      const { status: encryptionStatus, data: encryptedPasswords } =
+        await encryptPasswords(passwords, passKey);
+      // console.log({ encryptionStatus, encryptedPasswords });
+      encryptionStatus
+        ? firestore
+            .collection("passwords")
+            .doc(data._id)
+            .update({
+              title: title,
+              passwords: encryptedPasswords,
+              updationDate: new Date(),
+            })
+            .then(() => {
+              dispatch(showSnack("Password updated successfully"));
+              props.navigation.goBack();
+            })
+            .catch((err) => {
+              dispatch(
+                showSnack("Error in updating password, please try again")
+              );
+              console.log("Error while adding password", err.message);
+            })
+        : dispatch(
+            showAlert(
+              "Could not edit this password because of error in encryption process. Please try again."
+            )
+          );
     }
   };
 
@@ -122,10 +124,10 @@ export default function AddPassword(props) {
       };
       setPasswords([...passwords, newPassData]);
     } catch (err) {
-      dispatch(showSnack("An error occured, please try again"))
+      dispatch(showSnack("An error occured, please try again"));
       console.log("Error while adding new account field on ADD PASSWORD");
     }
-  }
+  };
 
   const removeAccount = () => {
     try {
@@ -133,16 +135,14 @@ export default function AddPassword(props) {
         const allPass = [...passwords];
         allPass.pop();
         setPasswords(allPass);
-      }
-      else{
+      } else {
         dispatch(showSnack("Minimum one account is required"));
-      } 
+      }
     } catch (err) {
-      dispatch(showSnack("An error occured, please try again"))
+      dispatch(showSnack("An error occured, please try again"));
       console.log("Error while removing account field on ADD PASSWORD");
-
     }
-  }
+  };
 
   const { colors } = theme;
   return (
@@ -161,6 +161,7 @@ export default function AddPassword(props) {
           />
         }
         data={passwords}
+        removeClippedSubviews={false}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => {
           return (
@@ -179,6 +180,7 @@ export default function AddPassword(props) {
                 textContentType="emailAddress"
                 value={item.email}
                 onChangeText={(txt) => setData("email", index, txt)}
+                // removeClippedSubviews={false}
               />
               <TextInput
                 placeholderTextColor={colors.textTwo}

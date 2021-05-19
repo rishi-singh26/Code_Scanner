@@ -11,21 +11,25 @@ import * as LocalAuthentication from "expo-local-authentication";
 
 export function validateEmail(email) {
   // this is also an option for email regx
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const re =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-  const emailRe = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const emailRe =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   return emailRe.test(String(email).toLowerCase());
 }
 
 // Validated whatsapp text links for indian phone numbers ie starting with 91
 export function validateWaLinkForINNum(link) {
-  const regex = /https:\/\/wa\.me\/91(?:\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$)/;
+  const regex =
+    /https:\/\/wa\.me\/91(?:\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$)/;
   return regex.test(String(link).toLowerCase());
 }
 
 export function validateUrl(value) {
-  const urlRegex = /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i;
+  const urlRegex =
+    /^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)(?:\.(?:[a-z\u00a1-\uffff0-9]-*)*[a-z\u00a1-\uffff0-9]+)*(?:\.(?:[a-z\u00a1-\uffff]{2,})))(?::\d{2,5})?(?:[/?#]\S*)?$/i;
 
   return urlRegex.test(value);
 }
@@ -50,7 +54,7 @@ export function sortArrayOfObjs(array, sortingKey) {
 
 export async function copyToClipboard(data) {
   try {
-    await Clipboard.setString(data);
+    Clipboard.setString(data);
     return true;
   } catch (error) {
     console.log("Error in copying to clipboard FUNCTIONS", error.message);
@@ -492,38 +496,13 @@ export async function decryptText(text, password) {
 }
 
 /**
- * returns an object { status, passwords, numArr};
- * status can be true of false, passwords is an array of objects
- * numArr is an array of length equal to the length of the passwords arr and consists of booleans
- */
-export async function getPasswordsData() {
-  try {
-    if (auth.currentUser) {
-      const data = await firestore
-        .collection("passwords")
-        .where("userId", "==", auth.currentUser.uid)
-        .get();
-
-      let allPasswords = [];
-      let numArr = [];
-      data.forEach((item) => {
-        const password = item.data();
-        const _id = item.id;
-        allPasswords.push({ ...password, _id });
-        numArr.push(false);
-      });
-      return { status: true, passwords: allPasswords, numArr: numArr };
-    } else return { status: false, passwords: null, numArr: null };
-  } catch (err) {
-    return { status: false, passwords: null, numArr: null };
-  }
-}
-
-/**
  * returns a boolean ie true or false after local authentication
  */
 export async function localAuth() {
-  if(await LocalAuthentication.isEnrolledAsync() && await LocalAuthentication.isEnrolledAsync()){
+  if (
+    (await LocalAuthentication.isEnrolledAsync()) &&
+    (await LocalAuthentication.isEnrolledAsync())
+  ) {
     try {
       const authData = await LocalAuthentication.authenticateAsync({
         promptMessage: "Authentication required",
@@ -535,116 +514,93 @@ export async function localAuth() {
       console.log("Error in local auth FUNCTIONS", err.message);
       return false;
     }
-  }
-  else {
-    return true
+  } else {
+    return true;
   }
 }
 
 /**
  *
- * @param {String} password
- * encrypts the page name for passwords screen with the password being passed
- * returns a boolean
- */
-export async function addScannerPassPgName(password, successFunc) {
-  try {
-    if (auth.currentUser) {
-      const { status, data } = await encryptText("Passwords", password);
-      if (status) {
-        await firestore
-          .collection("scannerPassPgName")
-          .add({
-            pageName: data,
-            userId: auth.currentUser.uid,
-            createdDate: new Date(),
-          })
-          .then(() => {
-            successFunc();
-            return { status: true };
-          })
-          .catch((err) => {
-            console.log(
-              "Error in add scanner Passwords Page Name FUNCTIONS",
-              err.message
-            );
-            return { status: false };
-          });
-      }
-    }
-  } catch (err) {
-    console.log(
-      "Error in add scanner Passwords Page Name FUNCTIONS",
-      err.message
-    );
-    return { status: false };
-  }
-}
-
-/**
- * 
  * @param {Array} passwordsArray
  * An array of objects, [{ email:, password, description }]
  * @param {String} encryptionKey
  * The password used to encrypt the passwords
  * Returns an array of objects in which email password and description is encrypted
  */
-export async function encryptPasswords(passwordsArray, encryptionKey){
+export async function encryptPasswords(passwordsArray, encryptionKey) {
   try {
     let error = false;
     const encryptedPassowordsArr = [];
-    for(var i = 0; i < passwordsArray.length; i++){
+    for (var i = 0; i < passwordsArray.length; i++) {
       const { email, password, description } = passwordsArray[i];
-      const { status: emailEncryptionStat, data: encryptedEmail } = await encryptText(email, encryptionKey);
-      const {status: passEncryptionStatus, data: encryptedPassword} = await encryptText(password, encryptionKey)
-      const { status: descEncryptionStatus, data: enctyptedDesc} = await encryptText(description, encryptionKey);
-      if(!emailEncryptionStat || !passEncryptionStatus || !descEncryptionStatus){
+      const { status: emailEncryptionStat, data: encryptedEmail } =
+        await encryptText(email, encryptionKey);
+      const { status: passEncryptionStatus, data: encryptedPassword } =
+        await encryptText(password, encryptionKey);
+      const { status: descEncryptionStatus, data: enctyptedDesc } =
+        await encryptText(description, encryptionKey);
+      if (
+        !emailEncryptionStat ||
+        !passEncryptionStatus ||
+        !descEncryptionStatus
+      ) {
         error = true;
       }
-      encryptedPassowordsArr.push(
-        {email: encryptedEmail, password: encryptedPassword, description: enctyptedDesc}
-      )
+      encryptedPassowordsArr.push({
+        email: encryptedEmail,
+        password: encryptedPassword,
+        description: enctyptedDesc,
+      });
     }
-    if(error){
+    if (error) {
       return { status: false, data: null };
     }
-    return { status: true, data: encryptedPassowordsArr }; 
+    return { status: true, data: encryptedPassowordsArr };
   } catch (err) {
-    console.log("Error in ENCRYPTING passwords on FUNCTIONS\n",err.message);
+    console.log("Error in ENCRYPTING passwords on FUNCTIONS\n", err.message);
     return { status: false, data: null };
   }
 }
 
 /**
- * 
- * @param {Array} passwordsArray 
+ *
+ * @param {Array} passwordsArray
  * An array of objects, [{ email, password, description }]
- * @param {String} decryptionKey 
+ * @param {String} decryptionKey
  * The password used to decrypt the passwords
  * Returns an array of objects in which email password and description is decrypted
  */
-export async function decryptPasswords(passwordsArray, decryptionKey){
+export async function decryptPasswords(passwordsArray, decryptionKey) {
   try {
     let error = false;
     const decryptedPassowordsArr = [];
-    for(var i = 0; i < passwordsArray.length; i++){
+    for (var i = 0; i < passwordsArray.length; i++) {
       const { email, password, description } = passwordsArray[i];
-      const { status: emailDecryptionStat, data: decryptedEmail } = await decryptText(email, decryptionKey);
-      const {status: passDecryptionStatus, data: decryptedPassword} = await decryptText(password, decryptionKey)
-      const { status: descDecryptionStatus, data: dectyptedDesc} = await decryptText(description, decryptionKey);
-      if(!emailDecryptionStat || !passDecryptionStatus || !descDecryptionStatus){
+      const { status: emailDecryptionStat, data: decryptedEmail } =
+        await decryptText(email, decryptionKey);
+      const { status: passDecryptionStatus, data: decryptedPassword } =
+        await decryptText(password, decryptionKey);
+      const { status: descDecryptionStatus, data: dectyptedDesc } =
+        await decryptText(description, decryptionKey);
+      if (
+        !emailDecryptionStat ||
+        !passDecryptionStatus ||
+        !descDecryptionStatus
+      ) {
         error = true;
       }
-      decryptedPassowordsArr.push(
-        {email: decryptedEmail, password: decryptedPassword, description: dectyptedDesc}
-      )
+      decryptedPassowordsArr.push({
+        email: decryptedEmail,
+        password: decryptedPassword,
+        description: dectyptedDesc,
+      });
     }
-    if(error){
+    if (error) {
       return { status: false, data: null };
     }
-    return { status: true, data: decryptedPassowordsArr }; 
+    return { status: true, data: decryptedPassowordsArr };
   } catch (err) {
-    console.log("Error in DECRYPTING passwords on FUNCTIONS\n",err.message);
+    console.log("Error in DECRYPTING passwords on FUNCTIONS\n", err.message);
     return { status: false, data: null };
   }
 }

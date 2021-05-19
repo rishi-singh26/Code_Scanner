@@ -71,6 +71,7 @@ export default function ResetPassword(props) {
         }}
         keyboardType="email-address"
         textContentType="emailAddress"
+        autoCapitalize={"none"}
       />
       {emailErr.length > 0 ? (
         <Text style={styles.errTxt}>{emailErr}</Text>

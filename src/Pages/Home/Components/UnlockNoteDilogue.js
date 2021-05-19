@@ -17,7 +17,6 @@ export default function UnlockNoteDilogue({
   onCancelPress,
   visible,
   hotBtnText,
-  showSubHead,
 }) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
@@ -32,10 +31,6 @@ export default function UnlockNoteDilogue({
       cancellable={true}
     >
       <Text style={[styles.headTxt, { color: colors.textOne }]}>{title}</Text>
-      {showSubHead && <Text style={[styles.subHeadTxt, { color: colors.textOne }]}>
-        Remember this password, if you forget this password, you will never be
-        able to access your saved passwords.
-      </Text>}
       <TextInput
         placeholder={"Password"}
         secureTextEntry
@@ -67,7 +62,12 @@ export default function UnlockNoteDilogue({
 }
 
 const styles = StyleSheet.create({
-  headTxt: { fontSize: 20, fontWeight: "700", marginTop: 5, marginLeft: 5 },
+  headTxt: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginVertical: 5,
+    marginLeft: 5,
+  },
   subHeadTxt: { fontSize: 16, marginVertical: 10, marginLeft: 5 },
   errTxt: { fontSize: 14, marginBottom: 10, marginLeft: 10 },
   buttonsView: {
