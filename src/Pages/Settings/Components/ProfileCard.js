@@ -1,19 +1,20 @@
 import React from "react";
-import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { auth } from "../../../Constants/Api";
 import { useSelector } from "react-redux";
+import { Avatar } from "react-native-paper";
 
 export default function ProfileCard(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
-  const { navigateToEdit } = props;
+  const { navigateToEdit, imageViewerFunc } = props;
 
   return (
     <View style={[styles.headerCard, { backgroundColor: colors.backOne }]}>
       <View>
         {auth?.currentUser?.displayName ? (
-          <Text style={styles.displayNameTxt}>
+          <Text style={[styles.displayNameTxt, { color: colors.textOne }]}>
             {auth.currentUser.displayName}
           </Text>
         ) : (
@@ -30,14 +31,19 @@ export default function ProfileCard(props) {
       </View>
       {auth?.currentUser?.photoURL ? (
         <TouchableOpacity
-          onPress={() => console.log("jhjh")}
-          style={{ borderRadius: 20 }}
+          onPress={navigateToEdit}
+          onLongPress={() => {
+            const imgData = {
+              uploadDate: null,
+              userId: null,
+              image: auth.currentUser.photoURL,
+              imageName: "Profile image",
+              isDeleted: false,
+            };
+            imageViewerFunc(imgData);
+          }}
         >
-          <Image
-            source={{ uri: auth.currentUser.photoURL }}
-            width={60}
-            height={60}
-          />
+          <Avatar.Image size={60} source={{ uri: auth.currentUser.photoURL }} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity

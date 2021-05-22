@@ -18,12 +18,18 @@ import { encryptText } from "../../Shared/Functions";
 export default function Editor(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
+
+  const {
+    title: prevTitle,
+    data: prevData,
+    isEditing,
+    id,
+  } = props?.route?.params;
   // console.log(props);
   const [testWidth, setTestWidth] = useState("99%");
-  const [title, setTitle] = useState(props?.route?.params?.title || "");
-  const [data, setData] = useState(props?.route?.params?.data || "");
+  const [title, setTitle] = useState(prevTitle || "");
+  const [data, setData] = useState(prevData || "");
   const [inputHeight, setInputHeight] = useState(150);
-  const [inputFullHeight, setInputFullHeight] = useState(150);
 
   const dispatch = useDispatch();
 
@@ -33,26 +39,11 @@ export default function Editor(props) {
         return (
           <TouchableOpacity
             onPress={() => {
-              console.log({ title, data, id: props?.route?.params?.id });
-              saveData(
-                title,
-                data,
-                props?.route?.params?.id,
-                props?.route?.params?.isEditing
-              );
+              saveData(title, data, id, isEditing);
             }}
             style={styles.headerEditIconStyle}
           >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "700",
-                color: "#888",
-                marginHorizontal: 20,
-              }}
-            >
-              SAVE
-            </Text>
+            <Text style={styles.svaeBtnTxt}>SAVE</Text>
           </TouchableOpacity>
         );
       },
@@ -62,33 +53,33 @@ export default function Editor(props) {
   const saveData = async (title, textData, id, isEditing) => {
     if (isEditing) {
       if (id) {
-        const {isLockaed, notePass} = props?.route?.params;
-        if(isLockaed){
+        const { isLockaed, notePass } = props?.route?.params;
+        if (isLockaed) {
           const { status, data } = await encryptText(textData, notePass);
-          console.log({status, data});
-          if(status){
+          // console.log({ status, data });
+          if (status) {
             dispatch(
               editScannedData(
                 {
                   title: title,
                   scannedData: { data: data },
                   updatedDate: new Date(),
-                },
-                id
+                }, // fields to be updated
+                id // _id of the document to be updated
               )
             );
-          }else{
-            dispatch(showSnack("Error while editing, please try again"))
+          } else {
+            dispatch(showSnack("Error while editing, please try again"));
           }
-        }else{
+        } else {
           dispatch(
             editScannedData(
               {
                 title: title,
                 scannedData: { data: textData },
                 updatedDate: new Date(),
-              },
-              id
+              }, // fields to be updated
+              id // _id of the document to be updated
             )
           );
         }
@@ -124,7 +115,6 @@ export default function Editor(props) {
         var fullHeight = ev.nativeEvent.layout.height - 47;
         // console.log(fullHeight);
         setInputHeight(fullHeight);
-        setInputFullHeight(fullHeight);
       }}
       style={{
         flex: 1,
@@ -136,7 +126,7 @@ export default function Editor(props) {
       <TextInput
         value={title}
         onChangeText={(text) => setTitle(text)}
-        placeholder="Enter title"
+        placeholder="Title"
         placeholderTextColor={colors.textTwo}
         style={[
           styles.textInput,
@@ -171,5 +161,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     paddingHorizontal: 10,
     paddingVertical: 15,
+  },
+  svaeBtnTxt: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#888",
+    marginHorizontal: 20,
   },
 });

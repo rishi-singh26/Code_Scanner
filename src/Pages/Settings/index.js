@@ -46,7 +46,15 @@ export default function Settings(props) {
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
-      <ProfileCard navigateToEdit={navigateToEdit} />
+      <ProfileCard
+        navigateToEdit={navigateToEdit}
+        imageViewerFunc={(imgData) => {
+          props.navigation.navigate("ImageViewer", {
+            imgData,
+            removeImage: null,
+          });
+        }}
+      />
       <ListTile
         tileText={theme.mode ? "Enable dark mode" : "Disable dark mode"}
         rightIcon={theme.mode ? "sun" : "moon"}
@@ -72,6 +80,12 @@ export default function Settings(props) {
         style={{ marginTop: 1 }}
         onPress={() => passPageLockHandler()}
         rightIconColor={usePassPageLock ? null : colors.primaryErrColor}
+      />
+      <ListTile
+        tileText={"Change password"}
+        rightIcon={"chevron-right"}
+        style={{ marginTop: 10 }}
+        onPress={() => props.navigation.navigate("ChangePasswd")}
       />
       <ListTile
         style={{ marginTop: 1 }}

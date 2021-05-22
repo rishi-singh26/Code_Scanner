@@ -19,9 +19,11 @@ import {
   copyToClipboard,
   decryptPasswords,
   decryptText,
+  searchPasswords,
   sortArrayOfObjs,
 } from "../../Shared/Functions";
 import { FAB } from "react-native-paper";
+import CollapsibleSearchBar from "../../Shared/Components/CollapsibleSearchBar";
 
 export default function Passwords(props) {
   const theme = useSelector((state) => state.theme);
@@ -33,6 +35,7 @@ export default function Passwords(props) {
   const [passKey, setPassKey] = useState("");
   const [showingPassKey, setShowingPassKey] = useState(false);
   const [decryptedPassword, setDecryptedPassword] = useState([]);
+  const [searchKey, setSearchKey] = useState("");
 
   const dispatch = useDispatch();
 
@@ -40,23 +43,15 @@ export default function Passwords(props) {
     props.navigation.setOptions({
       headerRight: () => {
         return (
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
+          <TouchableOpacity
+            onPress={() => {
+              setIsKeyBoxHidden(!isKeyBoxHidden);
+              // props.navigation.navigate("ChangePassword");
             }}
+            style={styles.headerQRIconStyle}
           >
-            <TouchableOpacity
-              onPress={() => {
-                setIsKeyBoxHidden(!isKeyBoxHidden);
-                // props.navigation.navigate("ChangePassword");
-              }}
-              style={styles.headerQRIconStyle}
-            >
-              <Feather name={"key"} size={23} color={colors.textOne} />
-            </TouchableOpacity>
-          </View>
+            <Feather name={"key"} size={23} color={colors.textOne} />
+          </TouchableOpacity>
         );
       },
     });
@@ -179,8 +174,29 @@ export default function Passwords(props) {
     getPasswords();
   }, []);
 
+  const searchPass = (searchKey) => {
+    setSearchKey(searchKey);
+    if (searchKey.length > 0) {
+      const result = searchPasswords(passwords, searchKey);
+      result.length > 0 ? setPasswords(result) : null;
+    } else {
+      getPasswords();
+    }
+  };
+
+  const closeSearch = () => {
+    getPasswords();
+    setSearchKey("");
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+      {/* Search bar */}
+      <CollapsibleSearchBar
+        onTextChange={(text) => searchPass(text)}
+        searchKey={searchKey}
+        onXPress={closeSearch}
+      />
       <Collapsible collapsed={isKeyBoxHidden}>
         <View style={[styles.passKeyBox, { backgroundColor: colors.backOne }]}>
           <View
@@ -436,6 +452,7 @@ const styles = StyleSheet.create({
   },
   passKeyBox: {
     padding: 10,
+    paddingHorizontal: 12,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

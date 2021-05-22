@@ -36,6 +36,7 @@ export default function Images(props) {
           image: result.uri,
           name: result.uri.split("/").pop(),
         },
+        true, // should upload image url to database
         auth.currentUser.uid,
         () => {
           dispatch(showSnack("Image uploaded"));

@@ -20,6 +20,7 @@ import FuelLog from "../Pages/FuelLog/index";
 import AddFuelLog from "../Pages/FuelLog/Components/AddFuelLog";
 import Settings from "../Pages/Settings/index";
 import EditProfile from "../Pages/Settings/Components/EditProfile";
+import ChangePasswd from "../Pages/Settings/Components/ChangePasswd";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -157,13 +158,18 @@ export default function Navigator() {
             />
             <Stack.Screen
               name="Settings"
-              options={{ title: "Setting" }}
+              options={{ title: "Settings" }}
               component={Settings}
             />
             <Stack.Screen
               name="EditProfile"
               options={{ title: "Profile" }}
               component={EditProfile}
+            />
+            <Stack.Screen
+              name="ChangePasswd"
+              options={{ title: "Change password" }}
+              component={ChangePasswd}
             />
             {/* <Stack.Screen
               name="PdfViewer"
@@ -193,6 +199,8 @@ export default function Navigator() {
               }
             : null
         }
+        // style={{ backgroundColor: colors.backOne }}
+        // theme={mode ? PaperDefaultTheme : PaperDarkTheme}
       >
         {snack.message}
       </Snackbar>

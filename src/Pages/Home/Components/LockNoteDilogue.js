@@ -57,8 +57,9 @@ export default function LockNoteDilogue({
         value={password}
         onChangeText={(text) => {
           setPassword(text);
-          if (text === retypePass) setErrText("");
-          else setErrText("Password does not match!!");
+          if (text !== retypePass && retypePass.length !== 0)
+            setErrText("Password does not match!!");
+          else setErrText("");
         }}
       />
       <TextInput
@@ -72,11 +73,10 @@ export default function LockNoteDilogue({
         value={retypePass}
         onChangeText={(text) => retypePassword(text)}
       />
-      {errText.length > 0 ? (
-        <Text style={[styles.errTxt, { color: colors.primaryErrColor }]}>
-          {errText}
-        </Text>
-      ) : null}
+
+      <Text style={[styles.errTxt, { color: colors.primaryErrColor }]}>
+        {errText.length > 0 ? errText : ""}
+      </Text>
       <View style={styles.buttonsView}>
         <TouchableOpacity
           style={{ padding: 15 }}

@@ -4,8 +4,11 @@
 
 ```sh
 $ git clone https://github.com/rishi-singh26/Code_Scanner.git
+clone this repository
 $ npm install
+install node_modules
 $ expo upgrade
+upgrade modules
 ```
 
 ### Firebase credentials setup
@@ -35,4 +38,3 @@ export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 export const cloudStorage = firebase.storage();
 ```
-

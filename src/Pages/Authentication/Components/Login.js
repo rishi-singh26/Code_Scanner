@@ -21,6 +21,7 @@ export default function Login(props) {
   const [pass, setPass] = useState("");
   const [shouldShowPassword, setShouldShowPassword] = useState(true);
   const [emailErr, setEmailErr] = useState("");
+  const [passwdErr, setPasswdErr] = useState("");
 
   const dispatch = useDispatch();
 
@@ -30,6 +31,11 @@ export default function Login(props) {
       return;
     }
     setEmailErr("");
+    if (password.length === 0) {
+      setPasswdErr("Enter a password");
+      return;
+    }
+    setPasswdErr("");
     dispatch(loginUser({ username, password }));
   };
 
@@ -92,6 +98,9 @@ export default function Login(props) {
           style={{ padding: 8 }}
         />
       </View>
+      {passwdErr.length > 0 ? (
+        <Text style={styles.errTxt}>{passwdErr}</Text>
+      ) : null}
       <TouchableOpacity
         onPress={() => loginUserOnDataValidation(email, pass)}
         style={[styles.loginBtn, { backgroundColor: colors.primaryColor }]}
@@ -138,11 +147,13 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     borderRightColor: "#000",
     borderRightWidth: 1,
+    paddingVertical: 5,
   },
   signUpBtn: {
     alignSelf: "center",
     marginTop: 15,
     marginHorizontal: 5,
+    paddingVertical: 5,
   },
   iconStyle: {
     backgroundColor: primaryColor,

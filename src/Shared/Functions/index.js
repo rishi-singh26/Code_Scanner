@@ -34,6 +34,12 @@ export function validateUrl(value) {
   return urlRegex.test(value);
 }
 
+/**
+ *
+ * @param {Array} array
+ * @param {String} sortingKey
+ * @returns {Array}
+ */
 export function sortArrayOfObjs(array, sortingKey) {
   const sortedArray = [...array];
 
@@ -52,6 +58,11 @@ export function sortArrayOfObjs(array, sortingKey) {
   return sortedArray;
 }
 
+/**
+ *
+ * @param {String} data
+ * @returns {Boolean}
+ */
 export async function copyToClipboard(data) {
   try {
     Clipboard.setString(data);
@@ -128,6 +139,12 @@ export async function addToContacts(data) {
   }
 }
 
+/**
+ *
+ * @param {Array} data
+ * @param {String} searchKey
+ * @returns {Array}
+ */
 export function searchScannedDataTitle(data, searchKey) {
   var finalArr = [];
   data.map((item) => {
@@ -142,6 +159,32 @@ export function searchScannedDataTitle(data, searchKey) {
   return finalArr;
 }
 
+/**
+ *
+ * @param {Array} data
+ * @param {String} searchKey
+ * @returns {Array} Array of passwrds after searching
+ */
+export function searchPasswords(data, searchKey) {
+  var finalArr = [];
+  data.map((item) => {
+    if (item.title) {
+      searchKey.toUpperCase().includes(item.title.toUpperCase()) ||
+      item.title.toUpperCase().includes(searchKey.toUpperCase())
+        ? finalArr.push(item)
+        : null;
+    }
+  });
+
+  return finalArr;
+}
+
+/**
+ *
+ * @param {Array} data
+ * @param {String} searchKey
+ * @returns {Array}
+ */
 export function searchContacts(data, searchKey) {
   const finalArr = [];
   data.map((item) => {
@@ -327,18 +370,21 @@ export async function shareThings(uri) {
 /**
  *
  * @param {Object} imageData
+ * @param {Boolean} shouldUploadImage
  * @param {String} userId
  * @param {Function} optionalFunc
+ * @returns {Object} {status: Boolean, downloadUri: URL}
  * image data must be like
  * { image: "image uri", name: "image name" }
  * uploads one image to firebase storage. The image data provided must be an Object then uploads that url to firestore to be used in the app returns an object { status, downloadUri }
  */
 export async function uploadImageToServer(
   imageData,
-  userId,
+  shouldUploadImage = true,
+  userId = "",
   optionalFunc = () => {}
 ) {
-  console.log("Starting upload");
+  // console.log("Starting upload");
   const response = await fetch(imageData.image);
   const blob = await response.blob();
 
@@ -350,21 +396,23 @@ export async function uploadImageToServer(
 
     var photoDownloadURLRef = cloudStorage.ref(result.metadata.fullPath);
     const photoDownloadURL = await photoDownloadURLRef.getDownloadURL();
-    console.log(
-      "Here is the download url",
-      photoDownloadURL,
-      "\nUploading to firestore"
-    );
-    await uploadImageUrl(
-      {
-        uploadDate: new Date(),
-        userId,
-        image: photoDownloadURL,
-        imageName: imageData.name,
-        isDeleted: false,
-      },
-      optionalFunc
-    );
+    // console.log(
+    //   "Here is the download url",
+    //   photoDownloadURL,
+    //   "\nUploading to firestore"
+    // );
+    shouldUploadImage
+      ? await uploadImageUrl(
+          {
+            uploadDate: new Date(),
+            userId,
+            image: photoDownloadURL,
+            imageName: imageData.name,
+            isDeleted: false,
+          },
+          optionalFunc
+        )
+      : null;
     return { status: true, downloadUri: photoDownloadURL };
   } catch (err) {
     console.log("Error in uploading iamge to server FUNCTIONS", err.message);
@@ -468,6 +516,7 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
  *
  * @param {String} text
  * @param {String} password
+ * @returns {String} encrypted text
  * pass in the text and the encryption key
  */
 export async function encryptText(text, password) {
@@ -483,6 +532,7 @@ export async function encryptText(text, password) {
  *
  * @param {String} text
  * @param {String} password
+ * @returns {String} decrypted text
  * pass in the text and the decryption key
  */
 export async function decryptText(text, password) {
@@ -496,6 +546,7 @@ export async function decryptText(text, password) {
 }
 
 /**
+ * @returns {Boolean}
  * returns a boolean ie true or false after local authentication
  */
 export async function localAuth() {
@@ -525,6 +576,7 @@ export async function localAuth() {
  * An array of objects, [{ email:, password, description }]
  * @param {String} encryptionKey
  * The password used to encrypt the passwords
+ * @returns {Array}
  * Returns an array of objects in which email password and description is encrypted
  */
 export async function encryptPasswords(passwordsArray, encryptionKey) {
@@ -568,6 +620,7 @@ export async function encryptPasswords(passwordsArray, encryptionKey) {
  * An array of objects, [{ email, password, description }]
  * @param {String} decryptionKey
  * The password used to decrypt the passwords
+ * @returns {Array}
  * Returns an array of objects in which email password and description is decrypted
  */
 export async function decryptPasswords(passwordsArray, decryptionKey) {

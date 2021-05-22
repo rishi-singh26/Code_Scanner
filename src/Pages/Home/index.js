@@ -38,7 +38,6 @@ import {
   Feather,
   AntDesign,
   Fontisto,
-  Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
@@ -50,7 +49,6 @@ import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { show3BtnAlert, showAlert } from "../../Redux/Alert/ActionCreator";
 import LockNoteDilogue from "./Components/LockNoteDilogue";
 import UnlockNoteDilogue from "./Components/UnlockNoteDilogue";
-import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 import ListEmpty from "./Components/ListEmpty";
 import AppLockDiloge from "./Components/AppLockDiloge";
 
@@ -79,9 +77,7 @@ export default function Home(props) {
   const [selectedData, setSelectedData] = useState(null);
   const [noteOpenerTitle, setNoteOpenerTitle] = useState("");
   const [isUnlocking, setIsUnlocking] = useState(false);
-  const [isLodaingPassPgData, setIsLodaingPassPgData] = useState(false);
   const [passInpHotBtnTxt, setPassInpHotBtnTxt] = useState("");
-  const [isLocalAuthDone, setIsLocalAuthDone] = useState(false);
   const [showLocAuthErrBox, setShowLocAuthErrBox] = useState(true);
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
@@ -99,11 +95,9 @@ export default function Home(props) {
     if (useAppLock) {
       const authenticated = await localAuth();
       if (authenticated) {
-        setIsLocalAuthDone(true);
         setShowLocAuthErrBox(false);
         dispatch(getScannedData());
       } else {
-        setIsLocalAuthDone(false);
         setShowLocAuthErrBox(true);
       }
     } else {
@@ -134,9 +128,15 @@ export default function Home(props) {
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"unlock"} size={20} color={textOne} />,
+      <Feather name={"unlock"} size={20} color={primaryErrColor} />,
       <Feather name={"x"} size={20} color={textOne} />,
     ];
+    const message = data?.title || "";
+    const messageTextStyle = {
+      fontSize: 20,
+      fontWeight: "700",
+      color: textOne,
+    };
 
     showActionSheetWithOptions(
       {
@@ -146,6 +146,8 @@ export default function Home(props) {
         icons,
         containerStyle,
         textStyle,
+        message,
+        messageTextStyle,
       },
       async (buttonIndex) => {
         if (buttonIndex == 0) {
@@ -179,13 +181,19 @@ export default function Home(props) {
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"trash"} size={20} color={textOne} />,
+      <Feather name={"trash"} size={20} color={primaryErrColor} />,
       <Feather name={"lock"} size={20} color={textOne} />,
       <Feather name={"copy"} size={20} color={textOne} />,
       <Feather name={"edit"} size={20} color={textOne} />,
       <Feather name={"share"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={textOne} />,
     ];
+    const message = data?.title || "";
+    const messageTextStyle = {
+      fontSize: 20,
+      fontWeight: "700",
+      color: textOne,
+    };
 
     showActionSheetWithOptions(
       {
@@ -195,6 +203,8 @@ export default function Home(props) {
         icons,
         containerStyle,
         textStyle,
+        message,
+        messageTextStyle,
       },
       async (buttonIndex) => {
         if (buttonIndex == 0) {
@@ -230,7 +240,7 @@ export default function Home(props) {
         }
         if (buttonIndex == 4) {
           const pdfuri = await shareScannedDataPdf(
-            `<h3>${data.title}</h3><p>${data.scannedData.data}</p>`
+            `<h1>${data.title}</h1><h4>${data.scannedData.data}</h4>`
           );
           pdfuri.status ? shareThings(pdfuri.pdfUri) : null;
           return;
@@ -251,20 +261,23 @@ export default function Home(props) {
   };
 
   const openScannerOptionsSheet = () => {
+    // TODO: Add image encryption
+    // TODO: Add pdf encryption
+    // TODO: Work on fuel logger
     const options = [
       "Scan Image",
       "Open Camera",
       "Add note",
       "Create QR code",
-      "Images",
-      "PDFs",
+      // "Images",
+      // "PDFs",
       "Share contacts",
       "Passwords",
-      "Fuel Log",
+      // "Fuel Log",
       "Cancel",
     ];
-    const destructiveButtonIndex = 9;
-    const cancelButtonIndex = 9;
+    const destructiveButtonIndex = 6;
+    const cancelButtonIndex = 6;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
@@ -272,11 +285,11 @@ export default function Home(props) {
       <Feather name={"camera"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
       <Fontisto name="qrcode" size={17} color={textOne} />,
-      <Feather name={"image"} size={20} color={textOne} />,
-      <AntDesign name={"pdffile1"} size={20} color={textOne} />,
+      // <Feather name={"image"} size={20} color={textOne} />,
+      // <AntDesign name={"pdffile1"} size={20} color={textOne} />,
       <Feather name={"users"} size={20} color={textOne} />,
       <Feather name={"key"} size={20} color={textOne} />,
-      <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
+      // <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
@@ -305,28 +318,28 @@ export default function Home(props) {
           props.navigation.navigate("QrGenerator");
           return;
         }
+        // if (buttonIndex === 4) {
+        //   props.navigation.navigate("Images");
+        //   return;
+        // }
+        // if (buttonIndex === 5) {
+        //   props.navigation.navigate("Pdfs");
+        //   return;
+        // }
         if (buttonIndex === 4) {
-          props.navigation.navigate("Images");
-          return;
-        }
-        if (buttonIndex === 5) {
-          props.navigation.navigate("Pdfs");
-          return;
-        }
-        if (buttonIndex === 6) {
           isContactsApiAvailable()
             ? props.navigation.navigate("ContactSharing")
             : dispatch(showSnack("Oops, can't share contacts on this device!"));
           return;
         }
-        if (buttonIndex === 7) {
+        if (buttonIndex === 5) {
           navigateToPass();
           return;
         }
-        if (buttonIndex === 8) {
-          props.navigation.navigate("FuelLog");
-          return;
-        }
+        // if (buttonIndex === 6) {
+        //   props.navigation.navigate("FuelLog");
+        //   return;
+        // }
       }
     );
   };
@@ -335,7 +348,7 @@ export default function Home(props) {
     setSearchKey(searchKey);
     if (searchKey.length > 0) {
       const result = searchScannedDataTitle(scannedData.data, searchKey);
-      setDataList(result);
+      result.length > 0 ? setDataList(result) : null;
     } else {
       setDataList([]);
     }
@@ -499,21 +512,20 @@ export default function Home(props) {
   };
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: backTwo }]}>
-      {isLodaingPassPgData ? <CustomActivityIndicator /> : null}
       {/* Header */}
       <Header
         title={"Scanner"}
         iconRightName={"settings"}
-        onRightIconPress={() => {
-          props.navigation.navigate("Settings");
-        }}
+        onRightIconPress={() => props.navigation.navigate("Settings")}
       />
       {/* Search bar */}
-      <CollapsibleSearchBar
-        onTextChange={(text) => searchData(text)}
-        searchKey={searchKey}
-        onXPress={closeSearch}
-      />
+      {scannedData.data.length > 0 ? (
+        <CollapsibleSearchBar
+          onTextChange={(text) => searchData(text)}
+          searchKey={searchKey}
+          onXPress={closeSearch}
+        />
+      ) : null}
       {/* List empty */}
       {scannedData.data.length === 0 && !scannedData.isLoading && (
         <ListEmpty
@@ -521,7 +533,7 @@ export default function Home(props) {
             props.navigation.navigate("Editor", { isEditing: false })
           }
           qrFunc={() => props.navigation.navigate("QrGenerator")}
-          passwordsFunc={openPassowrds}
+          passwordsFunc={navigateToPass}
           scanImgFunc={scanFromImage}
           scannerFunc={scnaCode}
         />
@@ -588,26 +600,15 @@ export default function Home(props) {
                   ) : null}
                   {item?.scannedData?.data ? (
                     item.isLockaed ? (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          paddingVertical: 10,
-                        }}
+                      <Text
+                        numberOfLines={2}
+                        style={[
+                          styles.scannedDataText,
+                          { color: primaryErrColor, fontSize: 13 },
+                        ]}
                       >
-                        <Ionicons
-                          name="lock-closed-outline"
-                          color={primaryErrColor}
-                          size={23}
-                          style={{ paddingRight: 10 }}
-                        />
-                        <Text
-                          numberOfLines={2}
-                          style={[styles.scannedDataText, { color: textOne }]}
-                        >
-                          Note Locked
-                        </Text>
-                      </View>
+                        Locked
+                      </Text>
                     ) : isContact ? (
                       <View
                         style={{ flexDirection: "row", alignItems: "center" }}
