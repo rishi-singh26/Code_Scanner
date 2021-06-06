@@ -4,7 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import Clipboard from "expo-clipboard";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { auth, cloudStorage, firestore } from "../../Constants/Api";
+import { cloudStorage, firestore } from "../../Constants/Api";
 import * as DocumentPicker from "expo-document-picker";
 import CryptoJS from "react-native-crypto-js";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -301,25 +301,29 @@ export function getDataObj(data) {
  * pass an optional function to run after the image has been picked successfully
  * opens image picjer native app
  */
-export async function pickImage(optionalFunc = () => {}) {
+export async function pickImage() {
   if (Platform.OS === "web") {
     alert("Device not supported.");
     return { status: false, result: null };
   }
+  console.log("Not on web");
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== "granted") {
     alert("Sorry, we need camera roll permissions to make this work!");
     return { status: false, result: null };
   }
+  // console.log("Permission granted");
   try {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       // aspect: [1, 1],
       quality: 0.5,
     });
-    // console.log(result);
-    optionalFunc();
+    // console.log("Here is image result", result);
+    if (result.cancelled) {
+      return { status: false, result: null };
+    }
     return { status: true, result };
   } catch (err) {
     console.log(err.message);

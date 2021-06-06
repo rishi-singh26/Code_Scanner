@@ -43,7 +43,11 @@ export default function ProfileCard(props) {
             imageViewerFunc(imgData);
           }}
         >
-          <Avatar.Image size={60} source={{ uri: auth.currentUser.photoURL }} />
+          <Avatar.Image
+            size={60}
+            source={{ uri: auth.currentUser.photoURL }}
+            style={{ backgroundColor: colors.backThree }}
+          />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity

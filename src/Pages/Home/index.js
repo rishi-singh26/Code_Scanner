@@ -34,12 +34,7 @@ import {
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
-import {
-  Feather,
-  AntDesign,
-  Fontisto,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
+import { Feather, AntDesign, Fontisto } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
@@ -78,7 +73,7 @@ export default function Home(props) {
   const [noteOpenerTitle, setNoteOpenerTitle] = useState("");
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [passInpHotBtnTxt, setPassInpHotBtnTxt] = useState("");
-  const [showLocAuthErrBox, setShowLocAuthErrBox] = useState(true);
+  const [showLocAuthErrBox, setShowLocAuthErrBox] = useState(false);
   // Action sheet provider
   const { showActionSheetWithOptions } = useActionSheet();
 
@@ -133,7 +128,7 @@ export default function Home(props) {
     ];
     const message = data?.title || "";
     const messageTextStyle = {
-      fontSize: 20,
+      fontSize: 17,
       fontWeight: "700",
       color: textOne,
     };
@@ -190,7 +185,7 @@ export default function Home(props) {
     ];
     const message = data?.title || "";
     const messageTextStyle = {
-      fontSize: 20,
+      fontSize: 17,
       fontWeight: "700",
       color: textOne,
     };
@@ -263,10 +258,10 @@ export default function Home(props) {
   const openScannerOptionsSheet = () => {
     // TODO: Add image encryption
     // TODO: Add pdf encryption
-    // TODO: Work on fuel logger
+    // TODO: Work on logger
     const options = [
-      "Scan Image",
       "Open Camera",
+      "Select Image",
       "Add note",
       "Create QR code",
       // "Images",
@@ -281,8 +276,8 @@ export default function Home(props) {
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"camera"} size={20} color={textOne} />,
+      <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
       <Fontisto name="qrcode" size={17} color={textOne} />,
       // <Feather name={"image"} size={20} color={textOne} />,
@@ -303,11 +298,11 @@ export default function Home(props) {
       },
       (buttonIndex) => {
         if (buttonIndex === 0) {
-          scanFromImage();
+          scnaCode();
           return;
         }
         if (buttonIndex === 1) {
-          scnaCode();
+          scanFromImage();
           return;
         }
         if (buttonIndex === 2) {
@@ -356,18 +351,18 @@ export default function Home(props) {
 
   const scanFromImage = async () => {
     try {
-      const imageData = await pickImage();
-      // console.log("Data from image", imageData);
-      if (imageData.status && !imageData.result.cancelled) {
-        const data = await BarCodeScanner.scanFromURLAsync(
-          imageData.result.uri
-        );
+      const { status, result } = await pickImage();
+      // console.log("Data from image", { status, result });
+      if (status && !result.cancelled) {
+        const data = await BarCodeScanner.scanFromURLAsync(result.uri);
         // console.log("Data from code", data);
-        if (data.length > 0) {
-          const firstScannedCode = data[0];
-          // console.log("Here is the scanned data", firstScannedCode);
-          checkForURLs(firstScannedCode.type, firstScannedCode.data);
-        } else dispatch(showSnack("No code detected"));
+        if (data.length === 0) {
+          dispatch(showSnack("No code detected"));
+          return;
+        }
+        const firstScannedCode = data[0];
+        // console.log("Here is the scanned data", firstScannedCode);
+        checkForURLs(firstScannedCode.type, firstScannedCode.data);
       }
     } catch (error) {
       console.log(error.message);
@@ -375,6 +370,7 @@ export default function Home(props) {
   };
 
   const checkForURLs = (type, data) => {
+    // console.log("Checking for url", { type, data });
     if (validateEmail(data)) {
       // console.log("it is an email");
       dispatch(

@@ -26,12 +26,12 @@ export default function ScannedDataDetail(props) {
   const [isQrCollapsed, setIsQrCollapsed] = useState(true);
   const theme = useSelector((state) => state.theme);
 
-  const { backOne, backTwo, backThree, textOne, textTwo } = theme.colors;
+  const { backOne, backTwo, textOne } = theme.colors;
 
   const dispatch = useDispatch();
 
   // console.log(scannedData);
-  // *Qrcode ref
+  // Qrcode ref
   const shareQrRef = useRef(null);
 
   const setHeaderOptions = () => {
@@ -48,7 +48,7 @@ export default function ScannedDataDetail(props) {
                     id: scannedData?.id,
                     isEditing: true,
                     isLockaed: scannedData?.isLockaed,
-                    notePass: scannedData?.notePass
+                    notePass: scannedData?.notePass,
                   });
                 }}
                 style={styles.headerEditIconStyle}
@@ -56,14 +56,16 @@ export default function ScannedDataDetail(props) {
                 <Feather name="edit" size={23} color={textOne} />
               </TouchableOpacity>
             )}
-            {scannedData?.text.length > 2000 ? null : <TouchableOpacity
-              onPress={() => {
-                setIsQrCollapsed(!isQrCollapsed);
-              }}
-              style={styles.headerQRIconStyle}
-            >
-              <FontAwesome name="qrcode" size={23} color={textOne} />
-            </TouchableOpacity>}
+            {scannedData?.text.length > 2000 ? null : (
+              <TouchableOpacity
+                onPress={() => {
+                  setIsQrCollapsed(!isQrCollapsed);
+                }}
+                style={styles.headerQRIconStyle}
+              >
+                <FontAwesome name="qrcode" size={23} color={textOne} />
+              </TouchableOpacity>
+            )}
           </HorizontalView>
         );
       },
@@ -73,7 +75,9 @@ export default function ScannedDataDetail(props) {
   };
 
   useEffect(() => {
-    scannedData?.text.length > 2000 ? dispatch(showSnack("Data too big to fit in a QR code!!")) : null;
+    scannedData?.text.length > 2000
+      ? dispatch(showSnack("Data too big to fit in a QR code!!"))
+      : null;
   }, []);
 
   useEffect(() => {
@@ -96,7 +100,7 @@ export default function ScannedDataDetail(props) {
     shareQrRef.current.capture().then(async (uri) => {
       console.log("shareQrCode ", uri);
       if (!(await Sharing.isAvailableAsync())) {
-        alert(`Uh oh, sharing isn't available on your platform`);
+        dispatch(showSnack(`Uh oh, sharing isn't available on your platform`));
         return;
       }
       await Sharing.shareAsync(uri);
@@ -113,13 +117,17 @@ export default function ScannedDataDetail(props) {
               ref={shareQrRef}
               options={{ format: "jpg", quality: 1.0 }}
             >
-              {scannedData?.text.length > 2000 ? null : <QRCode
-                size={280}
-                value={scannedData?.text || "Empty"}
-                backgroundColor={backTwo}
-                color={textOne}
-                onError={(err) => console.log("An error occured while making qr code", err)}
-              />}
+              {scannedData?.text.length > 2000 ? null : (
+                <QRCode
+                  size={280}
+                  value={scannedData?.text || "Empty"}
+                  backgroundColor={backTwo}
+                  color={textOne}
+                  onError={(err) =>
+                    console.log("An error occured while making qr code", err)
+                  }
+                />
+              )}
             </ViewShot>
             <ShareQRBar
               backgroundColor={backOne}

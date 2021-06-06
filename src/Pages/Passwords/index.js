@@ -60,7 +60,7 @@ export default function Passwords(props) {
   const getPasswords = () => {
     // console.log(auth.currentUser);
     if (!auth.currentUser) {
-      alert("Please logout and login again!!");
+      dispatch(showSnack("Please logout and login again!!"));
       return;
     }
     setPasswords([]);

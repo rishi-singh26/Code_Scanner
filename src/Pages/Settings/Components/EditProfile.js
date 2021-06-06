@@ -23,11 +23,14 @@ export default function EditProfile(props) {
   const { colors } = theme;
   const dispatch = useDispatch();
 
-  const [name, setName] = useState("");
-  const [image, setImage] = useState(null);
+  const [name, setName] = useState(auth?.currentUser?.displayName || "");
+  const [image, setImage] = useState({
+    uri: auth?.currentUser?.photoURL || null,
+  });
   const [isLoding, setIsLoding] = useState(false);
 
   const getImage = async () => {
+    console.log("getting profile image");
     const { status, result } = await pickImage();
     if (!status || result.cancelled) {
       dispatch(showSnack("Error while getting image, please try again!"));
@@ -41,7 +44,7 @@ export default function EditProfile(props) {
       },
       false
     );
-    // console.log("Here is data", data);
+    console.log("Here is data", data);
     if (!data.status) {
       dispatch(
         showSnack("Error while updating profile image, please try again!")

@@ -10,8 +10,10 @@ export const Alert = (
     threeBtnSubHead: "", // sub header text  for three button alert
     actionOne: () => {}, // neutral action function for three button alert
     actionTwo: () => {}, // positive action function for three button alert
+    actionThree: () => {}, // another action button for three button alert
     actionOneText: "", // neutral action btn text for three button alert
     actionTwoText: "", // positive action btn text for three button alert
+    actionThreeText: "", // another action button text for three button alert
     is3BtnAlertVisible: false, // visiblity toggel for three button alert
   },
   action
@@ -41,8 +43,10 @@ export const Alert = (
         threeBtnSubHead: action.payload.subHead,
         actionOne: action.payload.actionOne,
         actionTwo: action.payload.actionTwo,
+        actionThree: action.payload.actionThree,
         actionOneText: action.payload.actionOneText,
         actionTwoText: action.payload.actionTwoText,
+        actionThreeText: action.payload.actionThreeText,
         is3BtnAlertVisible: true,
       };
 
@@ -53,8 +57,10 @@ export const Alert = (
         threeBtnSubHead: "",
         actionOne: null,
         actionTwo: null,
+        actionThree: null,
         actionOneText: "",
         actionTwoText: "",
+        actionThreeText: "",
         is3BtnAlertVisible: false,
       };
     default:

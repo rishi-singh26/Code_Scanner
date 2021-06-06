@@ -48,7 +48,7 @@ export default function QrGenerator() {
     shareQrRef.current.capture().then(async (uri) => {
       console.log("shareQrCode ", uri);
       if (!(await Sharing.isAvailableAsync())) {
-        alert(`Uh oh, sharing isn't available on your platform`);
+        dispatch(showSnack(`Uh oh, sharing isn't available on your platform`));
         return;
       }
       await Sharing.shareAsync(uri);

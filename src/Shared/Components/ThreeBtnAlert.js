@@ -34,11 +34,16 @@ export default function ThreeBtnAlert({ isVisible }) {
         }}
       >
         <TouchableOpacity
-          onPress={() => dispatch(hide3BtnAlert())}
+          onPress={() => {
+            dispatch(hide3BtnAlert());
+            alert.actionThree();
+          }}
           style={styles.actionBtn}
         >
           <Text style={{ color: textOne, fontSize: 16, fontWeight: "700" }}>
-            Cancel
+            {alert?.actionThreeText && alert.actionThreeText != ""
+              ? alert.actionThreeText
+              : "Cancel"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity

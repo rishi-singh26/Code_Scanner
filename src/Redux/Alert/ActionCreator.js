@@ -28,12 +28,24 @@ export const hideAlert = () => (dispatch) => {
  * @param {String} actionOneText
  * @param {Function} actionTwo
  * @param {String} actionTwoText
- * all parameters are compulsary
+ * @param {Function} actionThree - Optional
+ * @param {String} actionThreeText - Optional
+ *
+ * all parameters are compulsary except actionThree and actionThreeText
  */
 export const show3BtnAlert =
-  (head, subHead = "", actionOne, actionOneText, actionTwo, actionTwoText) =>
+  (
+    head,
+    subHead = "",
+    actionOne,
+    actionOneText,
+    actionTwo,
+    actionTwoText,
+    actionThree = () => {},
+    actionThreeText = "Cancel"
+  ) =>
   (dispatch) => {
-    console.log("Showing alert");
+    // console.log("Showing alert");
     dispatch({
       type: ActionTypes.SHOW_THREE_BTN_ALERT,
       payload: {
@@ -41,8 +53,10 @@ export const show3BtnAlert =
         subHead,
         actionOne,
         actionTwo,
+        actionThree,
         actionOneText,
         actionTwoText,
+        actionThreeText,
       },
     });
   };

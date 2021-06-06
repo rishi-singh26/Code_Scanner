@@ -5,7 +5,6 @@ import {
   Dimensions,
   TouchableOpacity,
   Linking,
-  Alert,
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,6 +17,7 @@ import {
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
 import { show3BtnAlert } from "../../Redux/Alert/ActionCreator";
+import { showSnack } from "../../Redux/Snack/ActionCreator";
 
 export default function Scanner(props) {
   const [scanned, setScanned] = useState(false);
@@ -32,93 +32,37 @@ export default function Scanner(props) {
     checkForURLs(type, data);
   };
 
-  // const checkForURLs = (type, data) => {
-  //   if (validateEmail(data)) {
-  //     // console.log("it is an email");
-  //     dispatch(
-  //       show3BtnAlert(
-  //         "Email detected",
-  //         `Do you want to send email to ${data}?`,
-  //         () => uploadScannedData(type, data),
-  //         "Save",
-  //         () => Linking.openURL(`mailto:${data}`),
-  //         "Send email"
-  //       )
-  //     );
-  //   } else if (validateWaLinkForINNum(data)) {
-  //     console.log("it is a whatsapp link", data.split("/").pop());
-  //     dispatch(
-  //       show3BtnAlert(
-  //         "Whatsapp chat link detected",
-  //         `Do you want to open chat with +${data.split("/").pop()}?`,
-  //         () => uploadScannedData(type, data),
-  //         "Save",
-  //         () => Linking.openURL(`whatsapp://send?phone=${data}`),
-  //         "Open chat"
-  //       )
-  //     );
-  //   } else {
-  //     console.log("Uploading data");
-  //     uploadScannedData(type, data);
-  //   }
-  // };
-
   const checkForURLs = (type, data) => {
     if (validateEmail(data)) {
       // console.log("it is an email");
-      Alert.alert(
-        `Email detected`,
-        `Do you want to send email to ${data}?`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => setScanned(false),
-            style: "cancel",
-          },
-          {
-            text: `Save`,
-            onPress: () => uploadScannedData(type, data),
-            style: "default",
-          },
-          {
-            text: `Send email`,
-            onPress: () => {
-              Linking.openURL(`mailto:${data}`);
-              props.navigation.goBack();
-            },
-            style: "default",
-          },
-        ],
-        { cancelable: false }
+      dispatch(
+        show3BtnAlert(
+          "Email detected",
+          `Do you want to send email to ${data}?`,
+          () => uploadScannedData(type, data),
+          "Save",
+          () => Linking.openURL(`mailto:${data}`),
+          "Send email",
+          () => setScanned(false),
+          "Cancel"
+        )
       );
     } else if (validateWaLinkForINNum(data)) {
       // console.log("it is a whatsapp link", data.split("/").pop());
-      Alert.alert(
-        `Whatsapp chat link detected`,
-        `Do you want to open chat with +${data.split("/").pop()}?`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => setScanned(false),
-            style: "cancel",
-          },
-          {
-            text: `Save`,
-            onPress: () => uploadScannedData(type, data),
-            style: "default",
-          },
-          {
-            text: `Open chat`,
-            onPress: () => {
-              Linking.openURL(`${data}`);
-              props.navigation.goBack();
-            },
-            style: "default",
-          },
-        ],
-        { cancelable: false }
+      dispatch(
+        show3BtnAlert(
+          "Whatsapp chat link detected",
+          `Do you want to open chat with +${data.split("/").pop()}?`,
+          () => uploadScannedData(type, data),
+          "Save",
+          () => Linking.openURL(`whatsapp://send?phone=${data}`),
+          "Open chat",
+          () => setScanned(false),
+          "Cancel"
+        )
       );
     } else {
+      console.log("Uploading data");
       uploadScannedData(type, data);
     }
   };
@@ -137,12 +81,10 @@ export default function Scanner(props) {
 
   const scanFromImage = async () => {
     try {
-      const imageData = await pickImage();
+      const { status, result } = await pickImage();
       // console.log("Data from image", imageData);
-      if (imageData.status && !imageData.result.cancelled) {
-        const data = await BarCodeScanner.scanFromURLAsync(
-          imageData.result.uri
-        );
+      if (status && !result.cancelled) {
+        const data = await BarCodeScanner.scanFromURLAsync(result.uri);
         // console.log("Data from code", data);
         if (data.length > 0) {
           const firstScannedCode = data[0];
@@ -151,7 +93,10 @@ export default function Scanner(props) {
             type: firstScannedCode.type,
             data: firstScannedCode.data,
           });
-        } else alert("No code detected. Select a picture with good resolution");
+        } else
+          dispatch(
+            showSnack("No code detected. Select a picture with good resolution")
+          );
       }
     } catch (error) {
       console.log(error.message);

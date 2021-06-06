@@ -163,7 +163,7 @@ export default function Navigator() {
             />
             <Stack.Screen
               name="EditProfile"
-              options={{ title: "Profile" }}
+              options={{ title: "Edit profile" }}
               component={EditProfile}
             />
             <Stack.Screen
