@@ -14,6 +14,9 @@ import {
 } from "../../Redux/ScannedData/ActionCreator";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { encryptText } from "../../Shared/Functions";
+import { Feather, AntDesign } from "@expo/vector-icons";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import LockNoteDilogue from "../Home/Components/LockNoteDilogue";
 
 export default function Editor(props) {
   const theme = useSelector((state) => state.theme);
@@ -30,6 +33,10 @@ export default function Editor(props) {
   const [title, setTitle] = useState(prevTitle || "");
   const [data, setData] = useState(prevData || "");
   const [inputHeight, setInputHeight] = useState(150);
+  const [isPassInputShown, setIsPassInputShown] = useState(false);
+  const [password, setPassword] = useState("");
+  // Action sheet provider
+  const { showActionSheetWithOptions } = useActionSheet();
 
   const dispatch = useDispatch();
 
@@ -38,10 +45,8 @@ export default function Editor(props) {
       headerRight: () => {
         return (
           <TouchableOpacity
-            onPress={() => {
-              saveData(title, data, id, isEditing);
-            }}
-            style={styles.headerEditIconStyle}
+            onPress={() => openSaveOptions()}
+            style={{ padding: 6 }}
           >
             <Text style={styles.svaeBtnTxt}>SAVE</Text>
           </TouchableOpacity>
@@ -50,7 +55,59 @@ export default function Editor(props) {
     });
   };
 
-  const saveData = async (title, textData, id, isEditing) => {
+  const openSaveOptions = () => {
+    const options = [
+      "Save note without password",
+      "Add password before saving",
+      "Cancel",
+    ];
+    const destructiveButtonIndex = 2;
+    const cancelButtonIndex = 2;
+    const containerStyle = { backgroundColor: colors.backTwo };
+    const textStyle = { color: colors.textOne };
+    const icons = [
+      <AntDesign name={"warning"} size={20} color={colors.textOne} />,
+      <AntDesign name={"Safety"} size={21} color={colors.textOne} />,
+      <AntDesign name={"close"} size={20} color={colors.primaryErrColor} />,
+    ];
+    const message = "Options";
+    const messageTextStyle = {
+      fontSize: 17,
+      fontWeight: "700",
+      color: colors.textOne,
+    };
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        destructiveButtonIndex,
+        icons,
+        containerStyle,
+        textStyle,
+        message,
+        messageTextStyle,
+      },
+      async (buttonIndex) => {
+        if (buttonIndex == 0) {
+          saveData(title, data, id, isEditing);
+          return;
+        }
+        if (buttonIndex == 1) {
+          setIsPassInputShown(true);
+          return;
+        }
+      }
+    );
+  };
+
+  const saveData = async (
+    title,
+    textData,
+    id,
+    isEditing,
+    isEncrypted = false
+  ) => {
     if (isEditing) {
       if (id) {
         const { isLockaed, notePass } = props?.route?.params;
@@ -95,6 +152,7 @@ export default function Editor(props) {
           isDeleted: false,
           userId: auth.currentUser.uid,
           title: title,
+          isLockaed: isEncrypted, // checks if the data being saved is encrypted or not
         })
       );
       props.navigation.goBack();
@@ -108,6 +166,26 @@ export default function Editor(props) {
   useEffect(() => {
     setHeaderOptions();
   }, [title, data]);
+
+  const passwordDologueCancelPress = () => {
+    setIsPassInputShown(false);
+    setPassword("");
+  };
+
+  const passwordDologueOkPress = async () => {
+    if (password.length < 4) {
+      dispatch(showSnack("Password too small"));
+      return;
+    }
+    setIsPassInputShown(false);
+    const { status, data: encryptedData } = await encryptText(data, password);
+    console.log({ status, encryptedData });
+    if (!status) {
+      dispatch(showSnack("Could not save note, please try again!"));
+      return;
+    }
+    saveData(title, encryptedData, id, isEditing, true);
+  };
 
   return (
     <SafeAreaView
@@ -152,6 +230,13 @@ export default function Editor(props) {
         multiline
       />
       {/* </ScrollView> */}
+      <LockNoteDilogue
+        password={password}
+        setPassword={setPassword}
+        onOkPress={passwordDologueOkPress}
+        onCancelPress={passwordDologueCancelPress}
+        visible={isPassInputShown}
+      />
     </SafeAreaView>
   );
 }

@@ -34,7 +34,12 @@ import {
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
-import { Feather, AntDesign, Fontisto } from "@expo/vector-icons";
+import {
+  Feather,
+  AntDesign,
+  Fontisto,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
 import { FAB } from "react-native-paper";
@@ -264,15 +269,15 @@ export default function Home(props) {
       "Select Image",
       "Add note",
       "Create QR code",
-      // "Images",
-      // "PDFs",
+      "Images",
+      "PDFs",
       "Share contacts",
       "Passwords",
-      // "Fuel Log",
+      "Fuel Log",
       "Cancel",
     ];
-    const destructiveButtonIndex = 6;
-    const cancelButtonIndex = 6;
+    const destructiveButtonIndex = 9;
+    const cancelButtonIndex = 9;
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
@@ -280,11 +285,11 @@ export default function Home(props) {
       <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
       <Fontisto name="qrcode" size={17} color={textOne} />,
-      // <Feather name={"image"} size={20} color={textOne} />,
-      // <AntDesign name={"pdffile1"} size={20} color={textOne} />,
+      <Feather name={"image"} size={20} color={textOne} />,
+      <AntDesign name={"pdffile1"} size={20} color={textOne} />,
       <Feather name={"users"} size={20} color={textOne} />,
       <Feather name={"key"} size={20} color={textOne} />,
-      // <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
+      <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
@@ -313,28 +318,28 @@ export default function Home(props) {
           props.navigation.navigate("QrGenerator");
           return;
         }
-        // if (buttonIndex === 4) {
-        //   props.navigation.navigate("Images");
-        //   return;
-        // }
-        // if (buttonIndex === 5) {
-        //   props.navigation.navigate("Pdfs");
-        //   return;
-        // }
         if (buttonIndex === 4) {
+          props.navigation.navigate("Images");
+          return;
+        }
+        if (buttonIndex === 5) {
+          props.navigation.navigate("Pdfs");
+          return;
+        }
+        if (buttonIndex === 6) {
           isContactsApiAvailable()
             ? props.navigation.navigate("ContactSharing")
             : dispatch(showSnack("Oops, can't share contacts on this device!"));
           return;
         }
-        if (buttonIndex === 5) {
+        if (buttonIndex === 7) {
           navigateToPass();
           return;
         }
-        // if (buttonIndex === 6) {
-        //   props.navigation.navigate("FuelLog");
-        //   return;
-        // }
+        if (buttonIndex === 8) {
+          props.navigation.navigate("FuelLog");
+          return;
+        }
       }
     );
   };

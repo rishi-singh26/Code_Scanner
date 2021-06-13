@@ -6,12 +6,14 @@ import { auth, firestore } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import {
   copyToClipboard,
+  deletePdf,
   pickDocuments,
   uploadPdfToServer,
 } from "../../Shared/Functions";
 import RenderPdfTile from "./Components/RenderPdfTile";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import RenamePdfDilogue from "./Components/RenamePdfDilogue";
+import { showAlert } from "../../Redux/Alert/ActionCreator";
 
 export default function Pdfs(props) {
   const theme = useSelector((state) => state.theme);
@@ -75,18 +77,19 @@ export default function Pdfs(props) {
   };
 
   const openPdfOptions = (pdf) => {
-    const options = ["Copy url", "Download", "Rename", "Cancel"];
-    const destructiveButtonIndex = 3;
-    const cancelButtonIndex = 3;
+    const options = ["Delete", "Copy url", "Download", "Rename", "Cancel"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 4;
     const containerStyle = { backgroundColor: colors.backTwo };
     const textStyle = { color: colors.textOne };
     const message = `Cant open pdf files, will work in future updates.\n${pdf.pdfName}`;
     const messageTextStyle = { color: colors.textOne, fontSize: 16 };
     const icons = [
+      <Feather name={"trash"} size={19} color={colors.primaryErrColor} />,
       <Feather name={"copy"} size={20} color={colors.textOne} />,
       <Feather name={"download"} size={20} color={colors.textOne} />,
       <Feather name={"edit"} size={20} color={colors.textOne} />,
-      <Feather name={"x"} size={20} color={colors.primaryErrColor} />,
+      <Feather name={"x"} size={20} color={colors.textOne} />,
     ];
 
     showActionSheetWithOptions(
@@ -102,15 +105,31 @@ export default function Pdfs(props) {
       },
       async (buttonIndex) => {
         if (buttonIndex == 0) {
+          dispatch(
+            showAlert(
+              "Do you want to delete this pdf?",
+              "It can not be recovered later!",
+              () => {
+                dispatch(showSnack("Deleting pdf..."));
+                deletePdf(pdf, (message) => {
+                  dispatch(showSnack(message));
+                  getPdfs();
+                });
+              }
+            )
+          );
+          return;
+        }
+        if (buttonIndex == 1) {
           copyToClipboard(pdf.pdf);
           dispatch(showSnack("Copied to clipboard"));
           return;
         }
-        if (buttonIndex == 1) {
+        if (buttonIndex == 2) {
           Linking.canOpenURL(pdf.pdf) ? Linking.openURL(pdf.pdf) : null;
           return;
         }
-        if (buttonIndex == 2) {
+        if (buttonIndex == 3) {
           setSelectedPdf(pdf);
           setRenamePdfDilogueVisible(true);
           return;

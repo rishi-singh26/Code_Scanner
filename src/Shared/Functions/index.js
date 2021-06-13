@@ -440,7 +440,8 @@ export async function uploadImageUrl(imageData, optionalFunc) {
 
 /**
  *
- * @param {String} docId
+ * @param {Object} image
+ * {image: "image uri", imageName: "image name", _id: "image id"}
  * @param {Function} optionalFunc
  */
 export async function deleteImage(image, optionalFunc = () => {}) {
@@ -460,6 +461,35 @@ export async function deleteImage(image, optionalFunc = () => {}) {
           console.log(err.message);
           optionalFunc("Not deleted");
         });
+    });
+}
+
+/**
+ *
+ * @param {Object} pdf
+ * {}
+ * @param {Function} optionalFunc
+ */
+export async function deletePdf(pdf, optionalFunc = () => {}) {
+  await cloudStorage
+    .ref()
+    .child("scanner/pdfs/" + pdf.pdfName)
+    .delete()
+    .then(() => {
+      firestore
+        .collection("scannedPdfs")
+        .doc(pdf._id)
+        .delete()
+        .then(() => {
+          optionalFunc("Deleted");
+        })
+        .catch((err) => {
+          console.log(err.message);
+          optionalFunc("Not deleted");
+        });
+    })
+    .catch((err) => {
+      optionalFunc("Not deleted\n" + err.message);
     });
 }
 
