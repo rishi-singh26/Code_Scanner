@@ -19,6 +19,7 @@ import { showAlert } from "../../Redux/Alert/ActionCreator";
 import { deleteFuelLog } from "../../Redux/FuelLog/ActionCreator";
 import Collapsible from "../../Components/Accordian/Collapsable";
 
+// TODO: Create a proper logger
 export default function FuelLog(props) {
   const theme = useSelector((state) => state.theme);
   const [isFuelLogLoading, setIsFuelLogLoading] = useState(false);
@@ -134,7 +135,10 @@ export default function FuelLog(props) {
         // console.log(parseFloat(item.fuelVolume));
         totalCost += parseFloat(item.fuelCost);
       });
-      const milage = (totalKilometes / (totalFuel - parseFloat(fuelLogs[0].fuelVolume))).toFixed(2);
+      const milage = (
+        totalKilometes /
+        (totalFuel - parseFloat(fuelLogs[0].fuelVolume))
+      ).toFixed(2);
       return { totalCost, totalFuel, milage };
     }
     return { totalCost: 0, totalFuel: 0, milage: 0 };
@@ -344,6 +348,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 15
+    paddingHorizontal: 15,
   },
 });

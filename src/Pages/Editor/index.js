@@ -14,7 +14,7 @@ import {
 } from "../../Redux/ScannedData/ActionCreator";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import { encryptText } from "../../Shared/Functions";
-import { Feather, AntDesign } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import LockNoteDilogue from "../Home/Components/LockNoteDilogue";
 
@@ -45,7 +45,11 @@ export default function Editor(props) {
       headerRight: () => {
         return (
           <TouchableOpacity
-            onPress={() => openSaveOptions()}
+            onPress={() =>
+              isEditing
+                ? saveData(title, data, id, isEditing)
+                : openSaveOptions()
+            }
             style={{ padding: 6 }}
           >
             <Text style={styles.svaeBtnTxt}>SAVE</Text>
