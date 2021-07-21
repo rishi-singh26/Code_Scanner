@@ -13,11 +13,28 @@ import { useSelector } from "react-redux";
 import { PinchGestureHandler } from "react-native-gesture-handler";
 import { SCREEN_WIDTH } from "../../../../Shared/Styles";
 
+// const ZoomableImage = ({ show, setShow, imageSource }) => {
+//   return (
+//     <Modal
+//       animationType={"fade"}
+//       transparent={false}
+//       visible={show}
+//       onRequestClose={() => {
+//         setShow(!show);
+//       }}
+//     >
+//       <View style={styles.container}>
+//         <WebView source={{ uri: imageSource }} style={styles.image} />
+//       </View>
+//     </Modal>
+//   );
+// };
+
 export default function ImageViewer(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
-  const { imgData, removeImage } = props.route.params;
-  // console.log(imgData.image);
+  const { imgData, removeImage, imageStyle } = props.route.params;
+  console.log(imageStyle);
 
   const scale = React.useRef(new Animated.Value(1)).current;
 
@@ -39,10 +56,16 @@ export default function ImageViewer(props) {
         <PinchGestureHandler onGestureEvent={handlePinch}>
           <Animated.Image
             source={{ uri: imgData.image }}
-            style={[styles.image, { transform: [{ scale }] }]}
+            style={[
+              styles.image,
+              { transform: [{ scale }] },
+              imageStyle ? imageStyle : { height: SCREEN_WIDTH - 20 },
+            ]}
           />
         </PinchGestureHandler>
-        <Text style={{ fontSize: 20, color: colors.textOne, marginHorizontal: 15}}>
+        <Text
+          style={{ fontSize: 20, color: colors.textOne, marginHorizontal: 15 }}
+        >
           {imgData.imageName}
         </Text>
 
@@ -83,7 +106,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: SCREEN_WIDTH - 20,
-    height: SCREEN_WIDTH - 20,
+    // height: SCREEN_WIDTH - 20,
     borderRadius: 10,
     marginHorizontal: 10,
   },

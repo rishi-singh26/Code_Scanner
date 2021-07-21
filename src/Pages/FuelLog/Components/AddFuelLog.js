@@ -5,22 +5,32 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { showSnack } from "../../../Redux/Snack/ActionCreator";
 import { auth } from "../../../Constants/Api";
 import { addFuelLog, editFuelLog } from "../../../Redux/FuelLog/ActionCreator";
+import { validateInteger } from "../../../Shared/Functions";
 
 export default function AddFuelLog(props) {
   const routData = props.route.params;
-  const { isEditing } = routData;
+  const { isEditing, loggerData } = routData;
   const theme = useSelector((state) => state.theme);
-  const [date, setDate] = useState(isEditing ? new Date(routData.data.date.seconds * 1000) :new Date());
+  const [date, setDate] = useState(
+    isEditing ? new Date(routData.data.date.seconds * 1000) : new Date()
+  );
   const [show, setShow] = useState(false);
-  const [fuelVolume, setFuelVolume] = useState(isEditing ? routData.data.fuelVolume : "");
-  const [unitPrice, setUnitPrice] = useState(isEditing ? routData.data.unitPrice : "");
-  const [odometerReading, setOdometerReading] = useState(isEditing ? routData.data.odometerReading : "");
+  const [fuelVolume, setFuelVolume] = useState(
+    isEditing ? routData.data.fuelVolume : ""
+  );
+  const [unitPrice, setUnitPrice] = useState(
+    isEditing ? routData.data.unitPrice : ""
+  );
+  const [odometerReading, setOdometerReading] = useState(
+    isEditing ? routData.data.odometerReading : ""
+  );
   const [desc, setDesc] = useState(isEditing ? routData.data.desc : "");
 
   const dispatch = useDispatch();
@@ -38,7 +48,11 @@ export default function AddFuelLog(props) {
   const addOrEditLog = () => {
     // check if these fields are not empty
     if (fuelVolume === "" || unitPrice === "" || odometerReading === "") {
-      dispatch(showSnack("FUEL VOLUME, UNIT PRICE and ODOMETER READING are required and can NOT be empty!"));
+      dispatch(
+        showSnack(
+          "FUEL VOLUME, UNIT PRICE and ODOMETER READING are required and can NOT be empty!"
+        )
+      );
     }
     const fuelCost = Math.round(fuelVolume * unitPrice).toFixed(2);
     const newLog = {
@@ -51,29 +65,15 @@ export default function AddFuelLog(props) {
       creationDate: isEditing ? routData.data.creationDate : new Date(),
       updationDate: isEditing ? new Date() : null,
       userId: isEditing ? routData.data.userId : auth.currentUser.uid,
-    }
+      loggerId: isEditing ? routData.data.loggerId : loggerData._id,
+      loggerName: isEditing ? routData.data.loggerName : loggerData.title,
+    };
 
     // console.log({id: routData.data._id,newLog});
-    isEditing ? dispatch(editFuelLog(routData.data._id,newLog)) : dispatch(addFuelLog(newLog));
+    isEditing
+      ? dispatch(editFuelLog(routData.data._id, newLog))
+      : dispatch(addFuelLog(newLog));
     props.navigation.goBack();
-  };
-  
-
-  // checks is the enterd text is an integer number and does not contain any alphabetical characters
-  const validateInteger = (text) => {
-    // check if the length of the text is equal to zero
-    // if yes then clear the text field ie. set the value to an empty string.
-    if (text.length == 0) {
-      return true;
-    }
-    const validator = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/;
-    // checks if the text is an positive integer or a decimal point number.
-    // will accept 1, 12, 1.5, +1, +1.5,
-    // will not accept -> ., 1..5, 1.2.3, -1
-    if (!validator.test(text)) {
-      return false;
-    }
-    return true;
   };
 
   return (
@@ -152,7 +152,9 @@ export default function AddFuelLog(props) {
         style={[styles.submitBtn, { backgroundColor: colors.primaryColor }]}
         onPress={addOrEditLog}
       >
-        <Text style={styles.submitBtnTxt}>{isEditing ? "Edit Log" : "Add Log"}</Text>
+        <Text style={styles.submitBtnTxt}>
+          {isEditing ? "Edit Log" : "Add Log"}
+        </Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Linking, SafeAreaView, Text, TouchableOpacity } from "react-native";
+import { SafeAreaView, TouchableOpacity } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import { auth, firestore } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
 import {
-  copyToClipboard,
   deleteImage,
+  openFile,
   pickImage,
+  saveToDevice,
   shareThings,
   uploadImageToServer,
 } from "../../Shared/Functions";
@@ -14,27 +15,43 @@ import RenderImage from "./Components/RenderImage";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Feather } from "@expo/vector-icons";
 import { showAlert } from "../../Redux/Alert/ActionCreator";
-import RenameImgDilogue from "./Components/RenameImgDilogue";
+import Prompt from "../../Shared/Components/Prompt";
+import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 
 export default function Images(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
   const [images, setImages] = useState([]);
   const [imageName, setImageName] = useState("");
-  const [renameImgDilogVisible, setRenameImgDilogVisible] = useState(false);
-  const [selectedImg, setSelectedImg] = useState(null);
+  const [showImageNamePrompt, setShowImageNamePrompt] = useState(false);
+  const [uploadingImgData, setuploadingImgData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const dispatch = useDispatch();
   const { showActionSheetWithOptions } = useActionSheet();
 
-  const uploadImage = async () => {
+  const pickImgToBeUploaded = async () => {
     const { status, result } = await pickImage();
     if (status && !result.cancelled) {
+      setuploadingImgData(result);
+      setShowImageNamePrompt(true);
+    } else dispatch(showSnack("Oops!! Image not selected. Please try again"));
+  };
+
+  const uploadImage = async () => {
+    try {
+      if (imageName.length < 1) {
+        dispatch(showSnack("Enter image name"));
+        return;
+      }
       dispatch(showSnack("Uploading image..."));
-      await uploadImageToServer(
+      const extension = uploadingImgData.uri.split("/").pop().split(".").pop();
+      console.log(extension);
+      setShowImageNamePrompt(false);
+      const resp = await uploadImageToServer(
         {
-          image: result.uri,
-          name: result.uri.split("/").pop(),
+          image: uploadingImgData.uri,
+          name: imageName + "." + extension,
         },
         true, // should upload image url to database
         auth.currentUser.uid,
@@ -42,12 +59,14 @@ export default function Images(props) {
           dispatch(showSnack("Image uploaded"));
           getImages();
         }
-      )
-        .then((resp) => {
-          console.log("resp of server upload", resp);
-        })
-        .catch((err) => console.log(err.message));
-    } else dispatch(showSnack("Oops!! Image not selected. Please try again"));
+      );
+      setImageName("");
+      setuploadingImgData(null);
+      // console.log(resp);
+    } catch (err) {
+      console.log(err.message);
+      dispatch(showSnack("Error while uploading image", err.message));
+    }
   };
 
   const setHeaderOptions = () => {
@@ -56,7 +75,7 @@ export default function Images(props) {
         return (
           <TouchableOpacity
             style={{ paddingVertical: 14, paddingHorizontal: 30 }}
-            onPress={uploadImage}
+            onPress={pickImgToBeUploaded}
             onLongPress={() => props.navigation.navigate("UploadImages")}
             delayLongPress={10000}
           >
@@ -68,16 +87,14 @@ export default function Images(props) {
   };
 
   const openImageOptions = (image) => {
-    const options = ["Delete", "Copy url", "Share", "Rename", "Cancel"];
+    const options = ["Delete", "Share", "Cancel"];
     const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 4;
+    const cancelButtonIndex = 2;
     const containerStyle = { backgroundColor: colors.backTwo };
     const textStyle = { color: colors.textOne };
     const icons = [
       <Feather name={"trash"} size={19} color={colors.primaryErrColor} />,
-      <Feather name={"copy"} size={20} color={colors.textOne} />,
       <Feather name={"share"} size={20} color={colors.textOne} />,
-      <Feather name={"edit"} size={19} color={colors.textOne} />,
       <Feather name={"x"} size={20} color={colors.textOne} />,
     ];
 
@@ -107,22 +124,7 @@ export default function Images(props) {
           return;
         }
         if (buttonIndex == 1) {
-          copyToClipboard(image.image);
-          dispatch(showSnack("Copied to clipboard"));
-          return;
-        }
-        if (buttonIndex == 2) {
-          Linking.canOpenURL(image.image) ? Linking.openURL(image.image) : null;
-          // shareThings(image.image);
-          // const pdfuri = await shareScannedDataPdf(
-          //   `<h3>${data.title}</h3><p>${data.scannedData.data}</p>`
-          // );
-          // pdfuri.status ? shareThings(pdfuri.pdfUri) : null;
-          return;
-        }
-        if (buttonIndex == 3) {
-          setRenameImgDilogVisible(true);
-          setSelectedImg(image);
+          shareImage(image);
           return;
         }
       }
@@ -131,10 +133,11 @@ export default function Images(props) {
 
   const getImages = () => {
     console.log("Getting images");
+    setIsLoading(true);
     if (auth.currentUser) {
       firestore
         .collection("scannerImages")
-        .where("isDeleted", "==", false)
+        // .where("isDeleted", "==", false)
         .where("userId", "==", auth.currentUser.uid)
         // .orderBy("uploadDate", "asc")
         .limit(100)
@@ -147,26 +150,64 @@ export default function Images(props) {
             imageSnapshot.push({ _id, ...data });
           });
           setImages(imageSnapshot);
-          console.log("Received query snapshot of size", imageSnapshot.length);
+          // console.log("Received query snapshot of size", imageSnapshot.length);
+          setIsLoading(false);
         })
         .catch((err) => {
           console.log(err.message);
-          dispatch(showSnack("Couldn't load images"));
+          dispatch(showSnack("Error while loading image", err.message));
+          setIsLoading(false);
         });
+    }
+    setIsLoading(false);
+  };
+
+  const openImage = async (imageData) => {
+    try {
+      setIsLoading(true);
+      const { status, localUri } = await saveToDevice(
+        imageData.image,
+        imageData.imageName
+      );
+      if (!status) {
+        dispatch(
+          showSnack("Opps!! Error while opening image, please try again.")
+        );
+        return;
+      }
+      openFile(localUri.uri)
+        ? null
+        : dispatch(
+            showSnack("Opps!! Error while opening image, please try again.")
+          );
+      setIsLoading(false);
+    } catch (err) {
+      dispatch(showSnack("Opps!! Error while opening image.", err.message));
     }
   };
 
-  const editImage = (data, docId) => {
-    console.log("Editing Image");
-    firestore
-      .collection("scannerImages")
-      .doc(docId)
-      .update(data)
-      .then(() => {
-        dispatch(showSnack("Renaming successfull, now updating"));
-        getImages();
-      })
-      .catch((err) => console.log(err.message));
+  const shareImage = async (imageData) => {
+    try {
+      setIsLoading(true);
+      const { status, localUri } = await saveToDevice(
+        imageData.image,
+        imageData.imageName
+      );
+      if (!status) {
+        dispatch(
+          showSnack("Opps!! Error while sharing image, please try again.")
+        );
+        return;
+      }
+      shareThings(localUri.uri)
+        ? null
+        : dispatch(
+            showSnack("Opps!! Error while sharing image, please try again.")
+          );
+      setIsLoading(false);
+    } catch (err) {
+      dispatch(showSnack("Opps!! Error while Sharing image.", err.message));
+    }
   };
 
   useEffect(() => {
@@ -176,32 +217,25 @@ export default function Images(props) {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+      {isLoading && <CustomActivityIndicator />}
       <RenderImage
         images={images}
-        onPress={(imgData) =>
-          props.navigation.navigate("ImageViewer", {
-            imgData,
-            removeImage: null,
-          })
-        }
-        onLongPress={(image) => openImageOptions(image)}
+        onPress={(imgData) => openImage(imgData)}
+        onLongPress={(imgData) => openImageOptions(imgData)}
       />
-      <RenameImgDilogue
-        title={"Rename Image"}
-        visible={renameImgDilogVisible}
-        imgName={imageName}
-        setImgName={(name) => setImageName(name)}
-        onOkPress={() => {
-          dispatch(showSnack("Renaming image."));
-          setRenameImgDilogVisible(false);
-          setImageName("");
-          // console.log({ pdfName: pdfName }, selectedPdf._id);
-          editImage({ imageName: imageName }, selectedImg._id);
-        }}
+      <Prompt
+        title={"Enter image name"}
+        text={imageName}
+        setText={(txt) => setImageName(txt)}
         onCancelPress={() => {
-          setRenameImgDilogVisible(false);
+          setShowImageNamePrompt(false);
           setImageName("");
+          setuploadingImgData(null);
         }}
+        onOkPress={uploadImage}
+        visible={showImageNamePrompt}
+        hotBtnText={"Upload Image"}
+        placeholderTxt={"Image name (without extension)"}
       />
     </SafeAreaView>
   );

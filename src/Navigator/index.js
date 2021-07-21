@@ -21,7 +21,12 @@ import AddFuelLog from "../Pages/FuelLog/Components/AddFuelLog";
 import Settings from "../Pages/Settings/index";
 import EditProfile from "../Pages/Settings/Components/EditProfile";
 import ChangePasswd from "../Pages/Settings/Components/ChangePasswd";
-// import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
+import Loggers from "../Pages/Logs";
+import CreateLogger from "../Pages/Logs/Components/CreateLogger";
+import LogsList from "../Pages/Logs/Components/CustomLog/LogsList";
+import LogDetail from "../Pages/Logs/Components/CustomLog/LogDetail";
+import AddLog from "../Pages/Logs/Components/CustomLog/AddLog";
+import WebViewPage from "../Pages/WebView/index";
 
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -146,11 +151,7 @@ export default function Navigator() {
               options={{ title: "Change password" }}
               component={ChangePassword}
             />
-            <Stack.Screen
-              name="FuelLog"
-              options={{ title: "Fuel logs" }}
-              component={FuelLog}
-            />
+            <Stack.Screen name="FuelLog" component={FuelLog} />
             <Stack.Screen
               name="AddFuelLog"
               options={{ title: "Add fuel log" }}
@@ -171,11 +172,28 @@ export default function Navigator() {
               options={{ title: "Change password" }}
               component={ChangePasswd}
             />
-            {/* <Stack.Screen
-              name="PdfViewer"
-              component={PdfViewer}
-              options={{ title: "Pdf Viewer" }}
-            /> */}
+            <Stack.Screen
+              name="Loggers"
+              options={{ title: "Logger" }}
+              component={Loggers}
+            />
+            <Stack.Screen name="LogsList" component={LogsList} />
+            <Stack.Screen name="LogDetail" component={LogDetail} />
+            <Stack.Screen
+              name="CreateLogger"
+              options={{ title: "Create Logger" }}
+              component={CreateLogger}
+            />
+            <Stack.Screen
+              name="AddLog"
+              options={{ title: "Add log" }}
+              component={AddLog}
+            />
+            <Stack.Screen
+              name="WebViewPage"
+              options={{ title: "" }}
+              component={WebViewPage}
+            />
           </>
         ) : (
           <Stack.Screen

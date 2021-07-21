@@ -39,6 +39,7 @@ import {
   AntDesign,
   Fontisto,
   MaterialCommunityIcons,
+  Ionicons,
 } from "@expo/vector-icons";
 import { SCREEN_WIDTH } from "../../Shared/Styles";
 import Header from "../../Shared/Components/Header";
@@ -264,16 +265,18 @@ export default function Home(props) {
     // TODO: Add image encryption
     // TODO: Add pdf encryption
     // TODO: Work on logger
+    // TODO: work on image viewer
     const options = [
       "Open Camera",
       "Select Image",
       "Add note",
       "Create QR code",
+      "Passwords",
+      "Logger",
       "Images",
       "PDFs",
+      // "Time Rise",
       "Share contacts",
-      "Passwords",
-      "Fuel Log",
       "Cancel",
     ];
     const destructiveButtonIndex = 9;
@@ -281,15 +284,16 @@ export default function Home(props) {
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"camera"} size={20} color={textOne} />,
+      <Feather name={"camera"} size={19} color={textOne} />,
       <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
-      <Fontisto name="qrcode" size={17} color={textOne} />,
-      <Feather name={"image"} size={20} color={textOne} />,
-      <AntDesign name={"pdffile1"} size={20} color={textOne} />,
-      <Feather name={"users"} size={20} color={textOne} />,
+      <Fontisto name="qrcode" size={16} color={textOne} />,
       <Feather name={"key"} size={20} color={textOne} />,
       <MaterialCommunityIcons name={"counter"} size={20} color={textOne} />,
+      <Feather name={"image"} size={20} color={textOne} />,
+      <AntDesign name={"pdffile1"} size={20} color={textOne} />,
+      // <Ionicons name={"hourglass-outline"} size={20} color={textOne} />,
+      <Feather name={"users"} size={20} color={textOne} />,
       <Feather name={"x"} size={20} color={"#d10000"} />,
     ];
     showActionSheetWithOptions(
@@ -319,25 +323,29 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex === 4) {
-          props.navigation.navigate("Images");
-          return;
-        }
-        if (buttonIndex === 5) {
-          props.navigation.navigate("Pdfs");
-          return;
-        }
-        if (buttonIndex === 6) {
-          isContactsApiAvailable()
-            ? props.navigation.navigate("ContactSharing")
-            : dispatch(showSnack("Oops, can't share contacts on this device!"));
-          return;
-        }
-        if (buttonIndex === 7) {
           navigateToPass();
           return;
         }
+        if (buttonIndex === 5) {
+          props.navigation.navigate("Loggers");
+          return;
+        }
+        if (buttonIndex === 6) {
+          props.navigation.navigate("Images");
+          return;
+        }
+        if (buttonIndex === 7) {
+          props.navigation.navigate("Pdfs");
+          return;
+        }
+        // if (buttonIndex === 8) {
+        //   props.navigation.navigate("TImeRise");
+        //   return;
+        // }
         if (buttonIndex === 8) {
-          props.navigation.navigate("FuelLog");
+          isContactsApiAvailable()
+            ? props.navigation.navigate("ContactSharing")
+            : dispatch(showSnack("Oops, can't share contacts on this device!"));
           return;
         }
       }
@@ -539,7 +547,7 @@ export default function Home(props) {
           scannerFunc={scnaCode}
         />
       )}
-      {/* data liat */}
+      {/* data list */}
       <FlatList
         contentContainerStyle={{ paddingBottom: 80 }}
         refreshControl={

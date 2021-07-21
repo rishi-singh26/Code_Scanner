@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   TextInput,
@@ -7,18 +7,21 @@ import {
   StyleSheet,
 } from "react-native";
 import { useSelector } from "react-redux";
-import Dilogue from "../../../Shared/Components/Dilogue";
+import Dilogue from "./Dilogue";
 
-export default function RenameImgDilogue({
+export default function Prompt({
   title,
-  imgName,
-  setImgName,
+  text,
+  setText,
   onOkPress,
   onCancelPress,
   visible,
+  hotBtnText,
+  placeholderTxt,
 }) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
+  const [errText, setErrText] = useState("");
 
   return (
     <Dilogue
@@ -29,24 +32,28 @@ export default function RenameImgDilogue({
       cancellable={true}
     >
       <Text style={[styles.headTxt, { color: colors.textOne }]}>{title}</Text>
-
       <TextInput
-        placeholder={"Enter image name"}
+        placeholder={placeholderTxt}
         placeholderTextColor={colors.textTwo}
         style={[
           styles.textInput,
           { backgroundColor: colors.backTwo, color: colors.textOne },
         ]}
-        value={imgName}
-        onChangeText={(text) => setImgName(text)}
+        value={text}
+        onChangeText={(text) => setText(text)}
       />
+      {errText.length > 0 ? (
+        <Text style={[styles.errTxt, { color: colors.primaryErrColor }]}>
+          {errText}
+        </Text>
+      ) : null}
       <View style={styles.buttonsView}>
         <TouchableOpacity style={{ padding: 15 }} onPress={onCancelPress}>
           <Text style={[styles.btnTxt, { color: colors.textOne }]}>Cancel</Text>
         </TouchableOpacity>
         <TouchableOpacity style={{ padding: 15 }} onPress={onOkPress}>
           <Text style={[styles.btnTxt, { color: colors.primaryColor }]}>
-            Rename
+            {hotBtnText}
           </Text>
         </TouchableOpacity>
       </View>
@@ -55,7 +62,13 @@ export default function RenameImgDilogue({
 }
 
 const styles = StyleSheet.create({
-  headTxt: { fontSize: 20, fontWeight: "700", marginTop: 5, marginLeft: 5 },
+  headTxt: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginVertical: 5,
+    marginLeft: 5,
+  },
+  subHeadTxt: { fontSize: 16, marginVertical: 10, marginLeft: 5 },
   errTxt: { fontSize: 14, marginBottom: 10, marginLeft: 10 },
   buttonsView: {
     flexDirection: "row",

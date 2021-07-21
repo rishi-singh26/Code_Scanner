@@ -21,13 +21,14 @@ const fuelLogSuccess = (log) => ({
 });
 
 export const getFuelLog = () => (dispatch) => {
+  // TODO: Currently this function is not being used anywhere, change this if you use it and also modify the function because it doesnot check for "loggerId" in the "where" clause.
   dispatch(fuelLogLoading());
   if (!auth.currentUser) {
     dispatch(fuelLogErr("You are not authorized to perform this action"));
     return;
   }
   firestore
-    .collection("fuelLogs")
+    .collection("logs")
     .where("userId", "==", auth.currentUser.uid)
     .get()
     .then((resp) => {
@@ -51,7 +52,7 @@ export const addFuelLog = (newLog) => (dispatch) => {
     return;
   }
   firestore
-    .collection("fuelLogs")
+    .collection("logs")
     .add(newLog)
     .then(() => {
       dispatch(showSnack("Log added successfully."));
@@ -69,7 +70,7 @@ export const deleteFuelLog = (logId) => (dispatch) => {
     return;
   }
   firestore
-    .collection("fuelLogs")
+    .collection("logs")
     .doc(logId)
     .delete()
     .then(() => {
@@ -87,7 +88,7 @@ export const editFuelLog = (logId, updatedLog) => (dispatch) => {
     return;
   }
   firestore
-    .collection("fuelLogs")
+    .collection("logs")
     .doc(logId)
     .update(updatedLog)
     .then(() => {

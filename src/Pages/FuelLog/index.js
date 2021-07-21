@@ -11,7 +11,10 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { auth, firestore } from "../../Constants/Api";
 import { showSnack } from "../../Redux/Snack/ActionCreator";
-import { sortArrayOfObjs } from "../../Shared/Functions";
+import {
+  convertFirebaseDateToDate,
+  sortArrayOfObjs,
+} from "../../Shared/Functions";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
 import { useActionSheet } from "@expo/react-native-action-sheet";
@@ -19,16 +22,18 @@ import { showAlert } from "../../Redux/Alert/ActionCreator";
 import { deleteFuelLog } from "../../Redux/FuelLog/ActionCreator";
 import Collapsible from "../../Components/Accordian/Collapsable";
 
-// TODO: Create a proper logger
 export default function FuelLog(props) {
   const theme = useSelector((state) => state.theme);
-  const [isFuelLogLoading, setIsFuelLogLoading] = useState(false);
+  const [isFuelLogLoading, setIsFuelLogLoading] = useState(true);
   const [fuelLogs, setFuelLogs] = useState([]);
   const [statsHidden, setStatsHidden] = useState(true);
   const dispatch = useDispatch();
   const { showActionSheetWithOptions } = useActionSheet();
 
   const { colors } = theme;
+
+  const { data: loggerData } = props.route.params;
+  console.log(`Here is the logger id: ${loggerData._id}`);
 
   const getFuelLog = () => {
     // console.log(auth.currentUser);
@@ -38,8 +43,9 @@ export default function FuelLog(props) {
     }
     setIsFuelLogLoading(true);
     firestore
-      .collection("fuelLogs")
+      .collection("logs")
       .where("userId", "==", auth.currentUser.uid)
+      .where("loggerId", "==", loggerData._id)
       // .endAt(5)
       .onSnapshot(
         (resp) => {
@@ -62,10 +68,10 @@ export default function FuelLog(props) {
   };
 
   const addLog = () => {
-    props.navigation.navigate("AddFuelLog", { isEditing: false });
+    props.navigation.navigate("AddFuelLog", { isEditing: false, loggerData });
   };
 
-  const openScannerOptionsSheet = (log) => {
+  const openLogActions = (log) => {
     const options = ["Edit", "Delete", "Cancel"];
     const destructiveButtonIndex = 2;
     const cancelButtonIndex = 2;
@@ -119,6 +125,7 @@ export default function FuelLog(props) {
           </TouchableOpacity>
         );
       },
+      title: loggerData.title,
     });
   };
 
@@ -135,10 +142,17 @@ export default function FuelLog(props) {
         // console.log(parseFloat(item.fuelVolume));
         totalCost += parseFloat(item.fuelCost);
       });
-      const milage = (
-        totalKilometes /
-        (totalFuel - parseFloat(fuelLogs[0].fuelVolume))
-      ).toFixed(2);
+      const milage =
+        // if fuelLogs has only one log, then we cannot calculate milage
+        // because that means that the vehicle has been filled for the first time
+        // and we can only calculate the milage when we know the number kilometers that
+        // vehicle ran before it's fuel tank was empty.
+        fuelLogs.length == 1
+          ? "Not Known"
+          : (
+              totalKilometes /
+              (totalFuel - parseFloat(fuelLogs[0].fuelVolume))
+            ).toFixed(2);
       return { totalCost, totalFuel, milage };
     }
     return { totalCost: 0, totalFuel: 0, milage: 0 };
@@ -186,26 +200,23 @@ export default function FuelLog(props) {
           </View>
         </View>
       </Collapsible>
+      {!isFuelLogLoading && fuelLogs.length == 0 && (
+        <View style={{ marginVertical: 100, marginHorizontal: 40 }}>
+          <Text
+            style={{
+              fontSize: 22,
+              color: colors.textThree,
+              alignSelf: "center",
+            }}
+          >
+            You have not created any logs yet.
+          </Text>
+        </View>
+      )}
       <FlatList
         data={fuelLogs}
         keyExtractor={(item, index) => index.toString()}
-        ListEmptyComponent={
-          <View style={{ marginVertical: 30, marginHorizontal: 40 }}>
-            <Text
-              style={{
-                fontSize: 22,
-                color: colors.textThree,
-                alignSelf: "center",
-              }}
-            >
-              You have not created any logs yet.
-            </Text>
-          </View>
-        }
         renderItem={({ item, index }) => {
-          const dateInMillis = item.date.seconds * 1000;
-          var date = new Date(dateInMillis).toDateString();
-          // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString()
           return (
             <View
               style={[styles.logContainer, { backgroundColor: colors.backOne }]}
@@ -214,10 +225,10 @@ export default function FuelLog(props) {
               <View style={styles.dateContainer}>
                 {/* log date */}
                 <Text style={[styles.dateTxt, { color: colors.textOne }]}>
-                  {date}
+                  {convertFirebaseDateToDate(item.date).toDateString()}
                 </Text>
                 <TouchableOpacity
-                  onPress={() => openScannerOptionsSheet(item)}
+                  onPress={() => openLogActions(item)}
                   style={{ padding: 10 }}
                 >
                   <Feather

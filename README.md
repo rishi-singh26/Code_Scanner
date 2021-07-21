@@ -11,12 +11,13 @@ $ expo upgrade
 upgrade modules
 ```
 
-### Firebase credentials setup
+### Firebase credentials and Opencage API setup
 
 - Create a new folder named "Constants" inside "src".
 - Inside "Constants" foldar create a file by name "Api.js"
 - Inside "Api.js" copy the code below
 - Add appropriate firebase credentials
+- Paste your Opencage API key in place of "YOUR_OPENCAGE_API_KEY"
 
 ```sh
 import * as firebase from "firebase";
@@ -37,4 +38,26 @@ firebase.initializeApp(firebaseConfig);
 export const auth = firebase.auth();
 export const firestore = firebase.firestore();
 export const cloudStorage = firebase.storage();
+
+// opencage api
+
+const key = `YOUR_OPENCAGE_API_KEY`;
+
+export const geoCoderApi = (latitude, longitude) => {
+  return `https://api.opencagedata.com/geocode/v1/json?q=${latitude}%2C%20${longitude}&key=${key}&language=en&pretty=1`;
+};
+
+```
+
+### Google Maps Setup
+
+- Rename the "dummy-app.json" file present in the root directory to "app.json".
+- Inside "app.json" file replace "YOUR_GOOGLE_MAPS_API_KEY" with your google maps api key.
+
+```sh
+"config": {
+  "googleMaps": {
+    "apiKey": "YOUR_GOOGLE_MAPS_API_KEY"
+  }
+},
 ```

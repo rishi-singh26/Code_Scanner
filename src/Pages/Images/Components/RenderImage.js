@@ -7,6 +7,7 @@ import {
   View,
   StyleSheet,
   Text,
+  Linking,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { SCREEN_WIDTH } from "../../../Shared/Styles";
@@ -23,35 +24,50 @@ export default function RenderImage({ images, onPress, onLongPress }) {
         // console.log(item.isAddBtn ? "Its the add btn" : item.image);
         // console.log(item);
         return (
-          <TouchableOpacity
-            onPress={() =>
-              item.isAddBtn ? item.onPress() : onPress(item)
-            }
-            onLongPress={() => onLongPress(item)}
-          >
-            {item.isAddBtn ? (
-              <View
-                style={[
-                  styles.viewBox,
-                  {
-                    backgroundColor: colors.primarySuperFadedColor,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  },
-                ]}
-              >
-                <Feather name="plus" size={50} color={"#fff"} />
-              </View>
-            ) : (
-              <View style={styles.viewBox}>
-              <Image
-                source={{ uri: item.image }}
-                style={[styles.image, { backgroundColor: colors.backThree }]}
-              />
-              <Text numberOfLines={1} style={{color: colors.textOne, alignSelf: "center",marginTop: 5}}>{item.imageName}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
+          <View>
+            {/* <Text onPress={() => Linking.openURL(item.image)}>
+              {JSON.stringify(item, null, 4)}
+            </Text> */}
+            <TouchableOpacity
+              onPress={() => (item.isAddBtn ? item.onPress() : onPress(item))}
+              onLongPress={() => onLongPress(item)}
+            >
+              {item.isAddBtn ? (
+                <View
+                  style={[
+                    styles.viewBox,
+                    {
+                      backgroundColor: colors.primarySuperFadedColor,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    },
+                  ]}
+                >
+                  <Feather name="plus" size={50} color={"#fff"} />
+                </View>
+              ) : (
+                <View style={styles.viewBox}>
+                  <Image
+                    source={{ uri: item.image }}
+                    style={[
+                      styles.image,
+                      { backgroundColor: colors.backThree },
+                    ]}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      color: colors.textOne,
+                      alignSelf: "center",
+                      marginTop: 5,
+                    }}
+                  >
+                    {item.imageName}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
         );
       }}
     />
@@ -70,5 +86,5 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 4,
-  }
+  },
 });

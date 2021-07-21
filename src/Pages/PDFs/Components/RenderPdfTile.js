@@ -1,20 +1,12 @@
 import React from "react";
-import {
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-  Linking,
-} from "react-native";
+import { FlatList, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import { useSelector, useDispatch } from "react-redux";
-import { showSnack } from "../../../Redux/Snack/ActionCreator";
+import { useSelector } from "react-redux";
 import { SCREEN_WIDTH } from "../../../Shared/Styles";
 
-export default function RenderPdfTile({ pdfs, onPress }) {
+export default function RenderPdfTile({ pdfs, onPress, onLongPress }) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
-  const dispatch = useDispatch();
   return (
     <FlatList
       data={pdfs}
@@ -23,15 +15,8 @@ export default function RenderPdfTile({ pdfs, onPress }) {
       renderItem={({ item, index }) => {
         return (
           <TouchableOpacity
-            onPress={() => {
-              onPress(item);
-              // dispatch(
-              //   showSnack("Cant open pdfs, will work in future updates")
-              // );
-              // Linking.canOpenURL(item.pdf)
-              //   ? Linking.openURL(item.pdf)
-              //   : dispatch(showSnack("Oops!, can't open this file"));
-            }}
+            onPress={() => onPress(item)}
+            onLongPress={() => onLongPress(item)}
             style={[styles.viewBox, { backgroundColor: colors.backOne }]}
           >
             <AntDesign
