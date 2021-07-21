@@ -264,6 +264,7 @@ export default function Home(props) {
     // TODO: Add image encryption
     // TODO: Add pdf encryption
     // TODO: Work on logger
+    // TODO: work on image viewer
     const options = [
       "Open Camera",
       "Select Image",
@@ -273,7 +274,7 @@ export default function Home(props) {
       "PDFs",
       "Share contacts",
       "Passwords",
-      "Fuel Log",
+      "Logger",
       "Cancel",
     ];
     const destructiveButtonIndex = 9;
@@ -281,10 +282,10 @@ export default function Home(props) {
     const containerStyle = { backgroundColor: backTwo };
     const textStyle = { color: textOne };
     const icons = [
-      <Feather name={"camera"} size={20} color={textOne} />,
+      <Feather name={"camera"} size={19} color={textOne} />,
       <Feather name={"image"} size={20} color={textOne} />,
       <Feather name={"file-text"} size={20} color={textOne} />,
-      <Fontisto name="qrcode" size={17} color={textOne} />,
+      <Fontisto name="qrcode" size={16} color={textOne} />,
       <Feather name={"image"} size={20} color={textOne} />,
       <AntDesign name={"pdffile1"} size={20} color={textOne} />,
       <Feather name={"users"} size={20} color={textOne} />,
@@ -337,7 +338,7 @@ export default function Home(props) {
           return;
         }
         if (buttonIndex === 8) {
-          props.navigation.navigate("FuelLog");
+          props.navigation.navigate("Loggers");
           return;
         }
       }
@@ -539,7 +540,7 @@ export default function Home(props) {
           scannerFunc={scnaCode}
         />
       )}
-      {/* data liat */}
+      {/* data list */}
       <FlatList
         contentContainerStyle={{ paddingBottom: 80 }}
         refreshControl={

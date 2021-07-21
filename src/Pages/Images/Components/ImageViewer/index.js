@@ -13,6 +13,23 @@ import { useSelector } from "react-redux";
 import { PinchGestureHandler } from "react-native-gesture-handler";
 import { SCREEN_WIDTH } from "../../../../Shared/Styles";
 
+// const ZoomableImage = ({ show, setShow, imageSource }) => {
+//   return (
+//     <Modal
+//       animationType={"fade"}
+//       transparent={false}
+//       visible={show}
+//       onRequestClose={() => {
+//         setShow(!show);
+//       }}
+//     >
+//       <View style={styles.container}>
+//         <WebView source={{ uri: imageSource }} style={styles.image} />
+//       </View>
+//     </Modal>
+//   );
+// };
+
 export default function ImageViewer(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
@@ -42,7 +59,9 @@ export default function ImageViewer(props) {
             style={[styles.image, { transform: [{ scale }] }]}
           />
         </PinchGestureHandler>
-        <Text style={{ fontSize: 20, color: colors.textOne, marginHorizontal: 15}}>
+        <Text
+          style={{ fontSize: 20, color: colors.textOne, marginHorizontal: 15 }}
+        >
           {imgData.imageName}
         </Text>
 

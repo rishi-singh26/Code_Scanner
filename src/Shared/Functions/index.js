@@ -4,16 +4,18 @@ import * as ImagePicker from "expo-image-picker";
 import Clipboard from "expo-clipboard";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
-import { cloudStorage, firestore } from "../../Constants/Api";
+import {
+  auth,
+  cloudStorage,
+  firestore,
+  geoCoderApi,
+} from "../../Constants/Api";
 import * as DocumentPicker from "expo-document-picker";
 import CryptoJS from "react-native-crypto-js";
 import * as LocalAuthentication from "expo-local-authentication";
+import * as Location from "expo-location";
 
 export function validateEmail(email) {
-  // this is also an option for email regx
-  const re =
-    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
   const emailRe =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -501,7 +503,7 @@ export async function pickDocuments(optionalFunc = () => {}) {
     });
     console.log(result);
     if (result.type === "cancel") {
-      return { status: false, pdfData: null };
+      return { status: false, result: null };
     }
     optionalFunc();
     return { status: true, result };
@@ -690,4 +692,151 @@ export async function decryptPasswords(passwordsArray, decryptionKey) {
     console.log("Error in DECRYPTING passwords on FUNCTIONS\n", err.message);
     return { status: false, data: null };
   }
+}
+
+/**
+ *
+ * @param {FirebaseDate} firebaseDate {seconds, nanoseconds}
+ * @returns {Date} - Date object
+ */
+export function convertFirebaseDateToDate(firebaseDate) {
+  // var date = new Date(dateInMillis).toDateString() + ' at ' + new Date(dateInMillis).toLocaleTimeString()
+  // get date in miliseconds
+  const dateInMillis = firebaseDate.seconds * 1000;
+  // create a date with that data
+  const date = new Date(dateInMillis);
+  return date;
+}
+
+/**
+ *
+ * @param {Function} authErr
+ * @param {Function} successFunc
+ * @param {Function} errorFunc
+ * @param {String} title
+ * @returns
+ */
+export async function createFuelLogger(authErr, successFunc, errorFunc, title) {
+  if (!auth.currentUser) {
+    authErr();
+    return;
+  }
+  await firestore
+    .collection("loggers")
+    .add({
+      userId: auth.currentUser.uid,
+      creationDate: new Date(),
+      title,
+      loggerType: "Fuel logger",
+      loggerTypeId: 1,
+    })
+    .then(() => {
+      successFunc();
+    })
+    .catch((err) => {
+      errorFunc();
+      console.log("Error while creating fuel logger", err.message);
+    });
+}
+
+/**
+ * checks is the enterd text is an integer number and does not contain any alphabetical characters
+ * @param {String} text
+ * @returns Boolean
+ */
+export function validateInteger(text) {
+  // check if the length of the text is equal to zero
+  // if yes then clear the text field ie. set the value to an empty string.
+  if (text.length == 0) {
+    return true;
+  }
+  const validator = /^[+]?([0-9]+(?:[\.][0-9]*)?|\.[0-9]+)$/;
+  // checks if the text is an positive integer or a decimal point number.
+  // will accept 1, 12, 1.5, +1, +1.5,
+  // will not accept -> ., 1..5, 1.2.3, -1
+  if (!validator.test(text)) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Gets user location and returns an object
+ * @returns {Object} - { location(Object), errmess(String), status(Boolean) }
+ */
+export async function getLocation() {
+  try {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      // console.log("Permission to access location was denied");
+      return { location: null, errmess: "Permission denied", status: false };
+    }
+    let location = await Location.getCurrentPositionAsync({});
+    // console.log("Here is locatio data", location);
+    return { location: location, errmess: null, status: true };
+  } catch (err) {
+    return { location: null, errmess: err.message, status: false };
+  }
+}
+
+/**
+ * Gets user address from location and returns an object
+ * @returns - { results(Array), message(String), status(Boolean) }
+ */
+export async function getUserPlace() {
+  const { status, errmess, location } = await getLocation();
+  if (!status) {
+    return { status: false, message: errmess };
+  }
+  const latLong = {
+    latitude: location.coords.latitude,
+    longitude: location.coords.longitude,
+  };
+  // console.log(latLong);
+  const url = geoCoderApi(latLong.latitude, latLong.longitude);
+
+  try {
+    const data = await fetch(url);
+    const addressData = await data.json();
+    const { total_results, results } = addressData;
+
+    return { status: true, results, message: "Success" };
+  } catch (err) {
+    const data = { status: false, message: err.message };
+    console.log(data);
+    return data;
+  }
+}
+
+/**
+ *
+ * @param {Object} addressComponents
+ * @returns {Object}
+ */
+export function getAddressComponents(addressComponents) {
+  const placeName =
+    addressComponents?.city ||
+    addressComponents?.town ||
+    addressComponents?.village;
+  const district = addressComponents?.state_district;
+  const road = addressComponents?.road;
+  const county = addressComponents?.county;
+  const state = addressComponents?.state;
+  const state_code = addressComponents?.state_code;
+  const country = addressComponents?.country;
+  const country_code = addressComponents?.country_code;
+
+  const data = {
+    placeName,
+    district,
+    road,
+    county,
+    state,
+    state_code,
+    country,
+    country_code,
+    status: true,
+    message: "Success",
+  };
+  return data;
 }

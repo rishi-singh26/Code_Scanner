@@ -21,6 +21,10 @@ import AddFuelLog from "../Pages/FuelLog/Components/AddFuelLog";
 import Settings from "../Pages/Settings/index";
 import EditProfile from "../Pages/Settings/Components/EditProfile";
 import ChangePasswd from "../Pages/Settings/Components/ChangePasswd";
+import Loggers from "../Pages/Logs";
+import CreateLogger from "../Pages/Logs/Components/CreateLogger";
+import LogData from "../Pages/Logs/Components/CustomLog/LogData";
+import AddLog from "../Pages/Logs/Components/CustomLog/AddLog";
 // import PdfViewer from "../Pages/PDFs/Components/PDFViewer/index";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -146,11 +150,7 @@ export default function Navigator() {
               options={{ title: "Change password" }}
               component={ChangePassword}
             />
-            <Stack.Screen
-              name="FuelLog"
-              options={{ title: "Fuel logs" }}
-              component={FuelLog}
-            />
+            <Stack.Screen name="FuelLog" component={FuelLog} />
             <Stack.Screen
               name="AddFuelLog"
               options={{ title: "Add fuel log" }}
@@ -170,6 +170,22 @@ export default function Navigator() {
               name="ChangePasswd"
               options={{ title: "Change password" }}
               component={ChangePasswd}
+            />
+            <Stack.Screen
+              name="Loggers"
+              options={{ title: "Logger" }}
+              component={Loggers}
+            />
+            <Stack.Screen name="LogData" component={LogData} />
+            <Stack.Screen
+              name="CreateLogger"
+              options={{ title: "Create Logger" }}
+              component={CreateLogger}
+            />
+            <Stack.Screen
+              name="AddLog"
+              options={{ title: "Add log" }}
+              component={AddLog}
             />
             {/* <Stack.Screen
               name="PdfViewer"
