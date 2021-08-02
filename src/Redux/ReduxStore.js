@@ -7,6 +7,7 @@ import { Alert } from "./Alert/Alert";
 import { FuelLogs } from "./FuelLog/FuelLog";
 import { UseAppLock } from "./AppLock/AppLock";
 import { UsePassPageLock } from "./PassPageLock/PassPageLock";
+import { Uris } from "./LocalURIs/URIs";
 
 import thunk from "redux-thunk";
 import logger from "redux-logger";
@@ -19,7 +20,7 @@ export const ConfigureStore = () => {
     key: "root",
     storage: AsyncStorage,
     debug: true,
-    blacklist: ["snack", "alert"],
+    blacklist: ["snack", "alert", "uris"],
   };
   const store = createStore(
     persistCombineReducers(config, {
@@ -31,6 +32,7 @@ export const ConfigureStore = () => {
       fuelLogs: FuelLogs,
       useAppLock: UseAppLock,
       usePassPageLock: UsePassPageLock,
+      uris: Uris,
     }),
     applyMiddleware(thunk)
   );

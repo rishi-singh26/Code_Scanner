@@ -17,10 +17,12 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { showAlert } from "../../Redux/Alert/ActionCreator";
 import Prompt from "../../Shared/Components/Prompt";
 import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
+import { addPdfUri } from "../../Redux/LocalURIs/ActionCreator";
 
 export default function Pdfs(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
+  const localURIs = useSelector((state) => state.uris);
   const dispatch = useDispatch();
   const [pdfs, setPdfs] = useState([]);
   const [pdfName, setPdfName] = useState("");
@@ -152,58 +154,80 @@ export default function Pdfs(props) {
           return;
         }
         if (buttonIndex == 1) {
-          sharePDF(pdf);
+          openORSharePDF(pdf, 2);
           return;
         }
       }
     );
   };
 
-  const openPDF = async (pdfData) => {
+  const openORSharePDF = async (pdfData, openOrShare = 0) => {
     try {
       setIsLoading(true);
-      const { status, localUri } = await saveToDevice(
-        pdfData.pdf,
-        pdfData.pdfName
+      // check if this uri is present in global state (ie. in localUris.pdfURIs array)
+      let indexOfLocalURI = localURIs.pdfURIs.findIndex(
+        (x) => x.id === pdfData._id
       );
-      if (!status) {
-        dispatch(
-          showSnack("Opps!! Error while opening PDF, please try again.")
-        );
-        return;
+      // present
+      if (indexOfLocalURI >= 0) {
+        // check if we want to view the image or share the image
+        if (openOrShare === 1) {
+          // view
+          openFile(localURIs.pdfURIs[indexOfLocalURI].uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while opening PDF, please try again.")
+              );
+          setIsLoading(false);
+        } else if (openOrShare === 2) {
+          // share
+          shareThings(localURIs.pdfURIs[indexOfLocalURI].uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while sharing PDF, please try again.")
+              );
+          setIsLoading(false);
+        }
       }
-      openFile(localUri.uri)
-        ? null
-        : dispatch(
+      // not present
+      else {
+        // console.log("not present");
+        // save to device
+        const { status, localUri } = await saveToDevice(
+          pdfData.pdf,
+          pdfData.pdfName
+        );
+        // check save status
+        if (!status) {
+          dispatch(
             showSnack("Opps!! Error while opening PDF, please try again.")
           );
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(showSnack("Opps!! Error while opening PDF.", err.message));
-    }
-  };
-
-  const sharePDF = async (pdfData) => {
-    try {
-      setIsLoading(true);
-      const { status, localUri } = await saveToDevice(
-        pdfData.pdf,
-        pdfData.pdfName
-      );
-      if (!status) {
-        dispatch(
-          showSnack("Opps!! Error while sharing PDF, please try again.")
-        );
-        return;
+          setIsLoading(false);
+          return;
+        }
+        // add uri to global store for reuse
+        dispatch(addPdfUri({ id: pdfData._id, uri: localUri.uri }));
+        // check if we want to view the image or share the image
+        if (openOrShare === 1) {
+          // view
+          openFile(localUri.uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while opening image, please try again.")
+              );
+        } else if (openOrShare === 2) {
+          // share
+          shareThings(localUri.uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while sharing PDF, please try again.")
+              );
+        }
       }
-      shareThings(localUri.uri)
-        ? null
-        : dispatch(
-            showSnack("Opps!! Error while sharing PDF, please try again.")
-          );
       setIsLoading(false);
     } catch (err) {
-      dispatch(showSnack("Opps!! Error while sharing PDF.", err.message));
+      dispatch(showSnack("Opps!! Error while opening PDF." + err.message));
+      setIsLoading(false);
     }
   };
 
@@ -218,7 +242,7 @@ export default function Pdfs(props) {
       <RenderPdfTile
         pdfs={pdfs}
         onLongPress={(pdf) => openPdfOptions(pdf)}
-        onPress={(pdfData) => openPDF(pdfData)}
+        onPress={(pdfData) => openORSharePDF(pdfData, 1)}
       />
       <Prompt
         title={"Enter PDF name"}

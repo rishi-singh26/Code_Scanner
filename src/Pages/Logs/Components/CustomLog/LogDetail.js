@@ -421,7 +421,7 @@ export default function LogDetail(props) {
                   />
                   <TouchableOpacity
                     style={styles.expandBtn}
-                    onPress={() => viewFile(item.dataValue.uri, item.fileName)}
+                    onPress={() => shareFile(item.dataValue.uri, item.fileName)}
                   >
                     <Ionicons
                       name={"share-social-outline"}
@@ -431,7 +431,7 @@ export default function LogDetail(props) {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.expandBtn, { right: 60 }]}
-                    onPress={() => shareFile(item.dataValue.uri, item.fileName)}
+                    onPress={() => viewFile(item.dataValue.uri, item.fileName)}
                   >
                     <Ionicons
                       name={"expand-outline"}

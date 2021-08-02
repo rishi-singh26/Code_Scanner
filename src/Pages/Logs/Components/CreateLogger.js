@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   Text,
@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  FlatList,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { auth, firestore } from "../../../Constants/Api";
@@ -19,7 +18,9 @@ import {
   Fontisto,
   AntDesign,
   MaterialCommunityIcons,
+  MaterialIcons,
 } from "@expo/vector-icons";
+import DraggableFlatList from "react-native-draggable-flatlist";
 
 export default function CreateLogger(props) {
   const theme = useSelector((state) => state.theme);
@@ -49,11 +50,11 @@ export default function CreateLogger(props) {
     setLogData([...logData, newData]);
   };
 
-  const removeData = () => {
+  const removeData = (index) => {
     try {
       if (logData.length > 1) {
         const allLogData = [...logData];
-        allLogData.pop();
+        allLogData.splice(index, 1);
         setLogData(allLogData);
       } else {
         dispatch(showSnack("Minimum one data is required"));
@@ -187,17 +188,35 @@ export default function CreateLogger(props) {
     return hasFilled;
   };
 
+  const setHeaderOptions = () => {
+    props.navigation.setOptions({
+      headerRight: () => {
+        return (
+          <TouchableOpacity
+            style={{ paddingVertical: 14, paddingHorizontal: 30 }}
+            onPress={uploadLogger}
+          >
+            <Ionicons name={"checkmark"} size={25} color={colors.textOne} />
+          </TouchableOpacity>
+        );
+      },
+    });
+  };
+
+  useEffect(() => {
+    setHeaderOptions();
+  }, [title, logData]);
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.backOne }]}
     >
       {isLoading && <CustomActivityIndicator />}
-      <FlatList
+      <DraggableFlatList
         data={logData}
-        keyExtractor={(item, index) => index.toString()}
         removeClippedSubviews={false}
         ListHeaderComponent={
-          <View>
+          <View style={{ backgroundColor: colors.backTwo, paddingBottom: 10 }}>
             <Text style={[styles.label, { color: colors.textTwo }]}>
               Logger Name
             </Text>
@@ -207,7 +226,7 @@ export default function CreateLogger(props) {
               style={[
                 styles.textInput,
                 {
-                  backgroundColor: colors.backTwo,
+                  backgroundColor: colors.backOne,
                   color: colors.textOne,
                   fontSize: 18,
                   fontWeight: "700",
@@ -218,83 +237,86 @@ export default function CreateLogger(props) {
             />
           </View>
         }
-        renderItem={({ item, index }) => {
+        renderItem={({ item, index, drag, isActive }) => {
           return (
-            <View style={{ marginTop: 10 }}>
-              <TextInput
-                value={item.dataName}
-                style={[
-                  styles.textInput,
-                  { backgroundColor: colors.backTwo, color: colors.textOne },
-                ]}
-                onChangeText={(txt) => setData("dataName", index, txt)}
-                placeholder={"Data name"}
-                placeholderTextColor={colors.textThree}
-              />
-              <TouchableOpacity
-                style={[
-                  styles.dataTypeSelector,
-                  { backgroundColor: colors.backTwo },
-                ]}
-                onPress={() => dataTypesSelector(index)}
-              >
-                <View
-                  style={{ paddingRight: item.dataType == "Select" ? 0 : 10 }}
+            <View
+              style={{
+                marginTop: 6,
+                backgroundColor: isActive ? colors.backThree : colors.backTwo,
+                paddingVertical: 10,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  value={item.dataName}
+                  style={[
+                    styles.textInput,
+                    { backgroundColor: colors.backOne, color: colors.textOne },
+                  ]}
+                  onChangeText={(txt) => setData("dataName", index, txt)}
+                  placeholder={"Data name"}
+                  placeholderTextColor={colors.textThree}
+                />
+                <TouchableOpacity
+                  style={[
+                    styles.dataTypeSelector,
+                    { backgroundColor: colors.backOne },
+                  ]}
+                  onPress={() => dataTypesSelector(index)}
                 >
-                  {icons[dataTypeOptions.indexOf(item.dataType)]}
-                </View>
-                <Text style={{ color: colors.textOne }}>{item.dataType}</Text>
-              </TouchableOpacity>
+                  <View
+                    style={{ paddingRight: item.dataType == "Select" ? 0 : 10 }}
+                  >
+                    {icons[dataTypeOptions.indexOf(item.dataType)]}
+                  </View>
+                  <Text style={{ color: colors.textOne }}>{item.dataType}</Text>
+                </TouchableOpacity>
+              </View>
+              <View>
+                <TouchableOpacity
+                  style={{ padding: 15 }}
+                  onPress={() => removeData(index)}
+                >
+                  <MaterialIcons
+                    name={"close"}
+                    size={22}
+                    color={colors.textOne}
+                  />
+                </TouchableOpacity>
+                <TouchableOpacity style={{ padding: 15 }} onLongPress={drag}>
+                  <MaterialIcons
+                    name={"drag-indicator"}
+                    size={22}
+                    color={colors.textOne}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           );
         }}
-      />
-      <View style={styles.dataAddrBtnsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.dataAddrRemoverBtn,
-            {
-              backgroundColor: colors.backOne,
-              borderColor:
-                logData.length > 1 ? colors.primaryColor : colors.backThree,
-            },
-          ]}
-          onPress={removeData}
-        >
-          <Text
-            style={{
-              fontSize: 17,
-              color:
-                logData.length > 1 ? colors.primaryColor : colors.backThree,
-            }}
+        keyExtractor={(item, index) => index.toString()}
+        onDragEnd={({ data }) => setLogData(data)}
+        onDragBegin={(index) => console.log("Drag begin ", index)}
+        ListFooterComponent={
+          <TouchableOpacity
+            style={[
+              styles.dataAddrRemoverBtn,
+              {
+                backgroundColor: colors.backOne,
+                borderColor: colors.primaryColor,
+              },
+            ]}
+            onPress={addData}
           >
-            Remove
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.dataAddrRemoverBtn,
-            {
-              backgroundColor: colors.backOne,
-              borderColor: colors.primaryColor,
-            },
-          ]}
-          onPress={addData}
-        >
-          <Text style={{ fontSize: 17, color: colors.primaryColor }}>Add</Text>
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity
-        style={[
-          styles.createLogBtn,
-          {
-            backgroundColor: colors.primaryColor,
-          },
-        ]}
-        onPress={uploadLogger}
-      >
-        <Text style={styles.createLogBtnTxt}>{"Create Logger"}</Text>
-      </TouchableOpacity>
+            <Text style={{ fontSize: 17, color: colors.primaryColor }}>
+              Add
+            </Text>
+          </TouchableOpacity>
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -324,7 +346,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     alignItems: "center",
-    marginHorizontal: 20,
+    margin: 20,
     borderRadius: 7,
     minWidth: 160,
     borderWidth: 1,

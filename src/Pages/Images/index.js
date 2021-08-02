@@ -17,10 +17,12 @@ import { Feather } from "@expo/vector-icons";
 import { showAlert } from "../../Redux/Alert/ActionCreator";
 import Prompt from "../../Shared/Components/Prompt";
 import CustomActivityIndicator from "../../Shared/Components/CustomActivityIndicator";
+import { addImageUri } from "../../Redux/LocalURIs/ActionCreator";
 
 export default function Images(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
+  const localUris = useSelector((state) => state.uris);
   const [images, setImages] = useState([]);
   const [imageName, setImageName] = useState("");
   const [showImageNamePrompt, setShowImageNamePrompt] = useState(false);
@@ -124,7 +126,7 @@ export default function Images(props) {
           return;
         }
         if (buttonIndex == 1) {
-          shareImage(image);
+          openORShareImage(image, 2);
           return;
         }
       }
@@ -162,51 +164,75 @@ export default function Images(props) {
     setIsLoading(false);
   };
 
-  const openImage = async (imageData) => {
+  const openORShareImage = async (imageData, openOrShare = 0) => {
     try {
       setIsLoading(true);
-      const { status, localUri } = await saveToDevice(
-        imageData.image,
-        imageData.imageName
+      // check if this uri is present in global state (ie. in localUris.imageURIs array)
+      let indexOfLocalURI = localUris.imageURIs.findIndex(
+        (x) => x.id === imageData._id
       );
-      if (!status) {
-        dispatch(
-          showSnack("Opps!! Error while opening image, please try again.")
-        );
-        return;
+      // present
+      if (indexOfLocalURI >= 0) {
+        // check if we want to view the image or share the image
+        if (openOrShare === 1) {
+          // view
+          openFile(localUris.imageURIs[indexOfLocalURI].uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while opening image, please try again.")
+              );
+          setIsLoading(false);
+        } else if (openOrShare === 2) {
+          // share
+          shareThings(localUris.imageURIs[indexOfLocalURI].uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while sharing image, please try again.")
+              );
+          setIsLoading(false);
+        }
       }
-      openFile(localUri.uri)
-        ? null
-        : dispatch(
+      // not present
+      else {
+        // console.log("not present");
+        // save to device
+        const { status, localUri } = await saveToDevice(
+          imageData.image,
+          imageData.imageName
+        );
+        // check save status
+        if (!status) {
+          dispatch(
             showSnack("Opps!! Error while opening image, please try again.")
           );
-      setIsLoading(false);
-    } catch (err) {
-      dispatch(showSnack("Opps!! Error while opening image.", err.message));
-    }
-  };
-
-  const shareImage = async (imageData) => {
-    try {
-      setIsLoading(true);
-      const { status, localUri } = await saveToDevice(
-        imageData.image,
-        imageData.imageName
-      );
-      if (!status) {
-        dispatch(
-          showSnack("Opps!! Error while sharing image, please try again.")
-        );
-        return;
+          setIsLoading(false);
+          return;
+        }
+        // add uri to global store for reuse
+        dispatch(addImageUri({ id: imageData._id, uri: localUri.uri }));
+        // check if we want to view the image or share the image
+        if (openOrShare === 1) {
+          // view
+          openFile(localUri.uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while opening image, please try again.")
+              );
+          setIsLoading(false);
+        } else if (openOrShare === 2) {
+          // share
+          shareThings(localUri.uri)
+            ? null
+            : dispatch(
+                showSnack("Opps!! Error while sharing image, please try again.")
+              );
+          setIsLoading(false);
+        }
       }
-      shareThings(localUri.uri)
-        ? null
-        : dispatch(
-            showSnack("Opps!! Error while sharing image, please try again.")
-          );
       setIsLoading(false);
     } catch (err) {
-      dispatch(showSnack("Opps!! Error while Sharing image.", err.message));
+      dispatch(showSnack("Opps!! Error while opening image." + err.message));
+      setIsLoading(false);
     }
   };
 
@@ -220,7 +246,7 @@ export default function Images(props) {
       {isLoading && <CustomActivityIndicator />}
       <RenderImage
         images={images}
-        onPress={(imgData) => openImage(imgData)}
+        onPress={(imgData) => openORShareImage(imgData, 1)}
         onLongPress={(imgData) => openImageOptions(imgData)}
       />
       <Prompt

@@ -31,6 +31,7 @@ import {
   shareScannedDataPdf,
   shareThings,
   validateEmail,
+  validateUPIUrl,
   validateUrl,
   validateWaLinkForINNum,
 } from "../../Shared/Functions";
@@ -115,9 +116,9 @@ export default function Home(props) {
 
   const scnaCode = () => {
     if (hasPermission) {
-      props.navigation.navigate("Scanner");
+      props.navigation.navigate("ScannerCamera");
     } else {
-      getCamPermission(() => props.navigation.navigate("Scanner"));
+      getCamPermission(() => props.navigation.navigate("ScannerCamera"));
       // alert("No permission to camera.");
     }
   };
@@ -362,6 +363,7 @@ export default function Home(props) {
     }
   };
 
+  // image sanning starts here
   const scanFromImage = async () => {
     try {
       const { status, result } = await pickImage();
@@ -424,6 +426,7 @@ export default function Home(props) {
       })
     );
   };
+  // image sanning ends here
 
   const handleLockNote = async () => {
     const text = selectedData.scannedData.data;
@@ -535,18 +538,6 @@ export default function Home(props) {
           onXPress={closeSearch}
         />
       ) : null}
-      {/* List empty */}
-      {scannedData.data.length === 0 && !scannedData.isLoading && (
-        <ListEmpty
-          editorFunc={() =>
-            props.navigation.navigate("Editor", { isEditing: false })
-          }
-          qrFunc={() => props.navigation.navigate("QrGenerator")}
-          passwordsFunc={navigateToPass}
-          scanImgFunc={scanFromImage}
-          scannerFunc={scnaCode}
-        />
-      )}
       {/* data list */}
       <FlatList
         contentContainerStyle={{ paddingBottom: 80 }}
@@ -567,13 +558,14 @@ export default function Home(props) {
           const text = item.scannedData.data;
           // console.log("here is data", text);
           const isUrl = validateUrl(text);
+          const isUPIID = validateUPIUrl(text);
           const isContact = isContactInfo(text);
           return (
             <View
               style={[
                 styles.scannedDataContainer,
                 {
-                  borderTopWidth: index === 0 ? 0 : 1,
+                  borderTopWidth: index === 0 ? 0 : 0.5,
                   borderBottomWidth: 0,
                   borderColor: backTwo,
                   backgroundColor: backOne,
@@ -636,7 +628,7 @@ export default function Home(props) {
                       </View>
                     ) : (
                       <Text
-                        numberOfLines={2}
+                        numberOfLines={1}
                         style={[styles.scannedDataText, { color: textTwo }]}
                       >
                         {text}
@@ -665,9 +657,33 @@ export default function Home(props) {
                   </Text>
                 </TouchableOpacity>
               ) : null}
+              {isUPIID ? (
+                <TouchableOpacity
+                  onPress={() => (isUrl ? Linking.openURL(text) : null)}
+                  style={[styles.openURLView, { borderColor: backThree }]}
+                >
+                  <Text style={{ color: primaryColor, fontWeight: "700" }}>
+                    Open UPI
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
           );
         }}
+        ListEmptyComponent={
+          scannedData.data.length === 0 &&
+          !scannedData.isLoading && (
+            <ListEmpty
+              editorFunc={() =>
+                props.navigation.navigate("Editor", { isEditing: false })
+              }
+              qrFunc={() => props.navigation.navigate("QrGenerator")}
+              passwordsFunc={navigateToPass}
+              scanImgFunc={scanFromImage}
+              scannerFunc={scnaCode}
+            />
+          )
+        }
       />
       {/* FAB */}
       <FAB
