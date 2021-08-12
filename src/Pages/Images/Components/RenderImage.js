@@ -1,16 +1,15 @@
-import { Feather } from "@expo/vector-icons";
 import React from "react";
 import {
   FlatList,
-  Image,
+  Image as RNImage,
   TouchableOpacity,
   View,
   StyleSheet,
   Text,
-  Linking,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { SCREEN_WIDTH } from "../../../Shared/Styles";
+import { Feather, Ionicons } from "@expo/vector-icons";
 
 export default function RenderImage({ images, onPress, onLongPress }) {
   const theme = useSelector((state) => state.theme);
@@ -47,13 +46,18 @@ export default function RenderImage({ images, onPress, onLongPress }) {
                 </View>
               ) : (
                 <View style={styles.viewBox}>
-                  <Image
-                    source={{ uri: item.image }}
-                    style={[
+                  {item.isEncrypted ?
+                    <View style={[
                       styles.image,
-                      { backgroundColor: colors.backThree },
-                    ]}
-                  />
+                      { backgroundColor: "#32a852", alignItems: "center", justifyContent: "center" },
+                    ]}><Ionicons size={70} name={"shield-checkmark-outline"} color={"#fff"} /></View> :
+                    <RNImage
+                      source={{ uri: item.image }}
+                      style={[
+                        styles.image,
+                        { backgroundColor: colors.backThree },
+                      ]}
+                    />}
                   <Text
                     numberOfLines={1}
                     style={{

@@ -34,7 +34,7 @@ export default function ImageViewer(props) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
   const { imgData, removeImage, imageStyle } = props.route.params;
-  console.log(imageStyle);
+  console.log({ imageStyle, name: imgData.imageName });
 
   const scale = React.useRef(new Animated.Value(1)).current;
 

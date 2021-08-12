@@ -30,8 +30,7 @@ export default function UploadImages(props) {
     const numImages = selectedImgs.length;
     dispatch(
       showAlert(
-        `Do you want to upload ${numImages} ${
-          numImages > 1 ? `images` : "image"
+        `Do you want to upload ${numImages} ${numImages > 1 ? `images` : "image"
         }?`,
         ``,
         uploadImages
@@ -66,7 +65,7 @@ export default function UploadImages(props) {
           ]}
           onPress={(source) =>
             props.navigation.navigate("ImageViewer", {
-              source,
+              imgData: source,
               removeImage: null,
             })
           }

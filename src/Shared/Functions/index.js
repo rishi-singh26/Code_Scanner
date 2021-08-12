@@ -1,21 +1,21 @@
-import { Linking, Platform, Share } from "react-native";
-import * as Contacts from "expo-contacts";
-import * as ImagePicker from "expo-image-picker";
-import Clipboard from "expo-clipboard";
-import * as Print from "expo-print";
-import * as Sharing from "expo-sharing";
+import { Linking, Platform, Share } from 'react-native';
+import * as Contacts from 'expo-contacts';
+import * as ImagePicker from 'expo-image-picker';
+import Clipboard from 'expo-clipboard';
+import * as Print from 'expo-print';
+import * as Sharing from 'expo-sharing';
 import {
   auth,
   cloudStorage,
   firestore,
   geoCoderApi,
-} from "../../Constants/Api";
-import * as DocumentPicker from "expo-document-picker";
-import CryptoJS from "react-native-crypto-js";
-import * as LocalAuthentication from "expo-local-authentication";
-import * as Location from "expo-location";
-import * as FileSystem from "expo-file-system";
-import * as IntentLauncher from "expo-intent-launcher";
+} from '../../Constants/Api';
+import * as DocumentPicker from 'expo-document-picker';
+import CryptoJS from 'react-native-crypto-js';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as Location from 'expo-location';
+import * as FileSystem from 'expo-file-system';
+import * as IntentLauncher from 'expo-intent-launcher';
 
 export function validateEmail(email) {
   const emailRe =
@@ -56,12 +56,12 @@ export function sortArrayOfObjs(array, sortingKey) {
 
   sortedArray.length > 1
     ? sortedArray.sort((a, b) =>
-        a[sortingKey] < b[sortingKey]
-          ? 1
-          : b[sortingKey] < a[sortingKey]
+      a[sortingKey] < b[sortingKey]
+        ? 1
+        : b[sortingKey] < a[sortingKey]
           ? -1
           : 0
-      )
+    )
     : null;
 
   // console.log("Here is the sorted array", sortedArray);
@@ -79,7 +79,7 @@ export async function copyToClipboard(data) {
     Clipboard.setString(data);
     return true;
   } catch (error) {
-    console.log("Error in copying to clipboard FUNCTIONS", error.message);
+    console.log('Error in copying to clipboard FUNCTIONS', error.message);
     return false;
   }
 }
@@ -87,18 +87,18 @@ export async function copyToClipboard(data) {
 export function createQRString(data) {
   const name = data.firstName;
   const fullName = data.name;
-  let phoneNumbers = "";
-  let emails = "";
+  let phoneNumbers = '';
+  let emails = '';
   // \n TEL;TYPE=CELL:+916362056288
   data.phoneNumbers
     ? data.phoneNumbers.map((item) => {
-        phoneNumbers += `\nTEL;TYPE=CELL:${item.number}`;
-      })
+      phoneNumbers += `\nTEL;TYPE=CELL:${item.number}`;
+    })
     : null;
   data.emails
     ? data.emails.map((item) => {
-        emails += `\nEMAIL;TYPE=HOME:${item.email}`;
-      })
+      emails += `\nEMAIL;TYPE=HOME:${item.email}`;
+    })
     : null;
   const string = `BEGIN:VCARD\nVERSION:3.0\nN:;${name};;;\nFN:${fullName}${phoneNumbers}\n${emails}\nEND:VCARD`;
   // console.log(string);
@@ -111,7 +111,7 @@ export async function isContactsApiAvailable() {
 }
 
 export function isContactInfo(string) {
-  const isContact = string ? string.includes("BEGIN:VCARD") : false;
+  const isContact = string ? string.includes('BEGIN:VCARD') : false;
   return isContact;
 }
 
@@ -120,25 +120,25 @@ export async function addToContacts(data) {
     if (isContactsApiAvailable()) {
       // console.log(data);
       const contactData = {
-        [Contacts.Fields.FirstName]: "Bird",
-        [Contacts.Fields.LastName]: "Man",
-        [Contacts.Fields.Company]: "Young Money",
+        [Contacts.Fields.FirstName]: 'Bird',
+        [Contacts.Fields.LastName]: 'Man',
+        [Contacts.Fields.Company]: 'Young Money',
         [Contacts.Fields.PhoneNumbers]: [
           {
-            number: "(123) 456-7890",
+            number: '(123) 456-7890',
             isPrimary: true,
-            digits: "1234567890",
-            countryCode: "IN",
-            id: "1",
-            label: "main",
+            digits: '1234567890',
+            countryCode: 'IN',
+            id: '1',
+            label: 'main',
           },
         ],
         [Contacts.Fields.Emails]: [
           {
-            email: "test@gmail.com",
+            email: 'test@gmail.com',
             isPrimary: true,
-            id: "2",
-            label: "main",
+            id: '2',
+            label: 'main',
           },
         ],
       };
@@ -146,7 +146,7 @@ export async function addToContacts(data) {
     }
   } catch (error) {
     console.log(error.message);
-    alert("Contact was not added!");
+    alert('Contact was not added!');
   }
 }
 
@@ -161,7 +161,7 @@ export function searchScannedDataTitle(data, searchKey) {
   data.map((item) => {
     if (item.title) {
       searchKey.toUpperCase().includes(item.title.toUpperCase()) ||
-      item.title.toUpperCase().includes(searchKey.toUpperCase())
+        item.title.toUpperCase().includes(searchKey.toUpperCase())
         ? finalArr.push(item)
         : null;
     }
@@ -181,7 +181,7 @@ export function searchPasswords(data, searchKey) {
   data.map((item) => {
     if (item.title) {
       searchKey.toUpperCase().includes(item.title.toUpperCase()) ||
-      item.title.toUpperCase().includes(searchKey.toUpperCase())
+        item.title.toUpperCase().includes(searchKey.toUpperCase())
         ? finalArr.push(item)
         : null;
     }
@@ -201,7 +201,7 @@ export function searchContacts(data, searchKey) {
   data.map((item) => {
     if (item.name) {
       searchKey.toUpperCase().includes(item.name.toUpperCase()) ||
-      item.name.toUpperCase().includes(searchKey.toUpperCase())
+        item.name.toUpperCase().includes(searchKey.toUpperCase())
         ? finalArr.push(item)
         : null;
     }
@@ -216,88 +216,88 @@ export function getDataObj(data) {
     emails: [],
     urls: [],
   };
-  let lines = data.split("\n");
+  let lines = data.split('\n');
   // split the text into array of strings
   for (var line of lines) {
     // for each string
-    var typeAndValue = line.split(":;", 2);
+    var typeAndValue = line.split(':;', 2);
     for (var x of typeAndValue) {
-      if (x.includes("TEL;TYPE=CELL")) {
+      if (x.includes('TEL;TYPE=CELL')) {
         dataObj.phoneNumbers.push({
-          phoneNumber: x.split(":").pop().trim(),
-          type: "Home",
+          phoneNumber: x.split(':').pop().trim(),
+          type: 'Home',
           data: x,
         });
       }
-      if (x.includes("TEL;TYPE=WORK")) {
+      if (x.includes('TEL;TYPE=WORK')) {
         dataObj.phoneNumbers.push({
-          phoneNumber: x.split(":").pop().trim(),
-          type: "Work",
+          phoneNumber: x.split(':').pop().trim(),
+          type: 'Work',
           data: x,
         });
       }
-      if (x.includes("EMAIL;TYPE=HOME")) {
+      if (x.includes('EMAIL;TYPE=HOME')) {
         dataObj.emails.push({
-          email: x.split(":").pop().trim(),
-          type: "Home",
+          email: x.split(':').pop().trim(),
+          type: 'Home',
           data: x,
         });
       }
-      if (x.includes("EMAIL;TYPE=INTERNET")) {
+      if (x.includes('EMAIL;TYPE=INTERNET')) {
         dataObj.emails.push({
-          email: x.split(":").pop().trim(),
-          type: "Internet",
+          email: x.split(':').pop().trim(),
+          type: 'Internet',
           data: x,
         });
       }
-      if (x.includes("EMAIL;TYPE=HOME,INTERNET")) {
+      if (x.includes('EMAIL;TYPE=HOME,INTERNET')) {
         dataObj.emails.push({
-          email: x.split(":").pop().trim(),
-          type: "Home & Internet",
+          email: x.split(':').pop().trim(),
+          type: 'Home & Internet',
           data: x,
         });
       }
-      if (x.includes("FN")) {
+      if (x.includes('FN')) {
         dataObj.fullName = {
-          name: x.split(":").pop().trim(),
-          type: "Full name",
+          name: x.split(':').pop().trim(),
+          type: 'Full name',
           data: x,
         };
       }
       if (
-        x.includes("N:") &&
-        !x.includes("FN") &&
-        !x.includes("BEGIN") &&
-        !x.includes("VERSION")
+        x.includes('N:') &&
+        !x.includes('FN') &&
+        !x.includes('BEGIN') &&
+        !x.includes('VERSION')
       ) {
-        const nameArr = x.split(":")[1].split(";");
-        console.log("Here is the names arr", nameArr);
+        const nameArr = x.split(':')[1].split(';');
+        console.log('Here is the names arr', nameArr);
         dataObj.nameComponents = {
           lastName: nameArr[0],
           firstName: nameArr[1],
           title: nameArr[3],
-          type: "Name Components",
+          type: 'Name Components',
           data: x,
         };
       }
-      if (x.includes("URL")) {
+      if (x.includes('URL')) {
         dataObj.urls.push = {
-          url: x.split(":").pop().trim(),
-          type: "Url",
+          url: x.split(':').pop().trim(),
+          type: 'Url',
           data: x,
         };
       }
-      if (x.includes("TITLE")) {
+      if (x.includes('TITLE')) {
         dataObj.title = {
-          title: x.split(":").pop().trim(),
-          type: "Title",
+          title: x.split(':').pop().trim(),
+          type: 'Title',
           data: x,
         };
       }
-      if (x.includes("ORG")) {
+      if (x.includes('ORG')) {
         dataObj.organisation = {
-          org: x.split(":").pop().trim(),
-          type: "Organisation",
+          org: x.split(':').pop().trim(),
+          type: 'Organisation',
           data: x,
         };
       }
@@ -312,15 +312,15 @@ export function getDataObj(data) {
  * pass an optional function to run after the image has been picked successfully
  * opens image picjer native app
  */
-export async function pickImage() {
-  if (Platform.OS === "web") {
-    alert("Device not supported.");
+export async function pickImage(base64 = false) {
+  if (Platform.OS === 'web') {
+    alert('Device not supported.');
     return { status: false, result: null };
   }
-  console.log("Not on web");
+  console.log('Not on web');
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== "granted") {
-    alert("Sorry, we need camera roll permissions to make this work!");
+  if (status !== 'granted') {
+    alert('Sorry, we need camera roll permissions to make this work!');
     return { status: false, result: null };
   }
   // console.log("Permission granted");
@@ -330,6 +330,7 @@ export async function pickImage() {
       allowsEditing: true,
       // aspect: [1, 1],
       quality: 1,
+      base64: base64,
     });
     // console.log("Here is image result", result);
     if (result.cancelled) {
@@ -397,8 +398,8 @@ export async function shareThings(uri) {
 export async function uploadImageToServer(
   imageData,
   shouldUploadImage = true,
-  userId = "",
-  optionalFunc = () => {}
+  userId = '',
+  optionalFunc = () => { }
 ) {
   // console.log("Starting upload");
   const response = await fetch(imageData.image);
@@ -407,7 +408,7 @@ export async function uploadImageToServer(
   try {
     const result = await cloudStorage
       .ref()
-      .child("scanner/images/" + imageData.name)
+      .child('scanner/images/' + imageData.name)
       .put(blob);
 
     var photoDownloadURLRef = cloudStorage.ref(result.metadata.fullPath);
@@ -419,32 +420,42 @@ export async function uploadImageToServer(
     // );
     shouldUploadImage
       ? await uploadImageUrl(
-          {
-            uploadDate: new Date(),
-            userId,
-            image: photoDownloadURL,
-            imageName: imageData.name,
-            isDeleted: false,
-          },
-          optionalFunc
-        )
+        {
+          uploadDate: new Date(),
+          userId,
+          image: photoDownloadURL,
+          imageName: imageData.name,
+          isDeleted: false,
+        },
+        optionalFunc
+      )
       : null;
     return { status: true, downloadUri: photoDownloadURL };
   } catch (err) {
-    console.log("Error in uploading iamge to server FUNCTIONS", err.message);
+    console.log(
+      'Error in uploading iamge to server FUNCTIONS',
+      err.message
+    );
     return { status: false, downloadUri: null };
   }
 }
 
 export async function uploadImageUrl(imageData, optionalFunc) {
+  if (!auth.currentUser) {
+    optionalFunc('Authentication error, please logout and login again');
+    return;
+  }
   await firestore
-    .collection("scannerImages")
+    .collection('scannerImages')
     .add(imageData)
     .then(() => {
-      optionalFunc();
+      optionalFunc('Image uploaded successfully');
       return true;
     })
     .catch((err) => {
+      optionalFunc(
+        'Error while uploading image, please try again\n' + err.message
+      );
       console.log(err.message);
       return false;
     });
@@ -456,24 +467,36 @@ export async function uploadImageUrl(imageData, optionalFunc) {
  * {image: "image uri", imageName: "image name", _id: "image id"}
  * @param {Function} optionalFunc
  */
-export async function deleteImage(image, optionalFunc = () => {}) {
-  await cloudStorage
-    .ref()
-    .child("scanner/images/" + image.imageName)
-    .delete()
-    .then(() => {
-      firestore
-        .collection("scannerImages")
-        .doc(image._id)
-        .delete()
-        .then(() => {
-          optionalFunc("Deleted");
-        })
-        .catch((err) => {
-          console.log(err.message);
-          optionalFunc("Not deleted");
-        });
-    });
+export async function deleteImage(image, optionalFunc = () => { }) {
+  image.isEncrypted // if true then image is encrypted and only base64 string needs to be deleted from cloud firestore
+    ? firestore
+      .collection('scannerImages')
+      .doc(image._id)
+      .delete()
+      .then(() => {
+        optionalFunc('Deleted');
+      })
+      .catch((err) => {
+        console.log(err.message);
+        optionalFunc('Not deleted');
+      })
+    : await cloudStorage
+      .ref()
+      .child('scanner/images/' + image.imageName)
+      .delete()
+      .then(() => {
+        firestore
+          .collection('scannerImages')
+          .doc(image._id)
+          .delete()
+          .then(() => {
+            optionalFunc('Deleted');
+          })
+          .catch((err) => {
+            console.log(err.message);
+            optionalFunc('Not deleted');
+          });
+      });
 }
 
 /**
@@ -482,50 +505,50 @@ export async function deleteImage(image, optionalFunc = () => {}) {
  * {}
  * @param {Function} optionalFunc
  */
-export async function deletePdf(pdf, optionalFunc = () => {}) {
+export async function deletePdf(pdf, optionalFunc = () => { }) {
   await cloudStorage
     .ref()
-    .child("scanner/pdfs/" + pdf.pdfName)
+    .child('scanner/pdfs/' + pdf.pdfName)
     .delete()
     .then(() => {
       firestore
-        .collection("scannedPdfs")
+        .collection('scannedPdfs')
         .doc(pdf._id)
         .delete()
         .then(() => {
-          optionalFunc("Deleted");
+          optionalFunc('Deleted');
         })
         .catch((err) => {
           console.log(err.message);
-          optionalFunc("Not deleted");
+          optionalFunc('Not deleted');
         });
     })
     .catch((err) => {
-      optionalFunc("Not deleted\n" + err.message);
+      optionalFunc('Not deleted\n' + err.message);
     });
 }
 
-export async function pickDocuments(optionalFunc = () => {}) {
+export async function pickDocuments(optionalFunc = () => { }) {
   try {
     let result = await DocumentPicker.getDocumentAsync({
       multiple: true,
-      type: "application/pdf",
+      type: 'application/pdf',
     });
     // console.log(result);
-    if (result.type === "cancel") {
+    if (result.type === 'cancel') {
       return { status: false, result: null };
     }
     optionalFunc();
     return { status: true, result };
   } catch (err) {
-    console.log("Error in picking document on FUNCTIONS", err.message);
+    console.log('Error in picking document on FUNCTIONS', err.message);
     return { status: false, result: null };
   }
 }
 
-export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
-  optionalFunc("Uploading selected pdf...");
-  console.log("Uploading selected pdf...");
+export async function uploadPdfToServer(file, userId, optionalFunc = () => { }) {
+  optionalFunc('Uploading selected pdf...');
+  console.log('Uploading selected pdf...');
   const reference = cloudStorage.ref(`scanner/pdfs/${file.name}`);
   const response = await fetch(file.uri);
   const blob = await response.blob();
@@ -535,12 +558,12 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
   const pdfDownloadURL = await reference.getDownloadURL();
 
   console.log(
-    "Here is the PDF download url",
+    'Here is the PDF download url',
     pdfDownloadURL,
-    "\nUploading to firestore"
+    '\nUploading to firestore'
   );
   firestore
-    .collection("scannedPdfs")
+    .collection('scannedPdfs')
     .add({
       uploadDate: new Date(),
       userId,
@@ -549,12 +572,12 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
       isDeleted: false,
     })
     .then(() => {
-      console.log("Upload success");
-      optionalFunc("Pdf uploaded");
+      console.log('Upload success');
+      optionalFunc('Pdf uploaded');
     })
     .catch((err) => {
-      console.log("Err in uploading pdf", err.message);
-      optionalFunc("Pdf NOT uploaded!!!");
+      console.log('Err in uploading pdf', err.message);
+      optionalFunc('Pdf NOT uploaded!!!');
     });
 }
 
@@ -567,7 +590,10 @@ export async function uploadPdfToServer(file, userId, optionalFunc = () => {}) {
  */
 export async function encryptText(text, password) {
   try {
-    const encryptedData = await CryptoJS.AES.encrypt(text, password).toString();
+    const encryptedData = await CryptoJS.AES.encrypt(
+      text,
+      password
+    ).toString();
     return { status: true, data: encryptedData };
   } catch (error) {
     return { status: false, data: null };
@@ -602,13 +628,13 @@ export async function localAuth() {
   ) {
     try {
       const authData = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Authentication required",
-        fallbackLabel: "Use passcode",
-        cancelLabel: "Cancel",
+        promptMessage: 'Authentication required',
+        fallbackLabel: 'Use passcode',
+        cancelLabel: 'Cancel',
       });
       return authData.success;
     } catch (err) {
-      console.log("Error in local auth FUNCTIONS", err.message);
+      console.log('Error in local auth FUNCTIONS', err.message);
       return false;
     }
   } else {
@@ -655,7 +681,10 @@ export async function encryptPasswords(passwordsArray, encryptionKey) {
     }
     return { status: true, data: encryptedPassowordsArr };
   } catch (err) {
-    console.log("Error in ENCRYPTING passwords on FUNCTIONS\n", err.message);
+    console.log(
+      'Error in ENCRYPTING passwords on FUNCTIONS\n',
+      err.message
+    );
     return { status: false, data: null };
   }
 }
@@ -699,7 +728,10 @@ export async function decryptPasswords(passwordsArray, decryptionKey) {
     }
     return { status: true, data: decryptedPassowordsArr };
   } catch (err) {
-    console.log("Error in DECRYPTING passwords on FUNCTIONS\n", err.message);
+    console.log(
+      'Error in DECRYPTING passwords on FUNCTIONS\n',
+      err.message
+    );
     return { status: false, data: null };
   }
 }
@@ -732,12 +764,12 @@ export async function createFuelLogger(authErr, successFunc, errorFunc, title) {
     return;
   }
   await firestore
-    .collection("loggers")
+    .collection('loggers')
     .add({
       userId: auth.currentUser.uid,
       creationDate: new Date(),
       title,
-      loggerType: "Fuel logger",
+      loggerType: 'Fuel logger',
       loggerTypeId: 1,
     })
     .then(() => {
@@ -745,7 +777,7 @@ export async function createFuelLogger(authErr, successFunc, errorFunc, title) {
     })
     .catch((err) => {
       errorFunc();
-      console.log("Error while creating fuel logger", err.message);
+      console.log('Error while creating fuel logger', err.message);
     });
 }
 
@@ -777,9 +809,13 @@ export function validateInteger(text) {
 export async function getLocation() {
   try {
     let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== "granted") {
+    if (status !== 'granted') {
       // console.log("Permission to access location was denied");
-      return { location: null, errmess: "Permission denied", status: false };
+      return {
+        location: null,
+        errmess: 'Permission denied',
+        status: false,
+      };
     }
     let location = await Location.getCurrentPositionAsync({});
     // console.log("Here is locatio data", location);
@@ -810,7 +846,7 @@ export async function getUserPlace() {
     const addressData = await data.json();
     const { total_results, results } = addressData;
 
-    return { status: true, results, message: "Success" };
+    return { status: true, results, message: 'Success' };
   } catch (err) {
     const data = { status: false, message: err.message };
     console.log(data);
@@ -846,7 +882,7 @@ export function getAddressComponents(addressComponents) {
     country,
     country_code,
     status: true,
-    message: "Success",
+    message: 'Success',
   };
   return data;
 }
@@ -923,13 +959,16 @@ export async function ensureDirExists(fileDir) {
 export async function saveToDevice(uri, fileName) {
   // 'http://techslides.com/demos/sample-videos/small.mp4'
   try {
-    const fileDir = FileSystem.cacheDirectory + "scanner/";
+    const fileDir = FileSystem.cacheDirectory + 'scanner/';
     await ensureDirExists(fileDir);
-    const localUri = await FileSystem.downloadAsync(uri, fileDir + fileName);
+    const localUri = await FileSystem.downloadAsync(
+      uri,
+      fileDir + fileName
+    );
     // console.log("Here is uri after saving", localUri);
     return { status: true, localUri };
   } catch (err) {
-    console.log("error in saving image", err);
+    console.log('error in saving image', err);
     return { status: false, localUri: null };
   }
 }
@@ -942,7 +981,7 @@ export async function openFile(uri) {
   try {
     FileSystem.getContentUriAsync(uri).then((cUri) => {
       console.log(cUri);
-      IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+      IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
         data: cUri,
         flags: 1,
       });
