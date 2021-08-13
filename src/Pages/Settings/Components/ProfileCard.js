@@ -11,7 +11,7 @@ export default function ProfileCard(props) {
   const { navigateToEdit, imageViewerFunc } = props;
 
   return (
-    <View style={[styles.headerCard, { backgroundColor: colors.backOne }]}>
+    <View style={[styles.headerCard, { backgroundColor: colors.backTwo }]}>
       <View>
         {auth?.currentUser?.displayName ? (
           <Text style={[styles.displayNameTxt, { color: colors.textOne }]}>

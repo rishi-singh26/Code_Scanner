@@ -13,6 +13,7 @@
     "@react-native-async-storage/async-storage": "^1.13.0",
     "@react-native-community/datetimepicker": "3.2.0",
     "@react-native-community/masked-view": "0.1.10",
+    "@react-native-community/netinfo": "6.0.0",
     "@react-navigation/native": "^5.9.2",
     "@react-navigation/stack": "^5.12.8",
     "expo": "^41.0.0",
@@ -51,8 +52,7 @@
     "redux": "^4.0.5",
     "redux-logger": "*",
     "redux-persist": "^6.0.0",
-    "redux-thunk": "*",
-    "@react-native-community/netinfo": "6.0.0"
+    "redux-thunk": "*"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"

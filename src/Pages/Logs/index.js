@@ -150,7 +150,7 @@ export default function Loggers(props) {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       {/* Search bar */}
       <CollapsibleSearchBar
         onTextChange={(text) => setSearchKey(text)}

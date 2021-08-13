@@ -44,7 +44,7 @@ export default function LogsList(props) {
         return (
           <TouchableOpacity
             style={{ paddingVertical: 14, paddingHorizontal: 30 }}
-            // onPress={() => setStatsHidden(!statsHidden)}
+          // onPress={() => setStatsHidden(!statsHidden)}
           >
             <Ionicons
               name={"ios-information-circle-outline"}
@@ -95,7 +95,7 @@ export default function LogsList(props) {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       <FlatList
         data={logs}
         keyExtractor={(item, index) => index.toString()}
@@ -105,7 +105,7 @@ export default function LogsList(props) {
               onPress={() =>
                 props.navigation.navigate("LogDetail", { logData: item })
               }
-              style={[styles.loggerTile, { backgroundColor: colors.backOne }]}
+              style={[styles.loggerTile, { backgroundColor: colors.backTwo }]}
             >
               <Text style={[styles.loggerTileTxt, { color: colors.textOne }]}>
                 {item.title}

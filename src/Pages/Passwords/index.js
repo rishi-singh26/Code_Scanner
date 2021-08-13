@@ -305,70 +305,72 @@ export default function Passwords(props) {
                     )}
                   </View>
                 </TouchableOpacity>
-                <Collapsible collapsed={!collapsArr[index]}>
+                {/* <Collapsible collapsed={!collapsArr[index]}> */}
+                {collapsArr[index] &&
                   <View style={{ paddingVertical: 6 }}>
                     {item.passwords
                       ? decryptedPassword.map((pass, index) => {
-                          return (
-                            <View key={index}>
+                        return (
+                          <View key={index}>
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                fontWeight: "700",
+                                color: colors.textOne,
+                              }}
+                            >
+                              Account {index + 1}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => copy(pass.email)}
+                              style={[
+                                styles.accountData,
+                                { backgroundColor: colors.backTwo },
+                              ]}
+                            >
                               <Text
-                                style={{
-                                  fontSize: 15,
-                                  fontWeight: "700",
-                                  color: colors.textOne,
-                                }}
+                                style={[
+                                  { color: colors.textOne },
+                                  styles.email,
+                                ]}
                               >
-                                Account {index + 1}
+                                {pass.email}
                               </Text>
-                              <TouchableOpacity
-                                onPress={() => copy(pass.email)}
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              onPress={() => copy(pass.password)}
+                              style={[
+                                styles.accountData,
+                                { backgroundColor: colors.backTwo },
+                              ]}
+                            >
+                              <Text
                                 style={[
-                                  styles.accountData,
-                                  { backgroundColor: colors.backTwo },
+                                  { color: colors.textOne },
+                                  styles.pass,
                                 ]}
                               >
-                                <Text
-                                  style={[
-                                    { color: colors.textOne },
-                                    styles.email,
-                                  ]}
-                                >
-                                  {pass.email}
-                                </Text>
-                              </TouchableOpacity>
-                              <TouchableOpacity
-                                onPress={() => copy(pass.password)}
+                                {pass.password}
+                              </Text>
+                            </TouchableOpacity>
+                            {pass.description ? (
+                              <Text
+                                onPress={() => copy(pass.description)}
                                 style={[
-                                  styles.accountData,
-                                  { backgroundColor: colors.backTwo },
+                                  { color: colors.textOne },
+                                  styles.email,
                                 ]}
                               >
-                                <Text
-                                  style={[
-                                    { color: colors.textOne },
-                                    styles.pass,
-                                  ]}
-                                >
-                                  {pass.password}
-                                </Text>
-                              </TouchableOpacity>
-                              {pass.description ? (
-                                <Text
-                                  onPress={() => copy(pass.description)}
-                                  style={[
-                                    { color: colors.textOne },
-                                    styles.email,
-                                  ]}
-                                >
-                                  {pass.description}
-                                </Text>
-                              ) : null}
-                            </View>
-                          );
-                        })
+                                {pass.description}
+                              </Text>
+                            ) : null}
+                          </View>
+                        );
+                      })
                       : null}
                   </View>
-                </Collapsible>
+                }
+                {/* </Collapsible> */}
               </View>
             );
           }}

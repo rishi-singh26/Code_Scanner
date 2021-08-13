@@ -60,6 +60,8 @@ export default function Images(props) {
 
   const uploadImage = async () => {
     try {
+      setShowImageNamePrompt(false);
+      setImageName('');
       // console.log(JSON.stringify(uploadingImgData, null, 4));
       if (imageName.length < 1) {
         dispatch(showSnack('Enter image name'));
@@ -72,8 +74,6 @@ export default function Images(props) {
         .split('.')
         .pop();
       console.log(extension);
-      setShowImageNamePrompt(false);
-      setImageName('');
       // check if the image being uploaded has to be encrypted or not
       if (uploadingEncryptedImage) {
         if (passKey === "") {
@@ -81,25 +81,31 @@ export default function Images(props) {
           return;
         }
         console.log("Uploading encrypted image");
-        dispatch(showSnack("Uploading encrypted image"));
+        dispatch(showSnack("Encrypting image"));
         const encryptedImage = await encryptText(uploadingImgData.base64, passKey);
-        encryptedImage.status ? uploadImageUrl({
-          uploadDate: new Date(),
-          userId: auth.currentUser.uid,
-          image: {
-            data: encryptedImage.data,
-            height: uploadingImgData.height,
-            width: uploadingImgData.width,
-          },
-          isEncrypted: true,
-          imageName: imageName + '.' + extension,
-          isDeleted: false,
-        },
-          (message) => {
-            dispatch(showSnack(message));
-            getImages();
-          }
-        ) : dispatch(showSnack("Error while encrypting image please try again"))
+        if (encryptedImage.status) {
+          dispatch(showSnack("Image encryption successfull"));
+          uploadImageUrl(
+            {
+              uploadDate: new Date(),
+              userId: auth.currentUser.uid,
+              image: {
+                data: encryptedImage.data,
+                height: uploadingImgData.height,
+                width: uploadingImgData.width,
+              },
+              isEncrypted: true,
+              imageName: imageName + '.' + extension,
+              isDeleted: false,
+            },
+            (message) => {
+              dispatch(showSnack(message));
+              getImages();
+            }
+          )
+        } else {
+          dispatch(showSnack("Error while encrypting image please try again"))
+        }
       }
       else {
         const resp = await uploadImageToServer(
@@ -255,48 +261,52 @@ export default function Images(props) {
 
   const getImages = () => {
     console.log('Getting images');
-    dispatch(showSnack("Getting images"));
     setIsLoading(true);
-    if (auth.currentUser) {
-      firestore
-        .collection('scannerImages')
-        // .where("isDeleted", "==", false)
-        .where('userId', '==', auth.currentUser.uid)
-        // .orderBy("uploadDate", "asc")
-        .limit(100)
-        .get()
-        .then((images) => {
-          let imageSnapshot = [];
-          images.docs.map((item) => {
-            const _id = item.id;
-            const data = item.data();
-            imageSnapshot.push({ _id, ...data });
-          });
-          setImages(imageSnapshot);
-          // console.log("Received query snapshot of size", imageSnapshot.length);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log(err.message);
-          dispatch(
-            showSnack('Error while loading image', err.message)
-          );
-          setIsLoading(false);
-        });
+    if (!auth.currentUser) {
+      dispatch(showSnack("Authentication error, logout and login again"));
+      return;
     }
-    setIsLoading(false);
+    firestore
+      .collection('scannerImages')
+      // .where("isDeleted", "==", false)
+      .where('userId', '==', auth.currentUser.uid)
+      // .orderBy("uploadDate", "asc")
+      .limit(100)
+      .get()
+      .then((images) => {
+        let imageSnapshot = [];
+        images.docs.map((item) => {
+          const _id = item.id;
+          const data = item.data();
+          imageSnapshot.push({ _id, ...data });
+        });
+        setImages(imageSnapshot);
+        // console.log("Received query snapshot of size", imageSnapshot.length);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.log(err.message);
+        dispatch(
+          showSnack('Error while loading image', err.message)
+        );
+        setIsLoading(false);
+      });
   };
 
   const openORShareImage = async (imageData, openOrShare = 0) => {
     try {
+      setIsLoading(true);
+      // encrypted image
       if (imageData.isEncrypted) {
         if (passKey === "") {
           dispatch(showSnack("Enter your passkey!"));
+          setIsLoading(false);
           return;
         }
         const decryptedImage = await decryptText(imageData.image.data, passKey);
         if (!decryptedImage.status) {
           dispatch(showSnack("Incorrect passkey!"));
+          setIsLoading(false);
           return;
         }
         var base64 = `data:image/png;base64,${decryptedImage.data}`;
@@ -305,82 +315,86 @@ export default function Images(props) {
           removeImage: null,
           imageStyle: { aspectRatio: imageData.image.width / imageData.image.height }
         })
+        setIsLoading(false);
         return;
       }
-      setIsLoading(true);
-      // check if this uri is present in global state (ie. in localUris.imageURIs array)
-      let indexOfLocalURI = localUris.imageURIs.findIndex(
-        (x) => x.id === imageData._id
-      );
-      // present
-      if (indexOfLocalURI >= 0) {
-        // check if we want to view the image or share the image
-        if (openOrShare === 1) {
-          // view
-          openFile(localUris.imageURIs[indexOfLocalURI].uri)
-            ? null
-            : dispatch(
-              showSnack(
-                'Opps!! Error while opening image, please try again.'
-              )
-            );
-          setIsLoading(false);
-        } else if (openOrShare === 2) {
-          // share
-          shareThings(localUris.imageURIs[indexOfLocalURI].uri)
-            ? null
-            : dispatch(
-              showSnack(
-                'Opps!! Error while sharing image, please try again.'
-              )
-            );
-          setIsLoading(false);
-        }
-      }
-      // not present
+      // not encrypted image
       else {
-        // console.log("not present");
-        // save to device
-        const { status, localUri } = await saveToDevice(
-          imageData.image,
-          imageData.imageName
+        // check if this uri is present in global state (ie. in localUris.imageURIs array)
+        let indexOfLocalURI = localUris.imageURIs.findIndex(
+          (x) => x.id === imageData._id
         );
-        // check save status
-        if (!status) {
-          dispatch(
-            showSnack(
-              'Opps!! Error while opening image, please try again.'
-            )
-          );
-          setIsLoading(false);
-          return;
+        // present
+        if (indexOfLocalURI >= 0) {
+          // check if we want to view the image or share the image
+          if (openOrShare === 1) {
+            // view
+            openFile(localUris.imageURIs[indexOfLocalURI].uri)
+              ? null
+              : dispatch(
+                showSnack(
+                  'Opps!! Error while opening image, please try again.'
+                )
+              );
+            setIsLoading(false);
+          } else if (openOrShare === 2) {
+            // share
+            shareThings(localUris.imageURIs[indexOfLocalURI].uri)
+              ? null
+              : dispatch(
+                showSnack(
+                  'Opps!! Error while sharing image, please try again.'
+                )
+              );
+            setIsLoading(false);
+          } else {
+            setIsLoading(false);
+          }
         }
-        // add uri to global store for reuse
-        dispatch(addImageUri({ id: imageData._id, uri: localUri.uri }));
-        // check if we want to view the image or share the image
-        if (openOrShare === 1) {
-          // view
-          openFile(localUri.uri)
-            ? null
-            : dispatch(
+        // not present
+        else {
+          // console.log("not present");
+          // save to device
+          const { status, localUri } = await saveToDevice(
+            imageData.image,
+            imageData.imageName
+          );
+          // check save status
+          if (!status) {
+            dispatch(
               showSnack(
                 'Opps!! Error while opening image, please try again.'
               )
             );
-          setIsLoading(false);
-        } else if (openOrShare === 2) {
-          // share
-          shareThings(localUri.uri)
-            ? null
-            : dispatch(
-              showSnack(
-                'Opps!! Error while sharing image, please try again.'
-              )
-            );
-          setIsLoading(false);
+            setIsLoading(false);
+            return;
+          }
+          // add uri to global store for reuse
+          dispatch(addImageUri({ id: imageData._id, uri: localUri.uri }));
+          // check if we want to view the image or share the image
+          if (openOrShare === 1) {
+            // view
+            openFile(localUri.uri)
+              ? null
+              : dispatch(
+                showSnack(
+                  'Opps!! Error while opening image, please try again.'
+                )
+              );
+            setIsLoading(false);
+          } else if (openOrShare === 2) {
+            // share
+            shareThings(localUri.uri)
+              ? null
+              : dispatch(
+                showSnack(
+                  'Opps!! Error while sharing image, please try again.'
+                )
+              );
+            setIsLoading(false);
+          }
         }
       }
-      setIsLoading(false);
     } catch (err) {
       dispatch(
         showSnack('Opps!! Error while opening image.' + err.message)
@@ -391,16 +405,16 @@ export default function Images(props) {
 
   useEffect(() => {
     setHeaderOptions();
-  }, [isPasskeyBoxVisible]);
+  }, [isPasskeyBoxVisible, passKey]);
 
   useEffect(() => {
     getImages();
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       {isLoading && <CustomActivityIndicator />}
-      <Collapsible collapsed={isPasskeyBoxVisible}>
+      <Collapsible collapsed={!isPasskeyBoxVisible}>
         <View style={[styles.passKeyBox, { backgroundColor: colors.backOne }]}>
           <View
             style={[

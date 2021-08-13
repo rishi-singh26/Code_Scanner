@@ -39,8 +39,8 @@ export default function Pdfs(props) {
           <TouchableOpacity
             style={{ paddingVertical: 14, paddingHorizontal: 30 }}
             onPress={getUploadablePDF}
-            // onLongPress={() => props.navigation.navigate("UploadImages")}
-            // delayLongPress={10000}
+          // onLongPress={() => props.navigation.navigate("UploadImages")}
+          // delayLongPress={10000}
           >
             <Feather name="paperclip" color={colors.textOne} size={23} />
           </TouchableOpacity>
@@ -77,7 +77,7 @@ export default function Pdfs(props) {
       });
       setPdfName("");
       setuploadablePDFData(null);
-    } catch (error) {}
+    } catch (error) { }
   };
 
   const getPdfs = () => {
@@ -176,16 +176,16 @@ export default function Pdfs(props) {
           openFile(localURIs.pdfURIs[indexOfLocalURI].uri)
             ? null
             : dispatch(
-                showSnack("Opps!! Error while opening PDF, please try again.")
-              );
+              showSnack("Opps!! Error while opening PDF, please try again.")
+            );
           setIsLoading(false);
         } else if (openOrShare === 2) {
           // share
           shareThings(localURIs.pdfURIs[indexOfLocalURI].uri)
             ? null
             : dispatch(
-                showSnack("Opps!! Error while sharing PDF, please try again.")
-              );
+              showSnack("Opps!! Error while sharing PDF, please try again.")
+            );
           setIsLoading(false);
         }
       }
@@ -213,15 +213,15 @@ export default function Pdfs(props) {
           openFile(localUri.uri)
             ? null
             : dispatch(
-                showSnack("Opps!! Error while opening image, please try again.")
-              );
+              showSnack("Opps!! Error while opening image, please try again.")
+            );
         } else if (openOrShare === 2) {
           // share
           shareThings(localUri.uri)
             ? null
             : dispatch(
-                showSnack("Opps!! Error while sharing PDF, please try again.")
-              );
+              showSnack("Opps!! Error while sharing PDF, please try again.")
+            );
         }
       }
       setIsLoading(false);
@@ -237,7 +237,7 @@ export default function Pdfs(props) {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       {isLoading && <CustomActivityIndicator />}
       <RenderPdfTile
         pdfs={pdfs}

@@ -200,7 +200,7 @@ export default function Editor(props) {
       }}
       style={{
         flex: 1,
-        backgroundColor: colors.backTwo,
+        backgroundColor: colors.backOne,
         alignItems: "stretch",
       }}
     >

@@ -16,7 +16,7 @@ export default function ListTile({
     <TouchableOpacity
       style={[
         styles.tileContainer,
-        { backgroundColor: colors.backOne },
+        { backgroundColor: colors.backTwo },
         style ? style : null,
       ]}
       onPress={onPress}

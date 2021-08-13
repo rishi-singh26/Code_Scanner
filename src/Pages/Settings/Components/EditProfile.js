@@ -98,9 +98,9 @@ export default function EditProfile(props) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       {isLoding ? <CustomActivityIndicator /> : null}
-      <View style={[styles.card, { backgroundColor: colors.backOne }]}>
+      <View style={[styles.card, { backgroundColor: colors.backTwo }]}>
         {image != null ? (
           <TouchableOpacity onPress={() => getImage()}>
             <Image source={{ uri: image.uri }} style={styles.imageStyle} />
@@ -118,7 +118,7 @@ export default function EditProfile(props) {
         )}
       </View>
       <View
-        style={[styles.card, { backgroundColor: colors.backOne, marginTop: 2 }]}
+        style={[styles.card, { backgroundColor: colors.backTwo, marginTop: 2 }]}
       >
         <TextInput
           value={name}
@@ -127,7 +127,7 @@ export default function EditProfile(props) {
           }}
           style={[
             styles.textInput,
-            { color: colors.textOne, backgroundColor: colors.backTwo },
+            { color: colors.textOne, backgroundColor: colors.backOne },
           ]}
           placeholder="Name"
           placeholderTextColor={colors.textTwo}

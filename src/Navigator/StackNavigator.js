@@ -42,7 +42,7 @@ export default function SatckNavigator({ auth, contactsApiStatus, theme }) {
     <Stack.Navigator
       screenOptions={{
         headerTitleStyle: { fontWeight: "700" },
-        headerStyle: { backgroundColor: colors.backOne },
+        headerStyle: { backgroundColor: colors.backTwo },
         headerTintColor: colors.textOne,
         cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
       }}

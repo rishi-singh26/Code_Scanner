@@ -108,12 +108,12 @@ export default function ScannedDataDetail(props) {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: backOne }}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <Collapsible collapsed={isQrCollapsed}>
           <View>
             <ViewShot
-              style={[styles.qrView, { backgroundColor: backTwo }]}
+              style={[styles.qrView, { backgroundColor: backOne }]}
               ref={shareQrRef}
               options={{ format: "jpg", quality: 1.0 }}
             >
@@ -121,7 +121,7 @@ export default function ScannedDataDetail(props) {
                 <QRCode
                   size={280}
                   value={scannedData?.text || "Empty"}
-                  backgroundColor={backTwo}
+                  backgroundColor={backOne}
                   color={textOne}
                   onError={(err) =>
                     console.log("An error occured while making qr code", err)
@@ -130,7 +130,7 @@ export default function ScannedDataDetail(props) {
               )}
             </ViewShot>
             <ShareQRBar
-              backgroundColor={backOne}
+              backgroundColor={backTwo}
               shareQrCode={shareQrCode}
               onSave={onSave}
             />

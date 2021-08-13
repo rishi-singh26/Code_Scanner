@@ -20,7 +20,7 @@ export default function Header({
         paddingHorizontal: 20,
         paddingTop: 10,
         paddingBottom: 3,
-        backgroundColor: theme.colors.backOne,
+        backgroundColor: theme.colors.backTwo,
       }}
     >
       <Text

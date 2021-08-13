@@ -45,7 +45,7 @@ export default function Settings(props) {
     }
   };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backTwo }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.backOne }}>
       <ProfileCard
         navigateToEdit={navigateToEdit}
         imageViewerFunc={(imgData) => {

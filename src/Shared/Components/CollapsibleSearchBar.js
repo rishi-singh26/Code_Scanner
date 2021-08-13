@@ -15,7 +15,7 @@ export default function CollapsibleSearchBar({
       style={{
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: colors.backOne,
+        backgroundColor: colors.backTwo,
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderBottomColor: colors.backTwo,
@@ -27,7 +27,7 @@ export default function CollapsibleSearchBar({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          backgroundColor: colors.backTwo,
+          backgroundColor: colors.backOne,
           paddingLeft: 20,
           paddingRight: 0,
           borderRadius: 8,

@@ -10,7 +10,7 @@ export default function LogTile({
   style,
   onPress,
   rightIconColor,
-  onRightIconPress = () => {},
+  onRightIconPress = () => { },
 }) {
   const theme = useSelector((state) => state.theme);
   const { colors } = theme;
@@ -18,7 +18,7 @@ export default function LogTile({
     <TouchableOpacity
       style={[
         styles.tileContainer,
-        { backgroundColor: colors.backOne },
+        { backgroundColor: colors.backTwo },
         style ? style : null,
       ]}
       onPress={onPress}

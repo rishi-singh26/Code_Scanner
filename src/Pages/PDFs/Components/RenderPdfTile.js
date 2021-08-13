@@ -17,7 +17,7 @@ export default function RenderPdfTile({ pdfs, onPress, onLongPress }) {
           <TouchableOpacity
             onPress={() => onPress(item)}
             onLongPress={() => onLongPress(item)}
-            style={[styles.viewBox, { backgroundColor: colors.backOne }]}
+            style={[styles.viewBox, { backgroundColor: colors.backTwo }]}
           >
             <AntDesign
               name="pdffile1"

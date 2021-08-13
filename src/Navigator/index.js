@@ -36,7 +36,7 @@ export default function Navigator() {
     <NavigationContainer theme={mode ? DefaultTheme : DarkTheme}>
       <StatusBar
         barStyle={mode ? "dark-content" : "light-content"}
-        backgroundColor={colors.backOne}
+        backgroundColor={colors.backTwo}
       />
       <StackNavigator
         auth={auth}
@@ -49,16 +49,16 @@ export default function Navigator() {
         action={
           snack.actionTxt
             ? {
-                label: snack.actionTxt,
-                onPress: () => {
-                  snack.actionFunc();
-                  dispatch(hideSnack());
-                },
-              }
+              label: snack.actionTxt,
+              onPress: () => {
+                snack.actionFunc();
+                dispatch(hideSnack());
+              },
+            }
             : null
         }
-        // style={{ backgroundColor: colors.backOne }}
-        // theme={mode ? PaperDefaultTheme : PaperDarkTheme}
+      // style={{ backgroundColor: colors.backOne }}
+      // theme={mode ? PaperDefaultTheme : PaperDarkTheme}
       >
         {snack.message}
       </Snackbar>
